@@ -1,0 +1,30 @@
+{
+	"name": "@teawithsand/tws-stl-react",
+	"version": "0.0.1",
+	"description": "Bunch of misc utils that I've used at least in three projects, which use react",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest"
+	},
+	"keywords": [
+		"teawithsand",
+		"stl",
+		"misc",
+		"util"
+	],
+	"author": "teawithsand",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/react": "^18.0.21"
+	},
+	"peerDependencies": {
+		"@teawithsand/tws-stl": "^0.0.1",
+		"react": "^18.2.0"
+	},
+	"files": [
+		"dist/**"
+	]
+}
