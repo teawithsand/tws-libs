@@ -3,7 +3,8 @@
   "workspaces": [
     "tws-stl",
     "tws-stl-react",
-    "tws-trans"
+    "tws-trans",
+    "tws-ui"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"
