@@ -1,6 +1,6 @@
 import { MediaPlayerError, SourcePlayerError } from "../error"
 import { AudioFilter } from "../filter"
-import { PlayerNetworkState, PlayerReadyState } from "../native"
+import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
 export type PlayerConfig<SK> = {
 	isPlayingWhenReady: boolean

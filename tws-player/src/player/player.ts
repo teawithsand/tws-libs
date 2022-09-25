@@ -7,7 +7,7 @@ import {
 	PlayerNetworkState,
 	PlayerReadyState,
 	readHTMLPlayerState,
-} from "../native"
+} from "../util/native"
 import { PlayerSourceProvider, PlayerSourceResolver } from "../source"
 import { PlayerConfig, PlayerState } from "./state"
 
