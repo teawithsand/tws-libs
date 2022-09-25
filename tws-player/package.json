@@ -17,10 +17,13 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/jest": "^29.0.3",
+		"@types/jsmediatags": "^3.9.3",
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
-		"@teawithsand/tws-stl": "^0.0.1"
+		"@teawithsand/tws-stl": "^0.0.1",
+		"immer": "^9.0.15",
+		"jsmediatags": "^3.9.7"
 	},
 	"files": [
 		"dist/**"
