@@ -91,7 +91,9 @@ export default {
 	// moduleNameMapper: {},
 
 	// An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
-	// modulePathIgnorePatterns: [],
+
+	modulePathIgnorePatterns: ["<rootDir>/dist/", "node_modules"],
+
 
 	// Activates notifications for test results
 	// notify: false,
@@ -100,7 +102,7 @@ export default {
 	// notifyMode: "failure-change",
 
 	// A preset that is used as a base for Jest's configuration
-	preset: 'ts-jest',
+	preset: "ts-jest",
 
 	// Run tests from one or more projects
 	// projects: undefined,
