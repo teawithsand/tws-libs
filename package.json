@@ -4,7 +4,8 @@
     "tws-stl",
     "tws-stl-react",
     "tws-trans",
-    "tws-ui"
+    "tws-ui",
+    "tws-player"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"
