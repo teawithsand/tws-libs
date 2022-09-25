@@ -5,6 +5,9 @@
     "tws-stl-react",
     "tws-trans"
   ],
+  "scripts": {
+    "test-all": "npm run build --workspaces && npm run test --workspaces"
+  },
   "devDependencies": {
     "@types/jest": "^29.0.3",
     "jest": "^29.0.3",
