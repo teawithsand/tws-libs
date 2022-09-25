@@ -1,3 +1,1 @@
-export const hellWorld = () => {
-	console.info("Hell world!")
-}
+export * from "./language"
