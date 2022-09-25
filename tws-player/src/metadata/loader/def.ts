@@ -1,10 +1,8 @@
-import { ID3Metadata, Metadata } from "./metadata"
-import * as jsMediaTags from "jsmediatags"
-import { PlayerSourceResolver } from "../source"
+import { PlayerSourceResolver } from "../../source"
+import { ID3Metadata, Metadata } from "../metadata"
+import { MetadataLoader } from "./abstract"
 
-export interface MetadataLoader<T> {
-	loadMetadata(src: T): Promise<Metadata>
-}
+import * as jsMediaTags from "jsmediatags"
 
 export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 	constructor(private readonly resolver: PlayerSourceResolver<T>) {}

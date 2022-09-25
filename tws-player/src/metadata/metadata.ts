@@ -21,5 +21,5 @@ export type MetadataLoadingResult =
 	  }
 	| {
 			type: MetadataLoadingResultType.ERROR
-			error: string
+			error: any
 	  }
