@@ -1,6 +1,6 @@
 import { DefaultStickyEventBus, DefaultTaskAtom } from "@teawithsand/tws-stl"
 import StickyEventBus from "@teawithsand/tws-stl/dist/event-bus/stickyEventBus"
-import { produce, castDraft, current, isDraft } from "immer"
+import { produce, castDraft, current, isDraft, Draft } from "immer"
 import { MediaPlayerError } from "../error"
 import { WebAudioFilterManager } from "../filter"
 import {
@@ -10,6 +10,7 @@ import {
 } from "../util/native"
 import { PlayerSourceProvider, PlayerSourceResolver } from "../source"
 import { PlayerConfig, PlayerState } from "./state"
+import { WritableDraft } from "immer/dist/internal"
 
 type Element = HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
 
@@ -213,6 +214,16 @@ export class Player<S, SK> {
 		this.innerPlayerState.emitEvent(
 			produce(this.innerPlayerState.lastEvent, (draft) => {
 				draft.config = castDraft(config)
+			})
+		)
+	}
+
+	public mutateConfig = (
+		mutator: (draft: WritableDraft<PlayerConfig<SK>>) => void
+	) => {
+		this.innerPlayerState.emitEvent(
+			produce(this.innerPlayerState.lastEvent, (draft) => {
+				mutator(draft.config)
 			})
 		)
 	}
