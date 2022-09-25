@@ -1,8 +1,9 @@
 {
   "name": "@teawithsand/tws-stl",
   "version": "0.0.1",
-  "description": "Bunch of misc utils thtat I've used at least in four projects",
-  "main": "index.js",
+  "description": "Bunch of misc utils that I've used at least in three projects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest"
@@ -23,5 +24,8 @@
     "ts-jest": "^29.0.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.3"
-  }
+  },
+  "files": [
+    "dist/**"
+  ]
 }

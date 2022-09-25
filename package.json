@@ -1,0 +1,7 @@
+{
+  "name": "tws-libs",
+  "workspaces": [
+    "tws-stl",
+    "tws-stl-react"
+  ]
+}
