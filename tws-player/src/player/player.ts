@@ -40,7 +40,7 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any> = {
  * SimplePlayer, which uses HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
  * in order to provide controls.
  */
-export class PortablePlayer<S, SK> {
+export class Player<S, SK> {
 	private eventListeners: {
 		event: string
 		listener: any
