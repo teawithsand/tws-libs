@@ -2,7 +2,8 @@
   "private": true,
   "workspaces": [
     "tws-stl",
-    "tws-stl-react"
+    "tws-stl-react",
+    "tws-trans"
   ],
   "devDependencies": {
     "@types/jest": "^29.0.3",

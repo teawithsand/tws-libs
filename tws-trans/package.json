@@ -1,0 +1,28 @@
+{
+	"name": "@teawithsand/tws-trans",
+	"version": "0.0.1",
+	"description": "Simple, yet powerful translation library for react",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest"
+	},
+	"keywords": [
+		"teawithsand",
+		"react",
+        "translation"
+	],
+	"author": "teawithsand",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/react": "^18.0.21"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
+	},
+	"files": [
+		"dist/**"
+	]
+}
