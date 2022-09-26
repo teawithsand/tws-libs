@@ -17,7 +17,7 @@ export class SwApiHelper {
     /**
      * Checks for SW support.
      */
-	isSupported = () => {
+	get isSupported() {
 		return (
 			typeof window !== "undefined" &&
 			typeof window.navigator !== "undefined" &&

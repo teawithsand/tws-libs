@@ -123,7 +123,7 @@ export class GeolocationApiHelper {
 
 	private constructor() {}
 
-	private checkSupport = () => {
+	public get isSupported() {
 		return (
 			typeof window !== "undefined" &&
 			typeof window.navigator !== "undefined" &&
@@ -131,12 +131,10 @@ export class GeolocationApiHelper {
 		)
 	}
 
-	public readonly isSupported = this.checkSupport()
-
 	readPosition = async (
 		options: Partial<ReadPositionOptions>
 	): Promise<IGeolocationPosition> => {
-		if (!this.checkSupport()) {
+		if (!this.isSupported) {
 			throw new GeolocationError(
 				"Geolocation not supported",
 				GeolocationErrorCode.NOT_SUPPORTED
@@ -166,7 +164,7 @@ export class GeolocationApiHelper {
 	createReadClaim = (
 		options: Partial<ReadPositionOptions>
 	): GeolocationClaim => {
-		if (!this.checkSupport()) {
+		if (!this.isSupported) {
 			throw new GeolocationError(
 				"Geolocation not supported",
 				GeolocationErrorCode.NOT_SUPPORTED

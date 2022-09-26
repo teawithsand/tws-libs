@@ -1,19 +1,21 @@
 export class StorageManagerApiHelper {
-	private constructor(){}
+	private constructor() {}
 	private static innerInstance = new StorageManagerApiHelper()
 
 	public static get instance() {
 		return this.innerInstance
 	}
 
-
-	isSupported = () =>
-		typeof window !== "undefined" &&
-		typeof window.navigator !== "undefined" &&
-		"storage" in window.navigator
+	get isSupported() {
+		return (
+			typeof window !== "undefined" &&
+			typeof window.navigator !== "undefined" &&
+			"storage" in window.navigator
+		)
+	}
 
 	estimateStorage = async () => {
-		if (!this.isSupported()) return null
+		if (!this.isSupported) return null
 
 		try {
 			return await navigator.storage.estimate()
@@ -23,7 +25,7 @@ export class StorageManagerApiHelper {
 	}
 
 	requestPersistentStorage = async () => {
-		if (!this.isSupported()) return false
+		if (!this.isSupported) return false
 
 		try {
 			return await navigator.storage.persist()
@@ -33,7 +35,7 @@ export class StorageManagerApiHelper {
 	}
 
 	isPersistentStorage = async () => {
-		if (!this.isSupported()) return false
+		if (!this.isSupported) return false
 
 		try {
 			return await navigator.storage.persisted()
