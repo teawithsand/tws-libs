@@ -1,4 +1,4 @@
-import { DefaultStickyEventBus, StickySubscribable } from "../event-bus"
+import { DefaultStickyEventBus, StickySubscribable } from "../eventBus"
 
 export enum GeolocationErrorCode {
 	PERMISSION_DENIED = "permissionDenied",
