@@ -8,8 +8,8 @@ import {
 	PerformanceTimestampMs,
 	Subscribable,
 	Timeout,
+	StickyEventBus,
 } from "@teawithsand/tws-stl"
-import StickyEventBus from "@teawithsand/tws-stl/dist/event-bus/stickyEventBus"
 
 export enum SleepEventType {
 	SLEEP_BEGIN = 1,

@@ -1,5 +1,8 @@
-import { DefaultStickyEventBus, DefaultTaskAtom } from "@teawithsand/tws-stl"
-import StickyEventBus from "@teawithsand/tws-stl/dist/event-bus/stickyEventBus"
+import {
+	DefaultTaskAtom,
+	StickyEventBus,
+	DefaultStickyEventBus,
+} from "@teawithsand/tws-stl"
 import { produce, castDraft, current, isDraft, Draft } from "immer"
 import { MediaPlayerError } from "../error"
 import { WebAudioFilterManager } from "../filter"

@@ -5,7 +5,7 @@ import {
 	SubscriptionCanceler,
 } from "./subscribable"
 
-export default interface StickyEventBus<T>
+export interface StickyEventBus<T>
 	extends EventBus<T>,
 		StickySubscribable<T> {
 	readonly lastEvent: T

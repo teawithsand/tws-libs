@@ -1,4 +1,4 @@
-import { DefaultEventBus, Subscribable } from "@teawithsand/tws-stl"
+import { DefaultEventBus, Subscribable } from "../eventBus"
 
 export type MediaSessionMetadata = {
 	title: string
@@ -141,10 +141,19 @@ const mediaSessionPositionStateEquals = (
 /**
  * Note: instances of this class should't be constructed manually.
  * Instead use global instance.
- * 
+ *
  * @see MediaSessionHelper
  */
-export class MediaSessionHelperImpl {
+export class MediaSessionApiHelper {
+	private static innerInstance = new MediaSessionApiHelper()
+	static get instance() {
+		return this.innerInstance
+	}
+
+	private constructor() {
+		this.setSupportedActions(allMediaSessionActions)
+	}
+
 	private checkSupport = () => {
 		return (
 			typeof window !== "undefined" &&
@@ -159,7 +168,9 @@ export class MediaSessionHelperImpl {
 		return this.innerEventBus
 	}
 
-	public readonly isSupported = this.checkSupport()
+	public get isSupported() {
+		return this.checkSupport()
+	}
 
 	private supportedActions: Set<MediaSessionActionType> = new Set()
 
@@ -240,10 +251,6 @@ export class MediaSessionHelperImpl {
 		],
 	])
 
-	constructor() {
-		this.setSupportedActions(allMediaSessionActions)
-	}
-
 	setSupportedActions = (
 		actions:
 			| MediaSessionActionType[]
@@ -314,6 +321,11 @@ export class MediaSessionHelperImpl {
 					state
 				)
 			) {
+				if (state.playbackRate === 0)
+					throw new Error(
+						"Playback rate may not be zero, it has to be positive or negative integer(neg if playing backwards)"
+					)
+
 				this.lastSetMediaPositionState = { ...state }
 
 				let duration = state.duration
@@ -325,7 +337,9 @@ export class MediaSessionHelperImpl {
 				if (duration < 0) duration = 0
 
 				// Even though MDN says otherwise
-				// Firefox does not like duration which if +Infinity
+				// Firefox does not like duration which is +Infinity
+				// Tested at ff between 102 and 104
+				// I forgot to note the version down ¯\_(ツ)_/¯
 				if (!isFinite(duration)) {
 					duration = 24 * 60 * 60 * 30
 				}
@@ -336,11 +350,6 @@ export class MediaSessionHelperImpl {
 
 				position = Math.min(position, duration)
 
-				if (state.playbackRate === 0)
-					throw new Error(
-						"Playback rate may not be zero, it has to be positive or negative integer(neg if playing backwards)"
-					)
-
 				navigator.mediaSession.setPositionState({
 					playbackRate: state.playbackRate,
 					duration,
@@ -350,10 +359,3 @@ export class MediaSessionHelperImpl {
 		}
 	}
 }
-
-/**
- * Global instance of media session helper, as media session is global in window.navigator.
- * 
- * @see MediaSessionHelperImpl
- */
-export const MediaSessionHelper = new MediaSessionHelperImpl()
