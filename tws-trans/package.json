@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.1",
-		"@teawithsand/tws-stl-react": "0.0.1"
+		"@teawithsand/tws-stl-react": "^0.0.1"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
