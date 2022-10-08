@@ -1,5 +1,5 @@
 {
-	"name": "tws-gatsby-plugin",
+	"name": "@teawithsand/tws-gatsby-plugin",
 	"version": "0.0.1",
 	"description": "Plugin for abstracting away common gatsby tasks in my projects",
 	"main": "index.js",
