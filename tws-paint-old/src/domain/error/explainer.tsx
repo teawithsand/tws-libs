@@ -4,9 +4,9 @@ import AppTranslation, {
 	useAppTranslationSelector,
 } from "@app/trans/AppTranslation"
 
-import { LOG } from "tws-common/log/logger"
 import { ErrorExplainerBuilder } from "tws-common/misc/error-explainer"
 import { claimId, NS_LOG_TAG } from "tws-common/misc/GlobalIDManager"
+import { LOG } from "@teawithsand/tws-stl"
 
 const LOG_TAG = claimId(NS_LOG_TAG, "wayside-shrines/app-error-explainer")
 
