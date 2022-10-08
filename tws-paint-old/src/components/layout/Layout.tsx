@@ -1,10 +1,8 @@
+import { DialogBoundary } from "@teawithsand/tws-stl-react"
+import { ProvideFixedLanguage } from "@teawithsand/tws-trans"
 import React, { ReactElement, ReactFragment, ReactNode } from "react"
-
-import { GlobalIdManager } from "tws-common/misc/GlobalIDManager"
-import { DialogBoundary } from "tws-common/react/components/dialog"
-import { QueryClient, QueryClientProvider } from "tws-common/react/hook/query"
-import { ProvideFixedLanguage } from "tws-common/trans/language"
-import { SSRProvider } from "tws-common/ui"
+import { SSRProvider } from "react-bootstrap"
+import { QueryClient, QueryClientProvider } from "react-query"
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -19,8 +17,6 @@ const queryClient = new QueryClient({
 		},
 	},
 })
-
-GlobalIdManager.disable()
 
 const Layout = (props: {
 	children: ReactElement | ReactNode | ReactFragment | null | undefined

@@ -1,10 +1,9 @@
 import React from "react"
+import { Button } from "react-bootstrap"
 import styled from "styled-components"
 
 import { reactAppErrorExplainer } from "@app/domain/error/explainer"
-
-import { Button } from "tws-common/ui"
-import { ErrorBar } from "tws-common/ui/ErrorBar"
+import { ErrorBar } from "@app/legacy/ui/ErrorBar"
 
 const ErrorParent = styled.div`
 	display: grid;
