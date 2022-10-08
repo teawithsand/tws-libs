@@ -1,0 +1,8 @@
+node_modules/
+.cache/
+public
+src/gatsby-types.d.ts
+.yalc/
+yalc.lock
+/content
+!/content/.gitkeep
