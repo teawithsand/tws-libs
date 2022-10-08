@@ -1,8 +1,8 @@
 {
-	"name": "wayside-shrine",
+	"name": "tws-paint-old",
 	"version": "1.0.0",
 	"private": true,
-	"description": "wayside-shrine",
+	"description": "TWS paint port to new infrastructure",
 	"author": "teawithsand",
 	"keywords": [
 		"gatsby"
