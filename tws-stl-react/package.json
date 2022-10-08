@@ -26,5 +26,8 @@
 	},
 	"files": [
 		"dist/**"
-	]
+	],
+	"dependencies": {
+		"react-error-boundary": "^3.1.4"
+	}
 }
