@@ -1,6 +1,7 @@
 const TSConfigPathsPlugin = require("tsconfig-paths-webpack-plugin")
 const path = require("path")
 const { exists, writeFile, ensureDir } = require("fs")
+const { resolve } = require("path")
 
 function getMetaRedirect(toPath) {
 	let url = toPath.trim()
@@ -21,19 +22,24 @@ function getMetaRedirect(toPath) {
 	return `<meta http-equiv="refresh" content="0; URL='${url}'" />`
 }
 
+// TODO(teawithsand): reenable it, so redirects will still work
 async function writeRedirectsFiles(redirects, folder, pathPrefix) {
-	if (!redirects.length) return
+	return
 
 	for (const redirect of redirects) {
 		const { fromPath, toPath } = redirect
 
-		const FILE_PATH = path.join(
-			folder,
-			fromPath.replace(pathPrefix, ""),
-			"index.html",
-		)
+		const FILE_PATH = folder.endsWith(".html")
+			? folder
+			: path.join(folder, fromPath.replace(pathPrefix, ""), "index.html")
 
-		const fileExists = await exists(FILE_PATH)
+		const fileExists = await new Promise((resolve, reject) => {
+			try {
+				exists(FILE_PATH, (exists) => resolve(exists))
+			} catch (e) {
+				reject(e)
+			}
+		})
 		if (!fileExists) {
 			try {
 				await ensureDir(path.dirname(FILE_PATH))
@@ -42,7 +48,15 @@ async function writeRedirectsFiles(redirects, folder, pathPrefix) {
 			}
 
 			const data = getMetaRedirect(toPath)
-			await writeFile(FILE_PATH, data)
+			await new Promise((resolve, reject) => {
+				writeFile(FILE_PATH, data, (err) => {
+					if (err) {
+						reject(err)
+					} else {
+						resolve()
+					}
+				})
+			})
 		}
 	}
 }
@@ -60,8 +74,8 @@ const onCreatePage = async ({ page, actions }, config) => {
 		if (!languages.includes(defaultLanguage)) {
 			throw new Error(
 				`Default language ${defaultLanguage} not in languages: ${languages.join(
-					", ",
-				)}`,
+					", "
+				)}`
 			)
 		}
 	}
@@ -109,7 +123,7 @@ const onCreatePage = async ({ page, actions }, config) => {
 		isPermanent: true,
 	})
 
-	languages.forEach(lang => {
+	languages.forEach((lang) => {
 		if (lang === defaultLanguage) return
 		const newPage = {
 			...page,
@@ -139,12 +153,12 @@ const onCreateWebpackConfig = ({
 	const newUrlLoaderRule = {
 		...imgsRule,
 		test: new RegExp(
-			imgsRule.test.toString().replace("svg|", "").slice(1, -1),
+			imgsRule.test.toString().replace("svg|", "").slice(1, -1)
 		),
 	}
 
 	config.module.rules = [
-		...(config.module.rules ?? []).filter(rule => {
+		...(config.module.rules ?? []).filter((rule) => {
 			if (rule.test) {
 				return rule.test.toString() !== imgsRule.test.toString()
 			}
