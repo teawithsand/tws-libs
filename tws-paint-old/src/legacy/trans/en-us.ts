@@ -1,4 +1,7 @@
-import { CommonTranslation, makeCommonTranslationTemplate } from "."
+import {
+	CommonTranslation,
+	makeCommonTranslationTemplate,
+} from "@app/legacy/trans/template"
 
 export const CommonTranslationEN_US: CommonTranslation = {
 	...makeCommonTranslationTemplate({
