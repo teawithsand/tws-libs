@@ -32,6 +32,8 @@ const SpinnerText = styled.div`
 	font-size: 1.5em;
 `
 
+// TODO(teawithsand): obviously this should be part of tws-ui rather than tws-stl-react
+// remove dependency on styled-components and move this implementation to other library
 export const LoadingSpinner = (props: { text?: string }) => {
 	const text = props.text ?? "Loading..."
 	return (
