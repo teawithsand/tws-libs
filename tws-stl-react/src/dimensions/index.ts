@@ -8,3 +8,4 @@ export type ScreenDimensions = {
 
 export * from "./client"
 export * from "./window"
+export * from "./breakpoint"
