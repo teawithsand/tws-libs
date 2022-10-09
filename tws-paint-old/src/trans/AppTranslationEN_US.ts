@@ -1,8 +1,7 @@
-import AppTranslation from "@app/trans/AppTranslation"
+import { CommonTranslationEN_US } from "@app/legacy/trans";
+import { AppTranslation } from "./AppTranslation";
 
-import { CommonTranslationEN_US } from "tws-common/trans/common"
-
-const AppTranslationEN_US: AppTranslation = {
+export const AppTranslationEN_US: AppTranslation = {
 	common: CommonTranslationEN_US,
 	meta: {
 		title: "Teawithsand's Paint",
@@ -22,5 +21,3 @@ const AppTranslationEN_US: AppTranslation = {
 		},
 	},
 }
-
-export default AppTranslationEN_US

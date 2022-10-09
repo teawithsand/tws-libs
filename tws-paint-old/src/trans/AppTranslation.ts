@@ -1,13 +1,14 @@
-import AppTranslationEN_US from "@app/trans/AppTranslationEN_US"
-
-import { CommonTranslation } from "tws-common/trans/common"
-import { Language } from "tws-common/trans/language"
-import Translator, {
+import {
 	createTranslatorContext,
+	Language,
 	makeTranslationHooks,
-} from "tws-common/trans/Translator"
+	Translator,
+} from "@teawithsand/tws-trans"
 
-export default interface AppTranslation {
+import { CommonTranslation } from "@app/legacy/trans"
+import { AppTranslationEN_US } from "./AppTranslationEN_US"
+
+export interface AppTranslation {
 	common: CommonTranslation
 	meta: {
 		title: string

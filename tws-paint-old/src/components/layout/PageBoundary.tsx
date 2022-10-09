@@ -1,7 +1,8 @@
+import { DialogBoundary, LoadingSpinner } from "@teawithsand/tws-stl-react"
 import React, { ReactNode, Suspense } from "react"
 
 import ErrorRenderer from "@app/components/layout/ErrorRenderer"
-import { LoadingSpinner } from "@teawithsand/tws-stl-react"
+import { ComposedErrorBoundary } from "@app/legacy/ui/ComposedErrorBoundary"
 
 const PageBoundary = (props: { children?: ReactNode }) => {
 	const { children } = props
