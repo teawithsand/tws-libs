@@ -1,7 +1,6 @@
 import React, { useState } from "react"
+import { Button, Collapse } from "react-bootstrap"
 import { Transition } from "react-transition-group"
-
-import { Button, Collapse } from "tws-common/ui"
 
 export const ButtonDropdown = (
 	props: {

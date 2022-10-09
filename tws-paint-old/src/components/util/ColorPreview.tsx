@@ -1,7 +1,6 @@
+import { Color, encodeColor } from "@app/legacy/color"
 import React from "react"
 import styled from "styled-components"
-
-import { Color, encodeColor } from "tws-common/color"
 
 const Background = styled.div`
 	background-image: linear-gradient(45deg, #808080 25%, transparent 25%),

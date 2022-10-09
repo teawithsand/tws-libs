@@ -1,7 +1,7 @@
 import React from "react"
+import { Form } from "react-bootstrap"
 
-import { Color, encodeColorForInput, parseColor } from "tws-common/color"
-import { Form } from "tws-common/ui"
+import { Color, encodeColorForInput, parseColor } from "@app/legacy/color"
 
 export const ColorPickerInput = (props: {
 	value: Color
