@@ -4,4 +4,4 @@ npm-error.log
 /*/dist
 .cache
 /*/public
-gatsby-typed.d.ts
+gatsby-types.d.ts
