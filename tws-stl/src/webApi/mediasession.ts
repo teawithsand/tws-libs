@@ -1,4 +1,7 @@
 import { DefaultEventBus, Subscribable } from "../eventBus"
+import { LOG } from "../log"
+
+const LOG_TAG = "@teawithsand/tws-stl/mediaSession"
 
 export type MediaSessionMetadata = {
 	title: string
@@ -150,9 +153,16 @@ export class MediaSessionApiHelper {
 		return this.innerInstance
 	}
 
-	private constructor() {
-		this.setSupportedActions(allMediaSessionActions)
+	private initialized = false
+	private ensureInitialized = () => {
+		if (!this.initialized) {
+			if (this.checkSupport())
+				this.setSupportedActions(allMediaSessionActions)
+			this.initialized = true
+		}
 	}
+
+	private constructor() {}
 
 	private checkSupport = () => {
 		return (
@@ -279,7 +289,18 @@ export class MediaSessionApiHelper {
 					throw new Error(
 						`Unreachable code - no handler for action ${a}`
 					)
-				navigator.mediaSession.setActionHandler(a, h)
+				try {
+					navigator.mediaSession.setActionHandler(a, h)
+				} catch (e) {
+					// HACK(teawithsand): in chrome skipad may not be set, which causes this to throw
+					// so just ignore it for now
+
+					LOG.info(
+						LOG_TAG,
+						`Setting error handler for ${a} had thrown`,
+						e
+					)
+				}
 			}
 		}
 
@@ -287,6 +308,7 @@ export class MediaSessionApiHelper {
 	}
 
 	setMetadata = (metadata: MediaSessionMetadata | null) => {
+		this.ensureInitialized()
 		if (this.checkSupport()) {
 			if (
 				!mediaSessionMetadataEquals(
@@ -310,10 +332,12 @@ export class MediaSessionApiHelper {
 	}
 
 	setPlaybackState = (state: "playing" | "paused" | "none") => {
+		this.ensureInitialized()
 		if (this.checkSupport()) navigator.mediaSession.playbackState = state
 	}
 
 	setPositionState = (state: MediaSessionPositionState) => {
+		this.ensureInitialized()
 		if (this.checkSupport() && navigator.mediaSession.setPositionState) {
 			if (
 				!mediaSessionPositionStateEquals(
