@@ -4,7 +4,7 @@ import {
 	makeLayoutPlugin,
 	makeManifestPlugin,
 	makeSelfPlugin,
-} from "tws-gatsby-plugin"
+} from "@teawithsand/tws-gatsby-plugin"
 
 const plugins = customizeDefaultPlugins(
 	[
