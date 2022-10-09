@@ -240,7 +240,7 @@ const makeConfig = (siteMetadata, plugins) => ({
 
 const makeSelfPlugin = options => {
 	return {
-		resolve: "tws-gatsby-plugin",
+		resolve: "@teawithsand/tws-gatsby-plugin",
 		options,
 	}
 }
