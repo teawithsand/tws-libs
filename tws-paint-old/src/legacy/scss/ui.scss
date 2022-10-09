@@ -1,0 +1,5 @@
+@forward "~bootstrap/scss/bootstrap";
+
+body.use-is-fullscreen {
+    overflow: hidden;
+}

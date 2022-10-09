@@ -13,7 +13,7 @@ const plugins = customizeDefaultPlugins(
 	],
 	[
 		makeSelfPlugin({
-			languages: [],
+			languages: ["en-US"],
 		}),
 	],
 )

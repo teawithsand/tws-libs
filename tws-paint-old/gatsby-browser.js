@@ -1,1 +1,1 @@
-import "tws-common/scss/ui.scss"
+import "@app/legacy/scss/ui.scss"
