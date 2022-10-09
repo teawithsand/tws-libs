@@ -1,12 +1,9 @@
-import { current, isDraft } from "@reduxjs/toolkit";
-import produce, { setAutoFreeze } from "immer";
+import { current, isDraft } from "@reduxjs/toolkit"
+import produce, { setAutoFreeze } from "immer"
 
-
-
-import { applyMutationOnDraft } from "@app/domain/paint/defines";
-import { PaintAction, PaintActionType } from "@app/domain/paint/defines/action";
-import { PaintStateSnapshot } from "@app/domain/paint/redux/state";
-
+import { applyMutationOnDraft } from "@app/domain/paint/defines"
+import { PaintAction, PaintActionType } from "@app/domain/paint/defines/action"
+import { PaintStateSnapshot } from "@app/domain/paint/redux/state"
 
 setAutoFreeze(false) // improves performance of immer AFAIK
 export const copyAndOperateOnStateSnapshot = (

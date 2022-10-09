@@ -6,8 +6,7 @@ import {
 	PaintViewOptions,
 } from "@app/domain/paint/defines"
 import { PaintAction } from "@app/domain/paint/defines/action"
-
-import { Rect } from "tws-common/geometry"
+import { Rect } from "@app/legacy/geom"
 
 export type PaintSceneState = {
 	// in future some things

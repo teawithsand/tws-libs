@@ -1,8 +1,7 @@
+import { DefaultEventBus, EventBus } from "@teawithsand/tws-stl"
 import React, { createContext, ReactNode, useContext } from "react"
 
 import { PaintEvent } from "@app/domain/paint/defines/event"
-
-import { DefaultEventBus, EventBus } from "tws-common/event-bus"
 
 const PaintEventBusContext = createContext<EventBus<PaintEvent> | null>(null)
 

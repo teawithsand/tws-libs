@@ -1,17 +1,12 @@
-import { createAction } from "@reduxjs/toolkit";
+import { createAction } from "@reduxjs/toolkit"
+
+import { PaintScene } from "@app/domain/paint/defines"
+import { PaintAction } from "@app/domain/paint/defines/action"
+import { Rect } from "@app/legacy/geom"
 
 
-
-import { PaintScene } from "@app/domain/paint/defines";
-import { PaintAction } from "@app/domain/paint/defines/action";
-
-
-
-import { Rect } from "tws-common/geometry";
-import { claimId, NS_REDUX_ACTION_PREFIX } from "tws-common/misc/GlobalIDManager";
-
-
-const actionPrefix = claimId(NS_REDUX_ACTION_PREFIX, "tws-paint")
+// const actionPrefix = claimId(NS_REDUX_ACTION_PREFIX, "tws-paint")
+const actionPrefix = "tws-paint-old"
 
 export const setUncommittedPaintActions = createAction<PaintAction[]>(
 	`${actionPrefix}/setUncommittedPaintActions`,

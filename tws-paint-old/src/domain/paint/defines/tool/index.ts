@@ -2,8 +2,7 @@ import {
 	PathLineCapType,
 	PathLineJoinType,
 } from "@app/domain/paint/defines/element/path"
-
-import { Color } from "tws-common/color"
+import { Color } from "@app/legacy/color"
 
 export enum PaintToolType {
 	MOVE = "move",

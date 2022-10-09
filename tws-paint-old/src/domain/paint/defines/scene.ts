@@ -1,6 +1,5 @@
 import { PaintElement } from "@app/domain/paint/defines/element"
-
-import { Color } from "tws-common/color"
+import { Color } from "@app/legacy/color"
 
 export type PaintLayerOptions = {
 	name: string

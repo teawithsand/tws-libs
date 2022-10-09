@@ -1,7 +1,6 @@
 import { PaintSceneMutation } from "@app/domain/paint/defines/mutation"
 import { PaintToolType } from "@app/domain/paint/defines/tool"
-
-import { Color } from "tws-common/color"
+import { Color } from "@app/legacy/color"
 
 export enum PaintActionType {
 	SCENE_MUTATIONS = "scene-mutations",

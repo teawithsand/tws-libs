@@ -6,8 +6,7 @@ import {
 	useCurrentPaintTool,
 	usePaintScene,
 } from "@app/domain/paint/redux/selector/misc"
-
-import { Point } from "tws-common/geometry/point"
+import { Point } from "@app/legacy/geom"
 
 export const usePresentationDimensions = () => {
 	const scene = usePaintScene()

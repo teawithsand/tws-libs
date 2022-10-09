@@ -1,5 +1,5 @@
-import { Color } from "tws-common/color"
-import { Point } from "tws-common/geometry/point"
+import { Color } from "@app/legacy/color"
+import { Point } from "@app/legacy/geom"
 
 export type PathLineCapType = "butt" | "square" | "round"
 export type PathLineJoinType = "miter" | "round" | "bevel"
