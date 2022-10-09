@@ -8,7 +8,7 @@ import {
 	useDispatchAndCommitPaintActions,
 } from "@app/domain/paint/redux/selector"
 
-import { Button } from "tws-common/ui"
+import { Button } from "react-bootstrap"
 
 const InnerContainer = styled.div`
 	display: flex;

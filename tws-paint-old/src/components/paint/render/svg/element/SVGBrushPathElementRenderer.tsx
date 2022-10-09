@@ -8,7 +8,7 @@ import {
 	renderElementTransformAndFilter,
 } from "@app/domain/paint/defines"
 
-import { encodeColor } from "tws-common/color"
+import { encodeColor } from "@app/legacy/color"
 
 function getSvgPathFromStroke(stroke: ReturnType<typeof getStroke>) {
 	if (!stroke.length) return ""

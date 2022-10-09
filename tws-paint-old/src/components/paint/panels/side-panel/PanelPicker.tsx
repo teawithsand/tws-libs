@@ -1,9 +1,8 @@
 import React from "react"
+import { Button } from "react-bootstrap"
 import styled from "styled-components"
 
 import { PaintPanelType } from "@app/components/paint/panels/panels"
-
-import { Button } from "tws-common/ui"
 
 const InnerContainer = styled.div`
 	display: flex;

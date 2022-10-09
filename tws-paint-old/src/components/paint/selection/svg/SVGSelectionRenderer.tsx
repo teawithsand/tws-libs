@@ -1,17 +1,14 @@
-import React, { forwardRef, Ref, useMemo } from "react";
+import { useSubscribable } from "@teawithsand/tws-stl-react"
+import React, { forwardRef, Ref, useMemo } from "react"
 
-
-
-import { useElementDisplayBBoxRegistry } from "@app/components/paint/render/bbox";
-import { SelectionRendererProps } from "@app/components/paint/selection/SelectionRenderer";
-import { PaintElement } from "@app/domain/paint/defines";
-import { useCurrentPaintSnapshotSelector, usePaintSelector, usePointOperations } from "@app/domain/paint/redux/selector";
-
-
-
-import { useSubscribable } from "tws-common/event-bus";
-import { NORM_RECT_MIN, Point, Rect, rectDimensions, rectNormalize } from "tws-common/geometry";
-
+import { useElementDisplayBBoxRegistry } from "@app/components/paint/render/bbox"
+import { SelectionRendererProps } from "@app/components/paint/selection/SelectionRenderer"
+import { PaintElement } from "@app/domain/paint/defines"
+import {
+	usePaintSelector,
+	usePointOperations,
+} from "@app/domain/paint/redux/selector"
+import { NORM_RECT_MIN, Rect, rectDimensions, rectNormalize } from "@app/legacy/geom"
 
 const SelectionBoundingBox = (props: {
 	layerIndex: number
@@ -115,8 +112,13 @@ const InnerRenderer = (
 	props: SelectionRendererProps,
 	ref: Ref<SVGSVGElement | null>,
 ) => {
-	const { scene, screenWidth: presentationWidth, screenHeight: presentationHeight, style, className } =
-		props
+	const {
+		scene,
+		screenWidth: presentationWidth,
+		screenHeight: presentationHeight,
+		style,
+		className,
+	} = props
 
 	const currentSelectionBox = usePaintSelector(
 		s => s.actionsState.currentSelectionDragBox,
@@ -153,7 +155,7 @@ const InnerRenderer = (
 				e.preventDefault()
 				return false
 			}}
-			ref={ref}
+			ref={ref as any} // FIXME(teawithsand): remove that any cast
 		>
 			{/* TODO(teawithsand): better keys here for good performance for large amount of selected objects. 
 			Preferably use IDs of elements or sth like that */}

@@ -16,8 +16,8 @@ import {
 	BREAKPOINT_LG,
 	BREAKPOINT_MD,
 	breakpointMediaDown,
-} from "tws-common/react/hook/dimensions/useBreakpoint"
-import { Button } from "tws-common/ui"
+} from "@teawithsand/tws-stl-react"
+import { Button } from "react-bootstrap"
 
 const slideDuration = "300ms"
 const slideDurationNumber = parseInt(slideDuration.slice(0, -2))

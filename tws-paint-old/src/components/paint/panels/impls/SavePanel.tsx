@@ -1,12 +1,11 @@
+import { DownloadApiHelper } from "@teawithsand/tws-stl"
 import React, { useState } from "react"
+import { Button, Form } from "react-bootstrap"
 import { useDispatch } from "react-redux"
 import styled from "styled-components"
 
 import { setSceneSavedAction } from "@app/domain/paint/redux"
 import { useCurrentPaintSnapshotSelector } from "@app/domain/paint/redux/selector"
-
-import { Button, Form } from "tws-common/ui"
-import { downloadString } from "tws-common/webapi/download"
 
 const InnerContainer = styled.div`
 	display: grid;
@@ -69,7 +68,7 @@ export const SavePanel = () => {
 			</TwoFormRow>
 			<ExportButton
 				onClick={() => {
-					downloadString(
+					DownloadApiHelper.instance.downloadString(
 						JSON.stringify(scene),
 						"application/json",
 						fileName + ".twspaint",

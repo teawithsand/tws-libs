@@ -24,9 +24,9 @@ import {
 	useCurrentPaintTool,
 } from "@app/domain/paint/redux/selector"
 
-import { useSubscribableCallback } from "tws-common/event-bus"
-import { compareNumbers, inverseComparator } from "tws-common/lang/sort"
-import { throwExpression } from "tws-common/lang/throw"
+import { useSubscribableCallback } from "@teawithsand/tws-stl-react"
+import { compareNumbers, inverseComparator } from "@teawithsand/tws-stl"
+import { throwExpression } from "@teawithsand/tws-stl"
 
 // Map of layer index to set of touched element index
 type TouchedElements = Map<number, Set<number>>

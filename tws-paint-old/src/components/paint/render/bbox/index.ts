@@ -1,8 +1,8 @@
+import { DefaultEventBus, Subscribable } from "@teawithsand/tws-stl"
+import { throwExpression } from "@teawithsand/tws-stl"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 
-import { DefaultEventBus, Subscribable } from "tws-common/event-bus"
-import { Rect, rectNormalize } from "tws-common/geometry"
-import { throwExpression } from "tws-common/lang/throw"
+import { Rect, rectNormalize } from "@app/legacy/geom"
 
 export interface ElementDisplayBoundingBoxSubscribable
 	extends Subscribable<Rect | null> {

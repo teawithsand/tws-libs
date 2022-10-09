@@ -9,8 +9,8 @@ import {
 	useDispatchAndCommitPaintActions,
 } from "@app/domain/paint/redux/selector"
 
-import { Color } from "tws-common/color"
-import { Form } from "tws-common/ui"
+import { Color } from "@app/legacy/color"
+import { Form } from "react-bootstrap"
 
 const InnerContainer = styled.div`
 	display: grid;

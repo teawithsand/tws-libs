@@ -1,3 +1,4 @@
+import { useSubscribableCallback } from "@teawithsand/tws-stl-react"
 import produce from "immer"
 import React, { useCallback, useRef } from "react"
 import { useDispatch } from "react-redux"
@@ -20,20 +21,12 @@ import {
 	setDragSelectionBox,
 	setUncommittedPaintActions,
 } from "@app/domain/paint/redux"
-import { commitActionToActionStackOnPaintState } from "@app/domain/paint/redux/reducer/state"
 import {
 	useCurrentPaintTool,
 	usePaintScene,
 	usePointOperations,
 } from "@app/domain/paint/redux/selector"
-
-import { useSubscribableCallback } from "tws-common/event-bus"
-import {
-	Point,
-	rectContainsPoint,
-	rectIntersection,
-	rectNormalize,
-} from "tws-common/geometry"
+import { Point, rectContainsPoint, rectNormalize } from "@app/legacy/geom"
 
 type State =
 	| {
@@ -97,7 +90,7 @@ export const SelectHandler = () => {
 												layerIndex,
 												elementIndex,
 											)
-											
+
 										const isIn =
 											elementBoundingBox &&
 											rectContainsPoint(

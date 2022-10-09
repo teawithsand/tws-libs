@@ -3,7 +3,7 @@ import React, { forwardRef, Ref } from "react"
 import { SceneRendererProps } from "@app/components/paint/render/SceneRenderer"
 import { SVGLayerRenderer } from "@app/components/paint/render/svg/SVGLayerRenderer"
 
-import { encodeColor } from "tws-common/color"
+import { encodeColor } from "@app/legacy/color"
 
 const InnerRenderer = (
 	props: SceneRendererProps & {

@@ -1,3 +1,4 @@
+import { useSubscribableCallback } from "@teawithsand/tws-stl-react"
 import React, { useCallback, useRef } from "react"
 import { useDispatch } from "react-redux"
 
@@ -18,9 +19,7 @@ import {
 	useCurrentPaintSnapshotSelector,
 	useCurrentPaintTool,
 } from "@app/domain/paint/redux/selector"
-
-import { useSubscribableCallback } from "tws-common/event-bus"
-import { Point } from "tws-common/geometry/point"
+import { Point } from "@app/legacy/geom"
 
 type State =
 	| {

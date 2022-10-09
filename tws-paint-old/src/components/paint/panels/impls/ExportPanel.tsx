@@ -1,11 +1,10 @@
+import { DownloadApiHelper } from "@teawithsand/tws-stl"
 import React, { useState } from "react"
+import { Button, Form } from "react-bootstrap"
 import styled from "styled-components"
 
 import { SVGSceneRenderer } from "@app/components/paint/render/svg/SVGSceneRenderer"
 import { useCurrentPaintSnapshotSelector } from "@app/domain/paint/redux/selector"
-
-import { Button, Form } from "tws-common/ui"
-import { downloadString, downloadUrl } from "tws-common/webapi/download"
 
 const InnerContainer = styled.div`
 	display: grid;
@@ -223,9 +222,16 @@ export const ExportPanel = () => {
 									format,
 								)
 
-								downloadUrl(url, fileName)
+								DownloadApiHelper.instance.downloadUrl(
+									url,
+									fileName,
+								)
 							} else {
-								downloadString(text, "image/svg+xml", fileName)
+								DownloadApiHelper.instance.downloadString(
+									text,
+									"image/svg+xml",
+									fileName,
+								)
 							}
 						}
 					})()

@@ -1,14 +1,12 @@
+import { LoadingSpinner } from "@teawithsand/tws-stl-react"
 import React, { useState } from "react"
+import { Alert, Button, Form } from "react-bootstrap"
 import { useDispatch } from "react-redux"
 import styled from "styled-components"
 
+import { throwExpression } from "@app/../../tws-stl/dist"
 import { PaintScene } from "@app/domain/paint/defines"
 import { loadPaintScene } from "@app/domain/paint/redux"
-import { useCurrentPaintSnapshotSelector } from "@app/domain/paint/redux/selector"
-
-import { Alert, Button, Form } from "tws-common/ui"
-import LoadingSpinner from "tws-common/ui/LoadingSpinner"
-import { downloadString } from "tws-common/webapi/download"
 
 const InnerContainer = styled.div`
 	display: grid;
@@ -53,7 +51,13 @@ const readFileToText = async (file: File): Promise<string> => {
 		const reader = new FileReader()
 		reader.readAsText(file, "UTF-8")
 		reader.onload = function (evt) {
-			resolve(evt.target.result as string)
+			// TODO(teawithsand): fix possible null here + cast to any
+			resolve(
+				(evt.target?.result ??
+					throwExpression(
+						new Error("This should not be null"),
+					)) as any as string,
+			)
 		}
 		reader.onerror = function (e) {
 			reject(e)

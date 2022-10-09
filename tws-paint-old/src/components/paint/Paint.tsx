@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit"
+import { useWindowDimensions } from "@teawithsand/tws-stl-react"
 import React, { forwardRef, useMemo, useState } from "react"
 import { Helmet } from "react-helmet"
 import { Provider } from "react-redux"
@@ -44,8 +45,6 @@ import {
 	usePaintScene,
 	usePresentationDimensions,
 } from "@app/domain/paint/redux/selector"
-
-import useWindowDimensions from "tws-common/react/hook/dimensions/useWindowDimensions"
 
 const InnerContainer = styled.div`
 	display: grid;

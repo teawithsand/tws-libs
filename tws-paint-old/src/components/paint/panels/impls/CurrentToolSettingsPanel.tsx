@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react"
+import React from "react"
 
 import { PaintPanelType, usePanel } from "@app/components/paint/panels/panels"
 import { PaintToolType } from "@app/domain/paint/defines"

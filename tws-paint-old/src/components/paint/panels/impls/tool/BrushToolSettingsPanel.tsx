@@ -1,4 +1,5 @@
 import React from "react"
+import { Form } from "react-bootstrap"
 import styled from "styled-components"
 
 import { ColorPickerInput } from "@app/components/util/ColorPicker"
@@ -8,9 +9,7 @@ import {
 	useCurrentPaintSnapshotSelector,
 	useDispatchAndCommitPaintActions,
 } from "@app/domain/paint/redux/selector"
-
-import { Color } from "tws-common/color"
-import { Form } from "tws-common/ui"
+import { Color } from "@app/legacy/color"
 
 const InnerContainer = styled.div`
 	display: grid;

@@ -1,6 +1,5 @@
+import { throwExpression } from "@teawithsand/tws-stl"
 import { createContext, useContext } from "react"
-
-import { throwExpression } from "tws-common/lang/throw"
 
 export enum PaintPanelPlace {
 	SIDE_PANEL = "side-panel",
