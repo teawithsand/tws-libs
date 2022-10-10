@@ -5,6 +5,18 @@ export class BinaryReader {
 		this.intBuffer = new Uint8Array(buffer)
 	}
 
+	get byteOffset() {
+		return this.offset
+	}
+
+	get bytesLeft() {
+		return this.buffer.byteLength - this.offset
+	}
+
+	get bufferLeft(): ArrayBuffer {
+		return this.buffer.slice(this.offset)
+	}
+
 	readStringFixed = (sz: number): string => {
 		let s = ""
 		for (let i = 0; i < sz; i++) {
@@ -30,6 +42,8 @@ export class BinaryReader {
 		for (let i = 0; i < sz; i++) {
 			res.push(this.intBuffer[this.offset + i])
 		}
+
+		this.offset += sz
 
 		return res
 	}

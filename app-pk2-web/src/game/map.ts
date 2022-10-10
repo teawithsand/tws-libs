@@ -1,11 +1,10 @@
 import { throwExpression } from "@teawithsand/tws-stl"
 
-import {
-	mustReadPositiveFixedDecimalNumber,
-	readPositiveFixedDecimalNumber,
-	readStringConstSize,
-} from "../util/binary/bytes"
 import { BinaryReader } from "../util/binary/reader"
+
+// TODO(teawithsand): port map to new design
+//  compute map boundaries and so on from legacy map to new easy map format, which has dimensions as fields
+//  rather than c-style array
 
 /**
  * Port of following enum:
@@ -84,7 +83,7 @@ const readMapContentsArray = (rd: BinaryReader): number[][] => {
 	const levels = rd.readDecimalIntFixed()
 	const columns = rd.readDecimalIntFixed()
 
-	for (let y = offsetY; y < offsetY + columns; y++) {
+	for (let y = offsetY; y <= offsetY + columns; y++) {
 		const data = rd.readUnsignedNumbers(levels + 1)
 
 		for (let i = 0; i < levels + 1; i++) {
@@ -158,8 +157,8 @@ export const newParseLegacyMapBlob = (buffer: ArrayBuffer) => {
 
 			map: {
 				backgroundTilesIds,
-				foregroundTilesIds,
-				mapSpritesIds,
+				// foregroundTilesIds,
+				// mapSpritesIds,
 			},
 		}
 	} catch (e) {
