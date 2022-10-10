@@ -8,7 +8,8 @@
     "tws-player",
     "tws-gatsby-plugin",
     "tws-paint-old",
-    "app-tws-paint-old"
+    "app-tws-paint-old",
+    "app-pk2-web"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"
