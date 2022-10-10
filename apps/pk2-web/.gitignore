@@ -1,0 +1,6 @@
+./pk2-orig
+
+node_modules/
+.cache/
+public
+src/gatsby-types.d.ts
