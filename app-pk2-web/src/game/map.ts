@@ -1,9 +1,11 @@
+import { throwExpression } from "@teawithsand/tws-stl"
+
 import {
 	mustReadPositiveFixedDecimalNumber,
 	readPositiveFixedDecimalNumber,
 	readStringConstSize,
 } from "../util/binary/bytes"
-import { version } from "os"
+import { BinaryReader } from "../util/binary/reader"
 
 /**
  * Port of following enum:
@@ -70,110 +72,100 @@ export type LegacyMapData = {
 
 export class MapParseError extends Error {}
 
-export const parseLegacyMapBlob = (buffer: ArrayBuffer): LegacyMapData => {
-	let offset = 0
+const readMapContentsArray = (rd: BinaryReader): number[][] => {
+	const res: number[][] = []
 
-	{
-		const version = readStringConstSize(buffer.slice(offset), 5)
-		offset += 5
-		if (version !== "1.3") {
-			throw new MapParseError(
-				"Version is not 1.3. Others are not supported"
-			)
+	for (let i = 0; i < DEFAULT_MAP_WIDTH; i++) {
+		res.push([...new Array(DEFAULT_MAP_HEIGHT).keys()].fill(-1))
+	}
+
+	const offsetX = rd.readDecimalIntFixed()
+	const offsetY = rd.readDecimalIntFixed()
+	const levels = rd.readDecimalIntFixed()
+	const columns = rd.readDecimalIntFixed()
+
+	for (let y = offsetY; y < offsetY + columns; y++) {
+		const data = rd.readUnsignedNumbers(levels + 1)
+
+		for (let i = 0; i < levels + 1; i++) {
+			res[y][i + offsetX] =
+				data.pop() ??
+				throwExpression(
+					new MapParseError("Pop filed. Invalid offsets provided."),
+				)
 		}
 	}
 
-	const blockPaletteImagePath = readStringConstSize(buffer.slice(offset), 13)
-	offset += 13
+	return res
+}
 
-	const backgroundImagePath = readStringConstSize(buffer.slice(offset), 13)
-	offset += 13
+export const newParseLegacyMapBlob = (buffer: ArrayBuffer) => {
+	try {
+		const rd = new BinaryReader(buffer)
 
-	const musicFilePath = readStringConstSize(buffer.slice(offset), 13)
-	offset += 13
+		const version = rd.readStringFixed(5)
+		const blockPaletteImagePath = rd.readStringFixed(13)
+		const backgroundImagePath = rd.readStringFixed(13)
+		const musicFilePath = rd.readStringFixed(13)
+		const mapName = rd.readStringFixed(40).replace(/Ì.*$/, "") // replace required, this is what pk2 code does
+		const authorName = rd.readStringFixed(40).replace(/Ì.*$/, "") // like above
 
-	// TODO(teawithsand): apply 0xcd hack
-	const mapName = readStringConstSize(buffer.slice(offset), 40)
-	offset += 40
+		const levelOfTheEpisode = rd.readDecimalIntFixed()
+		const mapClimate = rd.readDecimalIntFixed()
 
-	const authorName = readStringConstSize(buffer.slice(offset), 40)
-	offset += 40
+		rd.advance(3 * 8) // three unused button times
 
-	const decNumberSize = 8
+		const mapTimeSeconds = rd.readDecimalIntFixed()
 
-	const levelOfTheEpisode = readPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
-	if (!levelOfTheEpisode)
-		throw new MapParseError("Expected level of the episode")
+		rd.advance(8)
 
-	const mapClimate = readPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
+		const backgroundMovementType = rd.readDecimalIntFixed()
 
-	offset += decNumberSize * 3 // three button times here; all unused
+		const playerSpriteId = rd.readDecimalIntFixed()
 
-	const mapTimeSeconds = readPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
+		const mapOnEpisodeX = rd.readDecimalIntFixed()
+		const mapOnEpisodeY = rd.readDecimalIntFixed()
+		const mapOnEpisodeIconId = rd.readDecimalIntFixed()
 
-	offset += decNumberSize // unused extra piece of data
+		const protoCount = rd.readDecimalIntFixed()
 
-	const backgroundMovementType = readPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
+		const prototypes: string[] = []
+		for (let i = 0; i < protoCount; i++) {
+			prototypes.push(rd.readStringFixed(13))
+		}
 
-	const playerSpriteId = mustReadPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
+		const backgroundTilesIds = readMapContentsArray(rd)
+		const foregroundTilesIds = readMapContentsArray(rd)
+		const mapSpritesIds = readMapContentsArray(rd)
 
-	const mapOnMapX = mustReadPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
-
-	const mapOnMapY = mustReadPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
-
-	const mapOnMapIconId = mustReadPositiveFixedDecimalNumber(
-		buffer.slice(offset),
-		decNumberSize
-	)
-	offset += decNumberSize
-
-	return {
-		version: "1.3",
-		width: 1234,
-		height: 1234,
-		blockPaletteImagePath,
-		backgroundImagePath,
-		musicFilePath,
-		mapName,
-		authorName,
-		mapTimeSeconds,
-		mapOfMap: {
+		return {
+			version,
+			blockPaletteImagePath,
+			backgroundImagePath,
+			musicFilePath,
+			mapName,
+			authorName,
+			mapClimate: mapClimate as MapClimate,
 			levelOfTheEpisode,
-			x: mapOnMapX,
-			y: mapOnMapY,
-			iconId: mapOnMapIconId,
-		},
-		climate: mapClimate as MapClimate,
-		backgroundMovementType:
-			backgroundMovementType as MapBackgroundMovementType,
-		playerSpriteId,
+			mapTimeSeconds,
+			backgroundMovementType:
+				backgroundMovementType as MapBackgroundMovementType,
+			playerSpriteId,
+			mapOnEpisodeX,
+			mapOnEpisodeY,
+			mapOnEpisodeIconId,
+			prototypes,
+
+			map: {
+				backgroundTilesIds,
+				foregroundTilesIds,
+				mapSpritesIds,
+			},
+		}
+	} catch (e) {
+		if (e instanceof MapParseError) {
+			throw e
+		}
+		throw new MapParseError(`Filed to parse map due to ${e}`)
 	}
 }
