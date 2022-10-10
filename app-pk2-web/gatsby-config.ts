@@ -14,11 +14,21 @@ const plugins = customizeDefaultPlugins(
 			languages: ["en-US"],
 		}),
 	],
+	[
+		{
+			resolve: "gatsby-source-filesystem",
+			options: {
+				name: "resources",
+				path: "./res/",
+			},
+			__key: "resources",
+		},
+	]
 )
 
 const config = makeConfig(
 	{
-		siteUrl: `https://paint.teawithsand.com`,
+		siteUrl: `https://pk2.teawithsand.com`,
 	},
 	plugins,
 )
