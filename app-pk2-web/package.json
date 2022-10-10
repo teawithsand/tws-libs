@@ -1,33 +1,34 @@
 {
-  "name": "pekka-kana-2",
-  "version": "1.0.0",
-  "private": true,
-  "description": "pekka-kana-2",
-  "author": "teawithsand",
-  "keywords": [
-    "gatsby"
-  ],
-  "scripts": {
-    "develop": "gatsby develop",
-    "start": "gatsby develop",
-    "build": "gatsby build",
-    "serve": "gatsby serve",
-    "clean": "gatsby clean",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "babel-plugin-styled-components": "^2.0.7",
-    "gatsby": "^4.24.3",
-    "gatsby-plugin-manifest": "^4.24.0",
-    "gatsby-plugin-styled-components": "^5.24.0",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
-    "styled-components": "^5.3.6"
-  },
-  "devDependencies": {
-    "@types/node": "^17.0.45",
-    "@types/react": "^18.0.21",
-    "@types/react-dom": "^18.0.6",
-    "typescript": "^4.8.3"
-  }
+	"name": "@teawithsand/pk2-web",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Pekka Kana 2 port to web browser",
+	"author": "teawithsand",
+	"keywords": [
+		"gatsby"
+	],
+	"scripts": {
+		"develop": "gatsby develop",
+		"start": "gatsby develop",
+		"build": "gatsby build",
+		"serve": "gatsby serve",
+		"clean": "gatsby clean",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@teawithsand/tws-stl": "^0.0.1",
+		"babel-plugin-styled-components": "^2.0.7",
+		"gatsby": "^4.24.3",
+		"gatsby-plugin-manifest": "^4.24.0",
+		"gatsby-plugin-styled-components": "^5.24.0",
+		"react": "^18.1.0",
+		"react-dom": "^18.1.0",
+		"styled-components": "^5.3.6"
+	},
+	"devDependencies": {
+		"@types/node": "^17.0.45",
+		"@types/react": "^18.0.21",
+		"@types/react-dom": "^18.0.6",
+		"typescript": "^4.8.3"
+	}
 }
