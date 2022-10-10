@@ -61,16 +61,16 @@ export type LegacyMapData = {
 	width: number
 	height: number
 
-	body: {
-		background: number[][]
-		foreground: number[][]
-		sprites: number[][]
-	}
+	// body: {
+	// 	background: number[][]
+	// 	foreground: number[][]
+	// 	sprites: number[][]
+	// }
 }
 
 export class MapParseError extends Error {}
 
-export const load13LegacyMapBlob = (buffer: ArrayBuffer): LegacyMapData => {
+export const parseLegacyMapBlob = (buffer: ArrayBuffer): LegacyMapData => {
 	let offset = 0
 
 	{
@@ -156,6 +156,9 @@ export const load13LegacyMapBlob = (buffer: ArrayBuffer): LegacyMapData => {
 	offset += decNumberSize
 
 	return {
+		version: "1.3",
+		width: 1234,
+		height: 1234,
 		blockPaletteImagePath,
 		backgroundImagePath,
 		musicFilePath,
