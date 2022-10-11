@@ -8,5 +8,6 @@
         "teawithsand",
         "unsimplify",
         "walkthrough"
-    ]
+    ],
+    "python.formatting.provider": "yapf"
 }

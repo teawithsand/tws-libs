@@ -22,7 +22,7 @@ const ArrayDisplay = (props: { tiles: number[][] }) => {
 			const res = rawResources.allFile.nodes.find(
 				v =>
 					v.relativePath ===
-					`gfx/tiles/tiles01/${String(i).padStart(3, "0")}.png`,
+					`blocks/tiles01/${String(i).padStart(3, "0")}.png`,
 			)
 
 			if (res) {
@@ -32,8 +32,6 @@ const ArrayDisplay = (props: { tiles: number[][] }) => {
 
 		return m
 	}, [rawResources])
-
-	console.log([...resMap.entries()])
 
 	const { tiles } = props
 	return (
