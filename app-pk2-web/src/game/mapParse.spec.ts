@@ -1,4 +1,4 @@
-import { newParseLegacyMapBlob, parseLegacyMapBlob } from "./map"
+import { newParseLegacyMapBlob, parseLegacyMapBlob } from "./map/map"
 
 const mapOneArray = [
 	0x31, 0x2e, 0x33, 0x00, 0xcd, 0x74, 0x69, 0x6c, 0x65, 0x73, 0x30, 0x31,
