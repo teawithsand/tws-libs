@@ -1,21 +1,14 @@
+import { ExternalEntityData } from "../entity/external/data"
+import { BlockId } from "../map"
+
+/**
+ * Manager, which manages resources for specified instance of game map.
+ */
 export interface ResourceLoader {
-	resolveResourceUrl(text: string): string
+	readonly backgroundColor?: string // color of background, defaults to white
+	readonly backgroundImageUrl?: string // URL of background image, if any
+
+	foregroundBlockImageUrl(id: BlockId): string
+	backgroundBlockImageUrl(id: BlockId): string
+	loadExternalEntityDataForName(name: string): ExternalEntityData
 }
-
-export type ResourceLoaderProvider = (res: string) => string | null
-
-export class ResourceLoaderImpl implements ResourceLoader {
-	constructor(private readonly providers: ResourceLoaderProvider[]) {}
-    
-	resolveResourceUrl(res: string): string {
-		for (const p of this.providers) {
-			const url = p(res)
-			if (url) return url
-		}
-
-		throw new Error(`Filed to resolve resource ${res}`)
-	}
-}
-
-// TODO(teawithsand): implement provider for these resources with gatsby plugin file system
-//  and static query, which would load these resources
