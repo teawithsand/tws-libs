@@ -57,11 +57,12 @@ const readMapContentsArray = (rd: BinaryReader): number[][] => {
 	const columns = rd.readDecimalIntFixed()
 
 	for (let y = offsetY; y <= offsetY + columns; y++) {
-		const data = rd.readUnsignedNumbers(levels + 1)
+		const readSize = levels + 1
+		const data = rd.readUnsignedNumbers(readSize)
 
-		for (let i = 0; i < levels + 1; i++) {
-			res[y][i + offsetX] =
-				data.pop() ??
+		for (let x = 0; x < readSize; x++) {
+			res[x + offsetX][y] =
+				data.shift() ??
 				throwExpression(
 					new MapParseError("Pop filed. Invalid offsets provided."),
 				)
@@ -139,9 +140,9 @@ export const parseLegacyMap = (buffer: ArrayBuffer): LegacyMapData => {
 				foreground: foregroundTilesIds,
 				sprites: mapSpritesIds,
 			},
-            // OR compute boundaries manually
-            height: DEFAULT_MAP_HEIGHT,
-            width: DEFAULT_MAP_WIDTH,
+			// OR compute boundaries manually
+			height: DEFAULT_MAP_HEIGHT,
+			width: DEFAULT_MAP_WIDTH,
 		}
 	} catch (e) {
 		if (e instanceof MapParseError) {

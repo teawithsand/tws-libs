@@ -1,7 +1,6 @@
-import { BlockStaticDefinition } from "./block"
 import { LegacyMapData } from "./legacy"
 
-export type TileId = number
+export type BlockId = number
 export type SpriteId = number
 
 export type MapHeader = {
@@ -13,8 +12,8 @@ export type MapHeader = {
 }
 
 export type MapBody = {
-	foreground: BlockStaticDefinition[][]
-	background: BlockStaticDefinition[][]
+	foreground: BlockId[][]
+	background: BlockId[][]
 }
 
 /**
@@ -25,9 +24,7 @@ export type MapData = {
 	header: MapHeader
 }
 
-export const updateFromLegacy = (legacy: LegacyMapData): MapData => {
-	throw new Error("NIY")
-	/*
+export const mapDataFromLegacy = (legacy: LegacyMapData): MapData => {
 	return {
 		header: {
 			width: legacy.width,
@@ -36,8 +33,8 @@ export const updateFromLegacy = (legacy: LegacyMapData): MapData => {
 			mapName: legacy.mapName,
 		},
 		body: {
-
+			background: legacy.body.background,
+			foreground: legacy.body.foreground,
 		},
 	}
-	*/
 }
