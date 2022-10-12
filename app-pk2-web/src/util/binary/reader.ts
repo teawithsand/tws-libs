@@ -52,63 +52,53 @@ export class BinaryReader {
 		return res
 	}
 
-	readFloat64 = (): number => {
-		const sz = 8
-		const slicedBuffer = new Uint8Array(this.buffer.slice(this.offset))
+	private getReadingBuffer = (): [ArrayBuffer, number] => {
+		const left = this.bufferLeft
+		const sz = Math.min(8, left.byteLength)
+		const slicedBuffer = new Uint8Array(left)
 
-		const buffer = new Uint32Array([0, 0])
+		const buffer = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])
 		for (let i = 0; i < sz; i++) {
 			buffer[i] = slicedBuffer[i]
 		}
 
-		const movedBuffer = buffer.buffer // refactor me
+		return [buffer.buffer.slice(0, sz), sz]
+	}
 
-		return new Float64Array(movedBuffer)[0]
+	readFloat64 = (): number => {
+		const [ab, sz] = this.getReadingBuffer()
+		this.offset += sz
+
+		return new Float64Array(ab)[0]
 	}
 
 	readNByteNumber = (sz: 1 | 2 | 4 | 8, unsigned = true): number => {
-		const slicedBuffer = new Uint8Array(this.buffer.slice(this.offset))
-		let isError = false
+		const [ab] = this.getReadingBuffer()
+		this.offset += sz
 
-		const buffer = new Uint32Array([0, 0])
-		for (let i = 0; i < sz; i++) {
-			buffer[i] = slicedBuffer[i]
-		}
-
-		const movedBuffer = buffer.buffer // refactor me
-
-		try {
-			if (unsigned) {
-				if (sz === 1) {
-					return new Uint8Array(movedBuffer)[0]
-				} else if (sz === 2) {
-					return new Uint16Array(movedBuffer)[0]
-				} else if (sz === 4) {
-					return new Uint32Array(movedBuffer)[0]
-				} else if (sz === 8) {
-					return Number(new BigUint64Array(movedBuffer)[0])
-				} else {
-					throw new Error(`Invalid unsigned number size ${sz}`)
-				}
+		if (unsigned) {
+			if (sz === 1) {
+				return new Uint8Array(ab)[0]
+			} else if (sz === 2) {
+				return new Uint16Array(ab)[0]
+			} else if (sz === 4) {
+				return new Uint32Array(ab)[0]
+			} else if (sz === 8) {
+				return Number(new BigUint64Array(ab)[0])
 			} else {
-				if (sz === 1) {
-					return new Int8Array(movedBuffer)[0]
-				} else if (sz === 2) {
-					return new Int16Array(movedBuffer)[0]
-				} else if (sz === 4) {
-					return new Int32Array(movedBuffer)[0]
-				} else if (sz === 8) {
-					return Number(new BigInt64Array(movedBuffer)[0])
-				} else {
-					throw new Error(`Invalid signed number size ${sz}`)
-				}
+				throw new Error(`Invalid unsigned number size ${sz}`)
 			}
-		} catch (e) {
-			isError = true
-			throw e // TODO(teawithsand): refactor me
-		} finally {
-			if (!isError) {
-				this.offset += sz
+		} else {
+			if (sz === 1) {
+				return new Int8Array(ab)[0]
+			} else if (sz === 2) {
+				return new Int16Array(ab)[0]
+			} else if (sz === 4) {
+				return new Int32Array(ab)[0]
+			} else if (sz === 8) {
+				return Number(new BigInt64Array(ab)[0])
+			} else {
+				throw new Error(`Invalid signed number size ${sz}`)
 			}
 		}
 	}
