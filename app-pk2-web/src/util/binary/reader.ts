@@ -17,6 +17,10 @@ export class BinaryReader {
 		return this.buffer.slice(this.offset)
 	}
 
+	readBool = (): boolean => {
+		return this.readNByteNumber(1) !== 0
+	}
+
 	readStringFixed = (sz: number): string => {
 		let s = ""
 		for (let i = 0; i < sz; i++) {
@@ -48,9 +52,31 @@ export class BinaryReader {
 		return res
 	}
 
+	readFloat64 = (): number => {
+		const sz = 8
+		const slicedBuffer = new Uint8Array(this.buffer.slice(this.offset))
+
+		const buffer = new Uint32Array([0, 0])
+		for (let i = 0; i < sz; i++) {
+			buffer[i] = slicedBuffer[i]
+		}
+
+		const movedBuffer = buffer.buffer // refactor me
+
+		return new Float64Array(movedBuffer)[0]
+	}
+
 	readNByteNumber = (sz: 1 | 2 | 4 | 8, unsigned = true): number => {
-		const movedBuffer = this.buffer.slice(this.offset)
+		const slicedBuffer = new Uint8Array(this.buffer.slice(this.offset))
 		let isError = false
+
+		const buffer = new Uint32Array([0, 0])
+		for (let i = 0; i < sz; i++) {
+			buffer[i] = slicedBuffer[i]
+		}
+
+		const movedBuffer = buffer.buffer // refactor me
+
 		try {
 			if (unsigned) {
 				if (sz === 1) {
