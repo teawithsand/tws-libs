@@ -2,50 +2,38 @@ import { graphql, useStaticQuery } from "gatsby"
 import React, { useMemo } from "react"
 
 import { MapData } from "@app/game/map"
+import { GatsbyResourceLoader } from "@app/game/resources"
 
 const ArrayDisplay = (props: { tiles: number[][] }) => {
-	const rawResources: Queries.ResourceFilesInnerQuery =
-		useStaticQuery(graphql`
-			query ResourceFilesInner {
-				allFile(filter: { sourceInstanceName: { eq: "resources" } }) {
-					nodes {
-						publicURL
-						relativePath
-					}
+	const rawResources: Queries.ResourceFilesQuery = useStaticQuery(graphql`
+		query ResourceFiles {
+			allFile(filter: { sourceInstanceName: { eq: "resources" } }) {
+				nodes {
+					publicURL
+					relativePath
 				}
 			}
-		`)
-	const resMap: Map<number, string> = useMemo(() => {
-		const m = new Map()
-
-		for (let i = 0; i < 255; i++) {
-			const res = rawResources.allFile.nodes.find(
-				v =>
-					v.relativePath ===
-					`blocks/tiles01/${String(i).padStart(3, "0")}.png`,
-			)
-
-			if (res) {
-				m.set(i, res.publicURL)
-			}
 		}
-
-		return m
-	}, [rawResources])
+	`)
+	
+	const resLoader = useMemo(
+		() => new GatsbyResourceLoader(rawResources, "tiles01"),
+		[rawResources],
+	)
 
 	const { tiles } = props
 	return (
 		<g>
 			{tiles.flatMap((vv, i) =>
 				vv.map((v, j) =>
-					resMap.get(v) ? (
+					v >= 0 && v <= 150 ? (
 						<image
 							key={`${i};${j}`}
 							x={i * 32}
 							y={j * 32}
 							width={32}
 							height={32}
-							href={resMap.get(v)}
+							href={resLoader.foregroundBlockImageUrl(v)}
 						/>
 					) : undefined,
 				),
