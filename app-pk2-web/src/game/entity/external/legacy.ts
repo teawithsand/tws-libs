@@ -3,39 +3,55 @@ import { BinaryReader } from "@app/util/binary/reader"
 export type LegacyExternalEntityData = {
 	version: string // only 1.3 is supported though
 	type: number
-	framesPath: string
-	soundPaths: string[]
-	soundTypes: number[]
-	frameCount: number
-	animations: LegacyExternalEntityAnimation[]
-	animationCount: number
 	name: string
+	display: {
+		frames: {
+			framesPath: string
+			firstFrameX: number
+			firstFrameY: number
+			frameWidth: number
+			frameHeight: number
+			spaceBetweenFrames: number
+			frameCount: number
+		}
+		width: number
+		height: number
+	}
 
-	width: number
-	height: number
+	sound: {
+		soundPaths: string[]
+		soundTypes: number[]
+	}
 
-	firstFrameX: number
-	firstFrameY: number
-	frameWidth: number
-	frameHeight: number
-	frameSpace: number
+	animation: {
+		animations: LegacyExternalEntityAnimation[]
+		animationCount: number
+		frameRate: number
+	}
 
-	frameRate: number
+	miscSprites: {
+		mutationSprite: string
+		bonusSprite: string
+	}
 
-	mutationSprite: string
-	bonusSprite: string
+	game: {
+		canGlide: boolean
+		canSwim: boolean
 
-	canGlide: boolean
-	canSwim: boolean
+		attackOne: {
+			time: number
+			spritePath: string
+		}
+		attackTwo: {
+			time: number
+			spritePath: string
+		}
 
-	attackOneFrames: number
-	attackTwoFrames: number
-
-	protectionType: number
-
-	energy: number
-	maxJumpTime: number
-	killScore: number
+		protectionType: number
+		energy: number
+		maxJumpTime: number
+		killScore: number
+	}
 }
 
 export type LegacyExternalEntityAnimation = {
@@ -63,7 +79,7 @@ export const innerParseLegacyEntityData = (data: ArrayBuffer) => {
 	const version = reader.readStringFixed(4)
 	assertBytesRead(0)
 
-	const type = reader.readStringFixed(4)
+	const type = reader.readNByteNumber(4)
 	assertBytesRead(4)
 	const spriteImagePath = reader.readStringFixed(100)
 	assertBytesRead(104)
@@ -180,10 +196,10 @@ export const innerParseLegacyEntityData = (data: ArrayBuffer) => {
 	const bonusSprite = reader.readStringFixed(100)
 	assertBytesRead(1444)
 
-	const ammoOneSprite = reader.readStringFixed(100)
+	const attackOneSpriteAmmo = reader.readStringFixed(100)
 	assertBytesRead(1544)
 
-	const ammoTwoSprite = reader.readStringFixed(100)
+	const attackTwoSpriteAmmo = reader.readStringFixed(100)
 	assertBytesRead(1644)
 
 	const isMakeSound = reader.readBool()
@@ -264,8 +280,8 @@ export const innerParseLegacyEntityData = (data: ArrayBuffer) => {
 		parallaxType,
 		mutateIntoSprite,
 		bonusSprite,
-		ammoOneSprite,
-		ammoTwoSprite,
+		attackOneSpriteAmmo,
+		attackTwoSpriteAmmo,
 		isMakeSound,
 		soundFrequency,
 		randomFrequency,
@@ -280,7 +296,7 @@ export const innerParseLegacyEntityData = (data: ArrayBuffer) => {
 		canGlide,
 		isBoss,
 		isBonusAlways,
-		isCanSwim: isCanSwim,
+		isCanSwim,
 	}
 }
 
@@ -288,4 +304,55 @@ export const parseLegacyEntityData = (
 	data: ArrayBuffer,
 ): LegacyExternalEntityData => {
 	const inner = innerParseLegacyEntityData(data)
+
+	return {
+		type: inner.type,
+		name: inner.name,
+		version: inner.version,
+
+		display: {
+			frames: {
+				firstFrameX: inner.xOfFirstFrame,
+				firstFrameY: inner.yOfFirstFrame,
+				frameCount: inner.frameCount,
+				frameWidth: inner.frameWidth,
+				frameHeight: inner.frameHeight,
+				framesPath: inner.spriteImagePath,
+				spaceBetweenFrames: inner.spaceBetweenFrames,
+			},
+			height: inner.height,
+			width: inner.width,
+		},
+
+		animation: {
+			animationCount: inner.animationCount,
+			animations: inner.animations,
+			frameRate: inner.frameRate,
+		},
+
+		miscSprites: {
+			bonusSprite: inner.bonusSprite,
+			mutationSprite: inner.mutateIntoSprite,
+		},
+		sound: {
+			soundPaths: inner.soundPaths,
+			soundTypes: inner.soundTypes,
+		},
+		game: {
+			attackOne: {
+				time: inner.attackOneTime,
+				spritePath: inner.attackOneSpriteAmmo,
+			},
+			attackTwo: {
+				time: inner.attackTwoTime,
+				spritePath: inner.attackTwoSpriteAmmo,
+			},
+			canGlide: inner.canGlide,
+			canSwim: inner.isCanSwim,
+			energy: inner.energy,
+			killScore: inner.killScore,
+			maxJumpTime: inner.maxJumpTime,
+			protectionType: inner.protectionType,
+		},
+	}
 }
