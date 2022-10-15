@@ -1,6 +1,6 @@
 import { BinaryReader } from "@app/util/binary/reader"
 
-export type LegacyExternalEntityData = {
+export type RawLegacyEntityData = {
 	version: string // only 1.3 is supported though
 	type: number
 	name: string
@@ -24,7 +24,7 @@ export type LegacyExternalEntityData = {
 	}
 
 	animation: {
-		animations: LegacyExternalEntityAnimation[]
+		animations: LegacyEntityAnimationData[]
 		animationCount: number
 		frameRate: number
 	}
@@ -38,11 +38,13 @@ export type LegacyExternalEntityData = {
 		canGlide: boolean
 		canSwim: boolean
 
-		attackOne: {
+		// TODO(teawithsand): replace it with enum of all attacks, as it's simpler
+		//  then simply spawn entity on demand
+		attackShoot: {
 			time: number
 			spritePath: string
 		}
-		attackTwo: {
+		attackEgg: {
 			time: number
 			spritePath: string
 		}
@@ -54,7 +56,7 @@ export type LegacyExternalEntityData = {
 	}
 }
 
-export type LegacyExternalEntityAnimation = {
+export type LegacyEntityAnimationData = {
 	sequence: number[]
 	frames: number
 	loop: boolean
@@ -302,7 +304,7 @@ export const innerParseLegacyEntityData = (data: ArrayBuffer) => {
 
 export const parseLegacyEntityData = (
 	data: ArrayBuffer,
-): LegacyExternalEntityData => {
+): RawLegacyEntityData => {
 	const inner = innerParseLegacyEntityData(data)
 
 	return {
@@ -339,11 +341,11 @@ export const parseLegacyEntityData = (
 			soundTypes: inner.soundTypes,
 		},
 		game: {
-			attackOne: {
+			attackShoot: {
 				time: inner.attackOneTime,
 				spritePath: inner.attackOneSpriteAmmo,
 			},
-			attackTwo: {
+			attackEgg: {
 				time: inner.attackTwoTime,
 				spritePath: inner.attackTwoSpriteAmmo,
 			},

@@ -56,7 +56,7 @@ export type BlockStaticDefinition = {
 
 	// Which block edge collides with specified block
 	// each block has obviously four edges
-	// but some blocks may have only top collision, 
+	// but some blocks may have only top collision,
 	// say platforms you can jump on but you can't fall from these
 	collisions: {
 		top: boolean
@@ -82,6 +82,6 @@ export const BLOCK_DEFINES: {
 			left: true,
 			right: true,
 			top: true,
-		}
+		},
 	},
 }

@@ -1,4 +1,4 @@
-import { ExternalEntityData } from "../entity/external/data"
+import { LegacyEntityData } from "@app/game/entity/external/defines"
 import { BlockId } from "../map"
 
 /**
@@ -10,5 +10,5 @@ export interface ResourceLoader {
 
 	foregroundBlockImageUrl(id: BlockId): string
 	backgroundBlockImageUrl(id: BlockId): string
-	loadExternalEntityDataForName(name: string): ExternalEntityData
+	loadLegacyEntityDataForName(name: string): LegacyEntityData
 }

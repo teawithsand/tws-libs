@@ -45,7 +45,7 @@ export class GatsbyResourceLoader implements ResourceLoader {
 		)
 	}
 
-	loadExternalEntityDataForName(name: string): ExternalEntityData {
+	loadLegacyEntityDataForName(name: string): ExternalEntityData {
 		throw new Error("Method not implemented.")
 	}
 }
