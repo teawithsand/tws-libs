@@ -27,7 +27,7 @@ module.exports = {
 	testEnvironmentOptions: {
 		url: `http://localhost`,
 	},
-	setupFiles: [`<rootDir>/loadershim.js`, "fake-indexeddb/auto"],
+	setupFiles: [`<rootDir>/loadershim.js`, "fake-indexeddb/auto", "jest-canvas-mock"],
 
 	testEnvironment: `jsdom`,
 	setupFilesAfterEnv: ["<rootDir>/setup-test-env.js"],
