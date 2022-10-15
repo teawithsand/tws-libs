@@ -1,6 +1,6 @@
 import React, { useMemo } from "react"
 
-import { StaticMapDisplay } from "@app/display/map"
+import { BlockCollisionAnalysis } from "@app/display/misc/blockCollisionAnalysis"
 import {
 	mapDataFromLegacy,
 	parseLegacyMap as parseLegacyMapData,
@@ -516,7 +516,10 @@ const IndexPage = () => {
 	const map = useMemo(() => mapDataFromLegacy(parseLegacyMapData(mapOne)), [])
 	return (
 		<main>
-			<StaticMapDisplay map={map} />
+			{/*
+<StaticMapDisplay map={map} />
+				*/}
+			<BlockCollisionAnalysis />
 		</main>
 	)
 }
