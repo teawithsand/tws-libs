@@ -19,6 +19,7 @@
 	"dependencies": {
 		"@teawithsand/tws-gatsby-plugin": "^0.0.1",
 		"@teawithsand/tws-stl": "^0.0.1",
+		"@teawithsand/tws-stl-react": "^0.0.1",
 		"babel-plugin-styled-components": "^2.0.7",
 		"gatsby": "^4.24.3",
 		"gatsby-plugin-manifest": "^4.24.0",
