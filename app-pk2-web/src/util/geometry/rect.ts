@@ -79,25 +79,25 @@ export class Rect {
 
 	containsPoint(p: Point, bordersAllowed = true) {
 		const rect = this.normalized
-
-		if (
-			bordersAllowed &&
-			rect.p1.x >= p.x &&
-			rect.p2.y >= p.y &&
-			rect.p1.x <= p.x &&
-			rect.p2.y <= p.y
-		) {
-			return true
-		} else if (
-			rect.p1.x > p.x &&
-			rect.p2.y > p.y &&
-			rect.p1.x < p.x &&
-			rect.p2.y < p.y
-		) {
-			return true
+		if (bordersAllowed) {
+			return (
+				p.x >= rect.p1.x &&
+				p.y >= rect.p1.y &&
+				p.x <= rect.p2.x &&
+				p.y <= rect.p2.y
+			)
 		} else {
-			return false
+			return (
+				p.x > rect.p1.x &&
+				p.y > rect.p1.y &&
+				p.x < rect.p2.x &&
+				p.y < rect.p2.y
+			)
 		}
+	}
+
+	containsRect(r: Rect): boolean {
+		return this.containsPoint(r.p1) && this.containsPoint(r.p2)
 	}
 
 	intersection(...rects: Rect[]): Rect | null {
@@ -109,7 +109,7 @@ export class Rect {
 				!rect.containsPoint(current.p1) &&
 				!rect.containsPoint(current.p2)
 			) {
-				return null // no intersection
+				return null
 			}
 
 			let x1 = Math.max(rect.p1.x, current.p1.x)

@@ -1,6 +1,52 @@
+import { Point } from "@app/util/geometry/point"
+import { Rect, RectLike } from "@app/util/geometry/rect"
+
 describe("geometry", () => {
 	it("has niy tests", () => {
 		// NIY
+	})
+
+	describe("rectangle", () => {
+		it("contains point", () => {
+			const r = new Rect([
+				[0, 0],
+				[1, 1],
+			])
+
+			expect(r.containsPoint(new Point([0, 0]))).toStrictEqual(true)
+
+			expect(new Rect([
+				[20, 20],
+				[30, 40],
+			]).containsPoint(new Point([19, 25]))).toStrictEqual(false)
+		})
+
+		it("intersects ok", () => {
+			const test = (a: RectLike, b: RectLike, c: RectLike | null) => {
+				const res =
+					new Rect(a).intersection(new Rect(b))?.normalized ?? null
+				if (c === null) {
+					expect(res).toBeNull()
+				} else {
+					expect(res?.equals(new Rect(c)) ?? false).toStrictEqual(
+						true,
+					)
+				}
+			}
+			const zeros: RectLike = [
+				[0, 0],
+				[0, 0],
+			]
+			test(zeros, zeros, zeros)
+			test(
+				zeros,
+				[
+					[0, 0],
+					[1, 1],
+				],
+				zeros,
+			)
+		})
 	})
 })
 
