@@ -54,7 +54,7 @@ export const emptyBlockId: BlockId = -1
 export type PrePlacedEntity = {
 	x: number
 	y: number
-	reference: string
+	reference: string // what this entity is called. Simple and should work.
 }
 
 export type MapData = {

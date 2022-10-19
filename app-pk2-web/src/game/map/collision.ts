@@ -1,7 +1,9 @@
+import { BlockCollisionData } from "@app/game/map/defines"
+
 /**
  * Value is true, where terrain exists. It's false otherwise.
  */
-export const analyzeGraphicsCollision = async (
+export const computeRawBlockCollisions = async (
 	url: string,
 ): Promise<boolean[][]> => {
 	const img = new Image()
@@ -59,5 +61,56 @@ export const analyzeGraphicsCollision = async (
 		return res
 	} finally {
 		document.body.removeChild(canvas)
+	}
+}
+
+export const computeBlockCollisionData = (
+	rawBlockCollisions: boolean[][],
+): BlockCollisionData => {
+	// this could be bin search btw on assumption that blocks aren't holey
+	const rays = (
+		iteratorFactory: (i: number) => Iterable<boolean>,
+		reverse = false,
+	) => {
+		const sz = rawBlockCollisions.length
+
+		const res = []
+		outer: for (let i = 0; i < sz; i++) {
+			const it = iteratorFactory(i)
+
+			let j = 0
+			for (const e of it) {
+				if (e === true) {
+					res.push(reverse ? sz - j - 1 : j)
+					continue outer
+				}
+				j++
+			}
+
+			res.push(-1)
+		}
+
+		return res
+	}
+
+	const topRay = rays(function* (i: number) {
+		for (const v of rawBlockCollisions[i]) yield v
+	})
+	const bottomRay = rays(function* (i: number) {
+		for (const v of [...rawBlockCollisions[i]].reverse()) yield v
+	})
+	const leftRay = rays(function* (i: number) {
+		for (const v of rawBlockCollisions) yield v[i]
+	})
+	const rightRay = rays(function* (i: number) {
+		for (const v of [...rawBlockCollisions].reverse()) yield v[i]
+	})
+
+	return {
+		raw: rawBlockCollisions,
+		topRay,
+		bottomRay,
+		leftRay,
+		rightRay,
 	}
 }

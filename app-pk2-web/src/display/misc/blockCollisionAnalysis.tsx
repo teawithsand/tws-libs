@@ -1,7 +1,7 @@
 import { throwExpression } from "@teawithsand/tws-stl"
 import React, { useEffect, useRef, useState } from "react"
 
-import { analyzeGraphicsCollision } from "@app/game/map/collision"
+import { computeRawBlockCollisions } from "@app/game/map/collision"
 
 const image = `
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
@@ -29,7 +29,7 @@ export const BlockCollisionAnalysis = (props: {}) => {
 	const [canvas, setCanvasRef] = useState<HTMLCanvasElement | null>(null)
 	useEffect(() => {
 		const f = async () => {
-			setRes(await analyzeGraphicsCollision(imageUrl))
+			setRes(await computeRawBlockCollisions(imageUrl))
 		}
 
 		f()
