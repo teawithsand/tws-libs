@@ -47,7 +47,8 @@ def main(src=src_path, dst=file_path):
 
         check_call([
             "convert", x,
-            join(dst, "scenery", os.path.basename(x)[:-4] + ".png")
+            join(dst, "scenery",
+                 os.path.basename(x)[:-4] + ".png")
         ])
 
     os.makedirs(join(dst, "models"), exist_ok=True)
@@ -81,6 +82,16 @@ def main(src=src_path, dst=file_path):
         y = join(dst, "models/sfx", fn + ".mp3")
         if not os.path.exists(y):
             check_call(["ffmpeg", "-i", x, y])
+
+    os.makedirs(join(dst, "episodes"), exist_ok=True)
+
+    for x in glob.glob(join(src, "episodes", "**", "*.map")):
+        episode_name = os.path.basename(os.path.realpath(os.path.join(x,
+                                                                      "..")))
+        map_name = os.path.basename(x)
+
+        os.makedirs(join(dst, "episodes", episode_name), exist_ok=True)
+        shutil.copy(x, join(dst, "episodes", episode_name, map_name))
 
 
 if __name__ == "__main__":
