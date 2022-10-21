@@ -1,26 +1,12 @@
 import { generateUUID, StickySubscribable } from "@teawithsand/tws-stl"
 import { FC } from "react"
 
+import { Entity } from "@app/game/entity/manager/entity"
 import {
 	GameReactRendererHook,
 	GameReactRendererOptions,
 } from "@app/game/entity/manager/renderer"
 import { GameState } from "@app/game/entity/manager/state"
-
-export abstract class Entity {
-	public readonly id = generateUUID()
-
-	abstract init(ctx: EntityContext): void
-	abstract tick(
-		ctx: EntityContext,
-		deltaTimeMs: number,
-	):
-		| {
-				isDead?: boolean
-		  }
-		| undefined
-	abstract release(ctx: EntityContext): void
-}
 
 export interface EntityManager {
 	addEntity(entity: Entity): void
@@ -40,6 +26,7 @@ export interface EntityContext {
 	readonly manager: EntityManager
 	readonly gameState: StickySubscribable<GameState>
 
+	spawn(entity: Entity): void
 	updateGameState(state: (state: GameState) => GameState): void
 	obtainReactRenderer<P>(
 		component: FC<P>,

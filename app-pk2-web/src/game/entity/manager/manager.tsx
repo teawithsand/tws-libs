@@ -2,11 +2,8 @@ import { DefaultStickyEventBus } from "@teawithsand/tws-stl"
 import { useStickySubscribable } from "@teawithsand/tws-stl-react"
 import React, { FC } from "react"
 
-import {
-	Entity,
-	EntityContext,
-	EntityManager,
-} from "@app/game/entity/manager/defines"
+import { EntityContext, EntityManager } from "@app/game/entity/manager/defines"
+import { Entity } from "@app/game/entity/manager/entity"
 import {
 	GameReactRendererContext,
 	ReactGameRendererHelper,
@@ -34,6 +31,13 @@ export class EntityManagerImpl implements EntityManager {
 		return {
 			gameState,
 			manager: this,
+			spawn: entity => {
+				if (this.entities.has(entity.id))
+					throw new Error("Entity with given id already added")
+
+				this.entities.set(entity.id, entity)
+				entity.init(this.ctx)
+			},
 			obtainReactRenderer: (component, props, options) => {
 				const ctx =
 					options.context ?? GameReactRendererContext.MAIN_SVG_SCREEN
@@ -67,19 +71,20 @@ export class EntityManagerImpl implements EntityManager {
 		)
 	}
 
-	addEntity(entity: Entity): void {
-		entity.init(this.ctx)
+	addEntity = (entity: Entity): void => {
 		if (this.entities.has(entity.id))
 			throw new Error("Entity with given id already added")
+
 		this.entities.set(entity.id, entity)
+		entity.init(this.ctx)
 	}
 
-	getEntity(id: string): Entity | null {
+	getEntity = (id: string): Entity | null => {
 		return this.entities.get(id) ?? null
 	}
 
 	// for now removing removed entities is ok
-	removeEntity(id: string): void {
+	removeEntity = (id: string): void => {
 		const e = this.entities.get(id)
 		if (e) e.release(this.ctx)
 		this.entities.delete(id)
@@ -98,7 +103,8 @@ export class EntityManagerImpl implements EntityManager {
 
 	doTick() {
 		const rmSet = new Set<string>()
-		for (const e of this.entities.values()) {
+		const entitiesCopy = [...this.entities.values()]
+		for (const e of entitiesCopy) {
 			const res = e.tick(this.ctx, 100) ?? {} // for now tick length is fixed
 
 			const isDead = res.isDead ?? false
