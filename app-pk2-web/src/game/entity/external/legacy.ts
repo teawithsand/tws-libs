@@ -1,4 +1,11 @@
 import { BinaryReader } from "@app/util/binary/reader"
+import { Rect } from "@app/util/geometry"
+
+export interface LegacyEntityIdTransformer {
+	transformSoundId(id: string): string
+	transformMasterSpriteFile(id: string): string
+	transformSpriteFileWithCoords(id: string, r: Rect): string
+}
 
 export type RawLegacyEntityData = {
 	version: string // only 1.3 is supported though
