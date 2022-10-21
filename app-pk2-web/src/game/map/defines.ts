@@ -1,3 +1,5 @@
+import { EntityData } from "@app/game/entity/external/data"
+
 export const BLOCK_WIDTH = 32
 export const BLOCK_HEIGHT = 32
 
@@ -51,10 +53,41 @@ export type BlockData = {
  */
 export const emptyBlockId: BlockId = -1
 
-export type PrePlacedEntity = {
+export type PrePlacedEntityByReference = {
 	x: number
 	y: number
 	reference: string // what this entity is called. Simple and should work.
+}
+
+export type PrePlacedEntity = {
+	x: number
+	y: number
+	entityData: EntityData
+}
+
+// TODO(teawithsand): somehow handle translating these moving blocks into entities + define some constants for them
+//  + write shift for time function for them. We may not want linear but something like sin-ease-in-out stuff or bezier curves
+export const BLOCK_SHIFTER_OFFSET = BLOCK_WIDTH * 3
+
+/**
+ * This type is simply hack. It's here because legacy to current translation procedure can't translate some references into URLs and load
+ * external data stuff, so this responsibility lays on the resource loader.
+ *
+ * TODO(teawithsand): give it better name
+ */
+export type AlmostMapData = {
+	blockData: {
+		[key: BlockId]: BlockData
+	}
+
+	backgroundImageLocator: string
+
+	width: number
+	height: number
+
+	foregroundBlocks: BlockId[][]
+	backgroundBlocks: BlockId[][]
+	prePlacedEntities: PrePlacedEntityByReference[]
 }
 
 export type MapData = {
@@ -62,12 +95,12 @@ export type MapData = {
 		[key: BlockId]: BlockData
 	}
 
-	backgroundImageURL: string
+	backgroundImageUrl: string
 
 	width: number
 	height: number
 
 	foregroundBlocks: BlockId[][]
 	backgroundBlocks: BlockId[][]
-	prePlacedEntities: PrePlacedEntity
+	prePlacedEntities: PrePlacedEntity[]
 }

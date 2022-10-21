@@ -1,30 +1,10 @@
+import { AlmostMapData } from "@app/game/map/defines"
+
 import { LegacyMapData } from "./legacy"
 
-export type BlockId = number
-export type SpriteId = number
-
-export type MapHeader = {
-	width: number
-	height: number
-
-	authorName: string
-	mapName: string
-}
-
-export type MapBody = {
-	foreground: BlockId[][]
-	background: BlockId[][]
-}
-
-/**
- * Map data parsed from file. Does not implement any dynamic data.
- */
-export type MapData = {
-	body: MapBody
-	header: MapHeader
-}
-
-export const mapDataFromLegacy = (legacy: LegacyMapData): MapData => {
+export const mapDataFromLegacy = (legacy: LegacyMapData): AlmostMapData => {
+	// TODO(teawithsand): implement it
+	throw new Error("NIY")
 	return {
 		header: {
 			width: legacy.width,
