@@ -6,7 +6,7 @@ import { getNowPerformanceTimestamp, simpleSleep } from "@teawithsand/tws-stl"
 export const runGameLoop = (
 	logic: () => Promise<void>,
 	render: () => Promise<void>,
-	ticksPerSecond: number,
+	delayPerTickMillis: number,
 ): {
 	break: () => void
 	promise: Promise<void>
@@ -20,9 +20,9 @@ export const runGameLoop = (
 			const elapsed = current - previous
 			previous = current
 			lag += elapsed
-			while (lag >= ticksPerSecond) {
+			while (lag >= delayPerTickMillis) {
 				await logic()
-				lag -= ticksPerSecond
+				lag -= delayPerTickMillis
 			}
 
 			await render()
@@ -30,7 +30,7 @@ export const runGameLoop = (
 			await simpleSleep(
 				Math.max(
 					0,
-					ticksPerSecond - (getNowPerformanceTimestamp() - current),
+					delayPerTickMillis - (getNowPerformanceTimestamp() - current),
 				),
 			)
 		}

@@ -47,7 +47,7 @@ export class ReactGameRendererHelper {
 	}
 
 	private updateBus = () => {
-		this.renderersBus.emitEvent([...this.renderers])
+		this.renderersBus.emitEvent([...(this.renderers ?? [])])
 	}
 
 	obtainReactRenderer<P>(

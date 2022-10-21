@@ -15,7 +15,7 @@ const ArrayDisplay = (props: { tiles: number[][] }) => {
 			}
 		}
 	`)
-	
+
 	const resLoader = useMemo(
 		() => new GatsbyResourceLoader(rawResources, "tiles01"),
 		[rawResources],

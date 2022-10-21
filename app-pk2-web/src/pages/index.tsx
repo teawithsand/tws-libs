@@ -1,5 +1,7 @@
 import React, { useMemo } from "react"
+import { createGlobalStyle } from "styled-components"
 
+import { EntityManagerDisplay } from "@app/display/entityManagerDisplay"
 import { BlockCollisionAnalysis } from "@app/display/misc/blockCollisionAnalysis"
 import {
 	mapDataFromLegacy,
@@ -512,14 +514,20 @@ const mapOneArray = [
 
 const mapOne = new Uint8Array([...mapOneArray]).buffer
 
+const Clear = createGlobalStyle`
+body{
+	padding: 0;
+	margin: 0;
+	height: 100vh;
+	width: 100vw;
+}`
+
 const IndexPage = () => {
-	const map = useMemo(() => mapDataFromLegacy(parseLegacyMapData(mapOne)), [])
+	// const map = useMemo(() => mapDataFromLegacy(parseLegacyMapData(mapOne)), [])
 	return (
 		<main>
-			{/*
-<StaticMapDisplay map={map} />
-				*/}
-			<BlockCollisionAnalysis />
+			<Clear />
+			{<EntityManagerDisplay />}
 		</main>
 	)
 }

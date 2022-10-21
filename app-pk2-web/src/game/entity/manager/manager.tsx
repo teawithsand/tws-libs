@@ -1,6 +1,10 @@
-import { DefaultStickyEventBus } from "@teawithsand/tws-stl"
+import {
+	DefaultStickyEventBus,
+	getNowPerformanceTimestamp,
+} from "@teawithsand/tws-stl"
 import { useStickySubscribable } from "@teawithsand/tws-stl-react"
 import React, { FC } from "react"
+import styled from "styled-components"
 
 import { EntityContext, EntityManager } from "@app/game/entity/manager/defines"
 import { Entity } from "@app/game/entity/manager/entity"
@@ -9,6 +13,20 @@ import {
 	ReactGameRendererHelper,
 } from "@app/game/entity/manager/renderer"
 import { GameState } from "@app/game/entity/manager/state"
+
+const DisplayRoot = styled.svg`
+	border: 1px solid black;
+
+	background-image: linear-gradient(45deg, #808080 25%, transparent 25%),
+		linear-gradient(-45deg, #808080 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, #808080 75%),
+		linear-gradient(-45deg, transparent 75%, #808080 75%);
+	background-size: 20px 20px;
+	background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+
+	background: repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% /
+		20px 20px;
+`
 
 export class EntityManagerImpl implements EntityManager {
 	private svgHelper = new ReactGameRendererHelper()
@@ -30,6 +48,11 @@ export class EntityManagerImpl implements EntityManager {
 		})
 		return {
 			gameState,
+			gameConfig: {
+				currentTickIndex: 0,
+				firstUpdatePerformanceTimestamp: 0,
+				lastUpdatePerformanceTimestamp: 0,
+			},
 			manager: this,
 			spawn: entity => {
 				if (this.entities.has(entity.id))
@@ -40,7 +63,7 @@ export class EntityManagerImpl implements EntityManager {
 			},
 			obtainReactRenderer: (component, props, options) => {
 				const ctx =
-					options.context ?? GameReactRendererContext.MAIN_SVG_SCREEN
+					options?.context ?? GameReactRendererContext.MAIN_SVG_SCREEN
 				if (ctx !== GameReactRendererContext.MAIN_SVG_SCREEN) {
 					throw new Error("non-svg renderers are NIY")
 				}
@@ -56,18 +79,16 @@ export class EntityManagerImpl implements EntityManager {
 
 	public readonly renderer: FC<{}> = () => {
 		const display = useStickySubscribable(this.ctx.gameState).display
-		const C = this.svgHelper.component
+		const Component = this.svgHelper.component
 
 		return (
-			<svg
+			<DisplayRoot
 				width={display.width}
 				height={display.height}
-				viewBox={`${display.screenOffsetX} ${display.screenOffsetY} ${
-					display.width + display.screenOffsetX
-				} ${display.height + display.screenOffsetY}`}
+				viewBox={`${display.screenOffsetX} ${display.screenOffsetY} ${display.width} ${display.height}`}
 			>
-				<C />
-			</svg>
+				<Component />
+			</DisplayRoot>
 		)
 	}
 
@@ -90,22 +111,22 @@ export class EntityManagerImpl implements EntityManager {
 		this.entities.delete(id)
 	}
 
-	forEachEntity(it: (e: Entity) => void): void {
+	forEachEntity = (it: (e: Entity) => void): void => {
 		this.entities.forEach(it)
 	}
 
-	findEntity(predicate: (e: Entity) => boolean): Entity | null {
+	findEntity = (predicate: (e: Entity) => boolean): Entity | null => {
 		for (const v of this.entities.values()) {
 			if (predicate(v)) return v
 		}
 		return null
 	}
 
-	doTick() {
+	doTick = () => {
 		const rmSet = new Set<string>()
 		const entitiesCopy = [...this.entities.values()]
 		for (const e of entitiesCopy) {
-			const res = e.tick(this.ctx, 100) ?? {} // for now tick length is fixed
+			const res = e.tick(this.ctx) ?? {} // for now tick length is fixed
 
 			const isDead = res.isDead ?? false
 			if (isDead) rmSet.add(e.id)
@@ -114,5 +135,11 @@ export class EntityManagerImpl implements EntityManager {
 		for (const id of rmSet.values()) {
 			this.removeEntity(id)
 		}
+
+		this.ctx.gameConfig.currentTickIndex++
+		const now = getNowPerformanceTimestamp()
+		if (!this.ctx.gameConfig.firstUpdatePerformanceTimestamp)
+			this.ctx.gameConfig.firstUpdatePerformanceTimestamp = now
+		this.ctx.gameConfig.lastUpdatePerformanceTimestamp = now
 	}
 }
