@@ -1,18 +1,17 @@
 import { throwExpression } from "@teawithsand/tws-stl"
 
-import { parseLegacyEntityData } from "@app/game/entity/external/legacy"
-import {
-	MapData,
-	mapDataFromLegacy,
-	parseLegacyMap,
-	PrePlacedEntity,
-} from "@app/game/map"
+import { LegacyEntityIdTransformerSync } from "@app/game/entity/external/legacy"
+import { mapDataFromLegacy, parseLegacyMap } from "@app/game/map"
 import { GameResources, LegacyResourceLoader } from "@app/game/resources/res"
 
 export class GatsbyResourceLoader implements LegacyResourceLoader {
 	readonly legacyEpisodes: string[]
 	readonly legacyEpisodesMaps: {
 		[key: string]: string[]
+	}
+
+	private readonly transformer: LegacyEntityIdTransformerSync = {
+		// TODO(teawithsand): implement it
 	}
 
 	constructor(private readonly rawResources: Queries.ResourceFilesQuery) {
@@ -70,8 +69,9 @@ export class GatsbyResourceLoader implements LegacyResourceLoader {
 		).arrayBuffer()
 
 		const legacyMapData = parseLegacyMap(mapBuffer)
-		const almostMapData = mapDataFromLegacy(legacyMapData)
+		const mapData = mapDataFromLegacy(legacyMapData, this.transformer)
 
+		/*
 		const backgroundImageUrl =
 			this.res.find(
 				v =>
@@ -85,37 +85,8 @@ export class GatsbyResourceLoader implements LegacyResourceLoader {
 				new Error(
 					`Background image with path ${legacyMapData.backgroundImagePath} was not found`,
 				),
-			)
-
-		const prePlacedEntities: PrePlacedEntity[] = []
-		for (const e of almostMapData.prePlacedEntities) {
-			const url =
-				this.res.find(
-					v => v.relativePath === "models/data/" + e.reference,
-				)?.publicURL ??
-				throwExpression(
-					new Error(
-						`There is no entity file registered for ${e.reference}`,
-					),
-				)
-
-			// Let's just assume that HTTP cache is there and I do not have to cache it by hand
-			const buffer = await (await (await fetch(url)).blob()).arrayBuffer()
-			const legacyEntityData = parseLegacyEntityData(buffer)
-
-			throw new Error("NIY")
-			// TODO(teawithsand): port that legacy entity data into new entity data and push it to prePlacedEntities
-		}
-
-		const mapData: MapData = {
-			width: almostMapData.width,
-			height: almostMapData.height,
-			backgroundBlocks: almostMapData.backgroundBlocks,
-			backgroundImageUrl,
-			blockData: almostMapData.blockData,
-			foregroundBlocks: almostMapData.foregroundBlocks,
-			prePlacedEntities,
-		}
+			) 
+		 */
 
 		return {
 			map: mapData,

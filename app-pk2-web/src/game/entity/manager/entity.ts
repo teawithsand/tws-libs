@@ -10,6 +10,7 @@ import { EntityData } from "@app/game/entity/external/data"
 import { EntityContext } from "@app/game/entity/manager/defines"
 import { GameReactRendererHook } from "@app/game/entity/manager/renderer"
 import { Point } from "@app/util/geometry"
+import { Once } from "@app/util/once"
 
 type Releaser = () => void
 
@@ -31,6 +32,26 @@ export class EntityResourceRegistry {
 	}
 }
 
+export type EntityLifecycleEvent = {
+	ctx: EntityContext
+} & (
+	| {
+			type: "init"
+	  }
+	| {
+			type: "tick"
+	  }
+	| {
+			type: "release"
+	  }
+)
+
+export type EntityHooks = {
+	contextSubscribable: StickySubscribable<EntityContext>
+	lcSubscribable: Subscribable<EntityLifecycleEvent>
+	lcResRegistry: EntityResourceRegistry
+}
+
 export abstract class Entity {
 	public readonly id = generateUUID()
 
@@ -38,11 +59,34 @@ export abstract class Entity {
 	private innerTickBus = new DefaultStickyEventBus<EntityContext>(
 		null as any as EntityContext,
 	)
-	protected contextSubscribable: StickySubscribable<EntityContext> =
+	protected readonly contextSubscribable: StickySubscribable<EntityContext> =
 		this.innerTickBus
 
-	protected innerInit(ctx: EntityContext) {
+	private innerLcBus = new DefaultEventBus<EntityLifecycleEvent>()
+	protected readonly lcSubscribable: Subscribable<EntityLifecycleEvent> =
+		this.innerLcBus
+
+	private readonly registerHooksOnce = Once.make()
+
+	protected hooks: Readonly<EntityHooks> = {
+		contextSubscribable: this.contextSubscribable,
+		lcSubscribable: this.lcSubscribable,
+		lcResRegistry: this.lcResRegistry,
+	}
+
+	/**
+	 * Function to bypass constructor issue, which causes class values to be undefined when it's invoked.
+	 * This function is called once after initialization. It should be treated as-if it was constructor.
+	 *
+	 * Note: this function is must-call-super function!
+	 * @mustCallSuper
+	 */
+	protected registerHooks() {
 		// noop
+	}
+
+	protected innerInit(ctx: EntityContext) {
+		// noop, to be overridden
 	}
 
 	protected innerTick(ctx: EntityContext):
@@ -50,17 +94,19 @@ export abstract class Entity {
 				isDead?: boolean
 		  }
 		| undefined {
+		// noop, to be overridden
 		return undefined
 	}
 
 	protected innerRelease(ctx: EntityContext): void {
+		// noop, to be overridden
 		return
 	}
 
 	public readonly init = (ctx: EntityContext): void => {
 		if (this.innerTickBus.lastEvent !== ctx)
 			this.innerTickBus.emitEvent(ctx)
-			
+		this.registerHooksOnce.do(() => this.registerHooks())
 		this.innerInit(ctx)
 	}
 

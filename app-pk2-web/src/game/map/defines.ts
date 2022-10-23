@@ -69,27 +69,6 @@ export type PrePlacedEntity = {
 //  + write shift for time function for them. We may not want linear but something like sin-ease-in-out stuff or bezier curves
 export const BLOCK_SHIFTER_OFFSET = BLOCK_WIDTH * 3
 
-/**
- * This type is simply hack. It's here because legacy to current translation procedure can't translate some references into URLs and load
- * external data stuff, so this responsibility lays on the resource loader.
- *
- * TODO(teawithsand): give it better name
- */
-export type AlmostMapData = {
-	blockData: {
-		[key: BlockId]: BlockData
-	}
-
-	backgroundImageLocator: string
-
-	width: number
-	height: number
-
-	foregroundBlocks: BlockId[][]
-	backgroundBlocks: BlockId[][]
-	prePlacedEntities: PrePlacedEntityByReference[]
-}
-
 export type MapData = {
 	blockData: {
 		[key: BlockId]: BlockData
@@ -103,4 +82,9 @@ export type MapData = {
 	foregroundBlocks: BlockId[][]
 	backgroundBlocks: BlockId[][]
 	prePlacedEntities: PrePlacedEntity[]
+
+	name: string
+	author: {
+		name: string
+	}
 }

@@ -16,7 +16,7 @@ import {
 } from "@app/game/entity/external/data"
 import {
 	LegacyEntityAnimationData,
-	LegacyEntityIdTransformer,
+	LegacyEntityIdTransformerSync,
 } from "@app/game/entity/external/legacy"
 import { EnumTranslatorBuilder } from "@app/util/enumTranslator"
 
@@ -153,7 +153,7 @@ export type LegacyEntityData = {
 
 export const entityDataFromLegacyEntityData = (
 	data: LegacyEntityData,
-	transformer: LegacyEntityIdTransformer,
+	transformer: LegacyEntityIdTransformerSync,
 ): EntityData => {
 	const disposition: EntityDataDisposition = (() => {
 		switch (data.type) {
@@ -237,7 +237,7 @@ export const entityDataFromLegacyEntityData = (
 							.map(v => ({
 								type: EntityAnimationImageType.SUB_IMAGE,
 								rect: [v.x1, v.y1, v.x2, v.y2],
-								url: transformer.transformMasterSpriteFile(
+								url: transformer.transformMasterEntitySpritesFile(
 									data.frameData.source,
 								),
 							})),
