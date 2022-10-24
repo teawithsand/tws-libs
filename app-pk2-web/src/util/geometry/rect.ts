@@ -68,13 +68,41 @@ export class Rect {
 		return this.width * this.height
 	}
 
+	get center(): Point {
+		return new Point([
+			this.p1.x / 2 + this.p2.x / 2,
+			this.p1.y / 2 + this.p2.y / 2,
+		])
+	}
+
 	translated(p: Point) {
 		return new Rect([this.p1.translated(p), this.p2.translated(p)])
 	}
 
 	grow(by: number) {
+		return this.growDirections({
+			left: by,
+			right: by,
+			top: by,
+			bottom: by,
+		})
+	}
+
+	growDirections(directions: {
+		left?: number
+		right?: number
+		top?: number
+		bottom?: number
+	}) {
+		const { left = 0, right = 0, top = 0, bottom = 0 } = directions
 		const [x1, y1, x2, y2] = this.normalized.toArray()
-		return new Rect([x1 - by, y1 - by, x2 + by, y2 + by])
+
+		// note: for now this method allows negative grow, which results in non-zero rect in OOB case
+		// but this behavior may change in future, so that "negative" rect width/height will become zero
+		// at any point that shift may have been performed there
+
+		return new Rect([x1 - left, y1 - top, x2 + right, y2 + bottom])
+			.normalized // may not be normalized if some values are negative
 	}
 
 	containsPoint(p: Point, bordersAllowed = true) {
