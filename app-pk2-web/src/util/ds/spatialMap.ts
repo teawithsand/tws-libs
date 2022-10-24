@@ -34,6 +34,7 @@ export class SpatialHashMap<T> {
 
 		return x && 0xffff | ((y & 0xffff) << 16) // Result of BW ops is 32 bit int in JS, so this is ok
 	}
+
 	private cellEntry = (x: number, y: number) => {
 		const cellIndexX = Math.floor(x / this.cellW)
 		const cellIndexY = Math.floor(y / this.cellH)
@@ -95,7 +96,7 @@ export class SpatialHashMap<T> {
 		}
 	}
 
-	getIntersectingValues = (rect: Rect): Array<T> => {
+	getIntersectingValues = (rect: Rect, allowEdges = true): Array<T> => {
 		let testRect = rect.normalized
 
 		// These checks are used to enforce that cells to the left/top will
@@ -110,6 +111,7 @@ export class SpatialHashMap<T> {
 			testRect = new Rect([x1, y1 - 1, x2, y2]).normalized
 		}
 
+		// TODO(teawithsand): ???
 		new Rect([
 			[0, 0],
 			[2 ** 16 - 1 * this.cellW, 2 ** 16 - 1 * this.cellH],
@@ -125,8 +127,14 @@ export class SpatialHashMap<T> {
 				const v =
 					this.clientMap.get(id) ??
 					throwExpression(new Error("Unreachable code"))
-
-				if (rect.intersection(v.rect) !== null) ids.add(id)
+				const intersection = testRect.intersection(v.rect)
+				if (intersection !== null) {
+					if (
+						allowEdges ||
+						(intersection.width !== 0 && intersection.height !== 0)
+					)
+						ids.add(id)
+				}
 			}
 		}
 
