@@ -1,3 +1,5 @@
+import { Vec2 } from "@app/util/vector"
+
 import { Point, PointLike } from "./point"
 
 export type RectLike =
@@ -33,9 +35,14 @@ export class Rect {
 		}
 	}
 
+	toString() {
+		return `Rect(${this.p1.toString()}, ${this.p2.toString()})`
+	}
+
 	toArray(): [number, number, number, number] {
 		return [this.p1.x, this.p1.y, this.p2.x, this.p2.y]
 	}
+
 	toPoints(): [PointLike, PointLike] {
 		return [this.p1, this.p2]
 	}
@@ -56,8 +63,9 @@ export class Rect {
 			[Math.max(x1, x2), Math.max(y1, y2)],
 		])
 	}
+	
 	get width(): number {
-		return Math.abs(this.p1.x - this.p2.y)
+		return Math.abs(this.p1.x - this.p2.x)
 	}
 
 	get height(): number {
@@ -75,7 +83,15 @@ export class Rect {
 		])
 	}
 
-	translated(p: Point) {
+	translatedX(x: number) {
+		return this.translated(new Point([x, 0]))
+	}
+
+	translatedY(y: number) {
+		return this.translated(new Point([0, y]))
+	}
+
+	translated(p: Point | Vec2) {
 		return new Rect([this.p1.translated(p), this.p2.translated(p)])
 	}
 

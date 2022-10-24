@@ -1,3 +1,5 @@
+import { Vec2 } from "@app/util/vector"
+
 export type PointLike =
 	| [number, number]
 	| {
@@ -39,12 +41,16 @@ export class Point {
 		return [this.x, this.y]
 	}
 
-	translated = (...points: Point[]) => {
+	toString() {
+		return `(${this.x},${this.y})`
+	}
+
+	translated = (...points: (Point | Vec2)[]) => {
 		return new Point(
 			[this, ...points].reduce(
 				(prev, current) =>
-					new Point([prev.x + current.x, prev.y + current.y])
-			)
+					new Point([prev.x + current.x, prev.y + current.y]),
+			),
 		)
 	}
 
@@ -77,7 +83,7 @@ export class Point {
 	 */
 	segmentDistance = (segment: [Point, Point]): number => {
 		const [x, y] = this.toArray()
-		const [[x1, y1], [x2, y2]] = segment.map((p) => p.toArray())
+		const [[x1, y1], [x2, y2]] = segment.map(p => p.toArray())
 
 		const A = x - x1
 		const B = y - y1

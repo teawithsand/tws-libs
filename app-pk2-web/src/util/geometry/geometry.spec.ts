@@ -15,10 +15,12 @@ describe("geometry", () => {
 
 			expect(r.containsPoint(new Point([0, 0]))).toStrictEqual(true)
 
-			expect(new Rect([
-				[20, 20],
-				[30, 40],
-			]).containsPoint(new Point([19, 25]))).toStrictEqual(false)
+			expect(
+				new Rect([
+					[20, 20],
+					[30, 40],
+				]).containsPoint(new Point([19, 25])),
+			).toStrictEqual(false)
 		})
 
 		it("intersects ok", () => {
@@ -45,6 +47,20 @@ describe("geometry", () => {
 					[1, 1],
 				],
 				zeros,
+			)
+			test(
+				[
+					[32, 32],
+					[33, 96],
+				],
+				[
+					[32, 32],
+					[64, 64],
+				],
+				[
+					[32, 32],
+					[33, 64],
+				]
 			)
 		})
 	})
