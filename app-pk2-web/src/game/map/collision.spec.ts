@@ -1,27 +1,33 @@
 import { computeBlockCollisionData } from "@app/game/map/collision"
-
-// TODO(teawithsand): put this function somewhere else
-function transpose<T>(matrix: T[][]) {
-	return matrix[0].map((_, c) => matrix.map((_, r) => matrix[r][c]))
-}
+import { transposeMatrix } from "@app/util/matrix"
 
 // transpose, so first coord is x, not y
 
-const solidLike = transpose([
+const solidLike = transposeMatrix([
 	[true, true, true],
 	[true, false, true],
 	[true, true, true],
 ])
 
-const cliff = transpose([
+const cliff = transposeMatrix([
 	[true, true, true],
 	[false, true, true],
 	[false, false, true],
 ])
 
-const inverseCliff = transpose([
+const inverseCliff = transposeMatrix([
 	[true, false, false],
 	[true, true, false],
+	[true, true, true],
+])
+const rightColumnEmpty = transposeMatrix([
+	[true, true, false],
+	[true, true, false],
+	[true, true, false],
+])
+const holeyRow = transposeMatrix([
+	[true, true, true],
+	[false, false, false],
 	[true, true, true],
 ])
 
@@ -57,6 +63,9 @@ describe("Block Collision operations", () => {
 		expect(computeBlockCollisionData(cliff).rightRay).toEqual([0, 0, 0])
 		expect(computeBlockCollisionData(inverseCliff).rightRay).toEqual([
 			2, 1, 0,
+		])
+		expect(computeBlockCollisionData(rightColumnEmpty).rightRay).toEqual([
+			1, 1, 1,
 		])
 	})
 })
