@@ -31,6 +31,11 @@ export enum MapBackgroundMovementType {
 
 export type BlockId = number
 
+/**
+ * Values are as follows:
+ * 1. number of blocks to skip for each row/column from appropriate direction
+ * 2. -1 if row/column is empty
+ */
 export type BlockCollisionData = {
 	raw: boolean[][]
 	topRay: number[]
@@ -69,18 +74,33 @@ export type PrePlacedEntity = {
 //  + write shift for time function for them. We may not want linear but something like sin-ease-in-out stuff or bezier curves
 export const BLOCK_SHIFTER_OFFSET = BLOCK_WIDTH * 3
 
-export type MapData = {
+// Map design
+// actually it's not as I've already written everything in math-like coordinate system(1st quarter).
+// 
+//  (0,0) -------------- (W,0)
+//    |                    |
+//    |                    |
+//    |                    |
+//  (0,H)                (W,H)
+//
+// There's no edge at the bottom. Entities should be killed once they are below H line.
+// Also please note that this coordinate system is also used by SVG, so it's reasonable to use here.
+
+export interface PartialMapData {
 	blockData: {
 		[key: BlockId]: BlockData
 	}
 
+	foregroundBlocks: BlockId[][]
+	backgroundBlocks: BlockId[][]
+}
+
+export type MapData = PartialMapData & {
 	backgroundImageUrl: string
 
 	width: number
 	height: number
 
-	foregroundBlocks: BlockId[][]
-	backgroundBlocks: BlockId[][]
 	prePlacedEntities: PrePlacedEntity[]
 
 	name: string
