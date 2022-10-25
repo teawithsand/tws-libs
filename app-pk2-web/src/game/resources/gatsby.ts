@@ -11,10 +11,26 @@ export class GatsbyResourceLoader implements LegacyResourceLoader {
 	}
 
 	private readonly transformer: LegacyEntityIdTransformerSync = {
-		// TODO(teawithsand): implement it
+		transformSoundId(id) {
+			id = id.replace(".xm", ".mp3")
+			return this.queryPath(`music/${id}`)
+		},
+		resolveBlockData(n) {
+			const p = this.queryPath(``)
+			return {
+				backgroundURL: this.
+			}
+		}
 	}
 
-	constructor(private readonly rawResources: Queries.ResourceFilesQuery) {
+	private queryPath(p: string): string {
+		return this.res.find(r => r.relativePath === p)?.publicURL || ""
+	}
+
+	constructor(
+		private readonly rawResources: Queries.ResourceFilesQuery,
+		private readonly episodeName: string,
+	) {
 		this.legacyEpisodes = [
 			...new Set(
 				rawResources.allFile.nodes
@@ -86,7 +102,7 @@ export class GatsbyResourceLoader implements LegacyResourceLoader {
 					`Background image with path ${legacyMapData.backgroundImagePath} was not found`,
 				),
 			) 
-		 */
+		*/
 
 		return {
 			map: mapData,

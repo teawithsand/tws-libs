@@ -45,8 +45,6 @@ export type BlockCollisionData = {
 }
 
 export type BlockData = {
-	foregroundURL: string // typically these are same
-	backgroundURL: string // typically these are same
 	collisions: BlockCollisionData // ignored when block is in background
 
 	// ignored for background blocks, in foreground blocks, used to determine whether entity is in water or not
@@ -96,13 +94,11 @@ export interface PartialMapData {
 }
 
 export type MapData = PartialMapData & {
-	backgroundImageUrl: string
-
 	width: number
 	height: number
 
 	prePlacedEntities: PrePlacedEntity[]
-
+	
 	name: string
 	author: {
 		name: string

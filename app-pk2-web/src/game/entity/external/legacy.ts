@@ -1,16 +1,9 @@
-import { EntityData } from "@app/game/entity/external/data"
-import { BlockData } from "@app/game/map"
 import { BinaryReader } from "@app/util/binary/reader"
-import { Rect } from "@app/util/geometry"
 
 export interface LegacyEntityIdTransformerSync {
 	transformSoundId(id: string): string
 	transformMasterEntitySpritesFile(id: string): string
-	transformSpriteFileWithCoords(id: string, r: Rect): string
 	transformScenery(id: string): string
-
-	resolveEntityData(id: string): EntityData
-	resolveBlockData(n: number): BlockData
 }
 
 export type RawLegacyEntityData = {

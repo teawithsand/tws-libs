@@ -1,6 +1,10 @@
-import { generateUUID, PerformanceTimestampMs, StickySubscribable } from "@teawithsand/tws-stl"
+import {
+	PerformanceTimestampMs,
+	StickySubscribable,
+} from "@teawithsand/tws-stl"
 import { FC } from "react"
 
+import { CollisionWorld } from "@app/game/entity/collisionWorld"
 import { Entity } from "@app/game/entity/manager/entity"
 import {
 	GameReactRendererHook,
@@ -25,6 +29,10 @@ export interface EntityManager {
 export interface EntityContext {
 	readonly manager: EntityManager
 	readonly gameState: StickySubscribable<GameState>
+
+	// Not queryable via listeners in react stuff
+	// only other updates/queries may trigger queries/updates
+	readonly collisionWorld: CollisionWorld
 
 	readonly gameConfig: {
 		currentTickIndex: number

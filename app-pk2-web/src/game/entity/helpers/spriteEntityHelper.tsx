@@ -5,6 +5,14 @@ import React from "react"
 import { EntityHooks } from "@app/game/entity/manager/entity"
 import { Rect } from "@app/util/geometry"
 
+
+export type SpriteEntityHelperDisplayData = {
+	urls: string[] // can be data url
+	animationDelayMillis: number
+	loopAnimation: boolean
+	cropRect: Rect | null // rect to crop image at given url
+}
+
 export class SpriteEntityHelper {
 	private readonly bus = new DefaultStickyEventBus({
 		url: "",
