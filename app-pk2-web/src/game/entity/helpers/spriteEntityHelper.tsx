@@ -5,18 +5,13 @@ import React from "react"
 import { EntityHooks } from "@app/game/entity/manager/entity"
 import { Rect } from "@app/util/geometry"
 
-export type SpriteEntityHelperData = {
-	url: string // can be data url
-	cropRect: Rect | null // rect to crop image at given url
-}
-
 export class SpriteEntityHelper {
 	private readonly bus = new DefaultStickyEventBus({
 		url: "",
 		rect: new Rect(),
 	})
 
-    // TODO(teawithsand): check performance of this stuff
+	// TODO(teawithsand): check performance of this stuff
 	setUrl = (url: string) => {
 		this.bus.emitEvent({
 			...this.bus.lastEvent,
@@ -41,11 +36,11 @@ export class SpriteEntityHelper {
 				if (!data.rect.area) return <></>
 
 				// TODO(teawithsand): implement cropRect parameter
-                // It's quite hard to implement in SVG, as it turns out, so drawing to canvas and cropping should be
-                // considered an option first
-                // 
-                // then handling bunch of object URLs should be easy
-                // and releasing them afterwards should be no problem as well
+				// It's quite hard to implement in SVG, as it turns out, so drawing to canvas and cropping should be
+				// considered an option first
+				//
+				// then handling bunch of object URLs should be easy
+				// and releasing them afterwards should be no problem as well
 
 				return (
 					<image
