@@ -8,7 +8,7 @@ const rep = <T>(v: T, n: number): T[] => new Array(n).fill(v)
 const sqRep = <T>(v: T, n: number): T[][] => rep(rep(v, n), n)
 
 describe("CollisionMap", () => {
-	it.only("computes proper entity-block collision and surrounding ones", () => {
+	it("computes proper entity-block collision and surrounding ones", () => {
 		const blocks = transposeMatrix([
 			[-1, -1, -1, -1],
 			[-1, -1, -1, -1], // (32,32) -> (64,64)
