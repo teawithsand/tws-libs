@@ -15,7 +15,6 @@ export class PlayerEntity extends Entity {
 
 		this.spriteHelper = new SpriteEntityHelper(this.hooks)
         this.spriteHelper.setRect(this.r)
-        this.spriteHelper.setUrl()
 
 		this.lcSubscribable.addSubscriber(e => {
 			if (e.type === "tick") {

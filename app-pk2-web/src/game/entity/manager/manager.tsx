@@ -1,6 +1,7 @@
 import {
 	DefaultStickyEventBus,
 	getNowPerformanceTimestamp,
+	PerformanceTimestampMs,
 } from "@teawithsand/tws-stl"
 import { useStickySubscribable } from "@teawithsand/tws-stl-react"
 import React, { FC } from "react"
@@ -50,8 +51,8 @@ export class EntityManagerImpl implements EntityManager {
 			gameState,
 			gameConfig: {
 				currentTickIndex: 0,
-				firstUpdatePerformanceTimestamp: 0,
-				lastUpdatePerformanceTimestamp: 0,
+				firstUpdatePerformanceTimestamp: 0 as PerformanceTimestampMs,
+				lastUpdatePerformanceTimestamp: 0 as PerformanceTimestampMs,
 			},
 			manager: this,
 			spawn: entity => {

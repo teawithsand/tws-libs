@@ -1,8 +1,9 @@
 import { graphql, useStaticQuery } from "gatsby"
 import React, { useMemo } from "react"
 
-import { MapData } from "@app/game/map"
-import { GatsbyResourceLoader } from "@app/game/resources"
+import { BlockMapData } from "@app/game/data/map"
+import { GatsbyResourceLoader } from "@app/game/resources/gatsby"
+import { GatsbyResourcesUtil } from "@app/game/resources/managed"
 
 const ArrayDisplay = (props: { tiles: number[][] }) => {
 	const rawResources: Queries.ResourceFilesQuery = useStaticQuery(graphql`
@@ -17,7 +18,7 @@ const ArrayDisplay = (props: { tiles: number[][] }) => {
 	`)
 
 	const resLoader = useMemo(
-		() => new GatsbyResourceLoader(rawResources, "tiles01"),
+		() => new GatsbyResourceLoader(new GatsbyResourcesUtil(rawResources)),
 		[rawResources],
 	)
 
@@ -33,7 +34,9 @@ const ArrayDisplay = (props: { tiles: number[][] }) => {
 							y={j * 32}
 							width={32}
 							height={32}
-							href={resLoader.foregroundBlockImageUrl(v)}
+							href={
+								"todo resolve block url here, as we have to use specific tile set to handle it`"
+							}
 						/>
 					) : undefined,
 				),
@@ -42,7 +45,7 @@ const ArrayDisplay = (props: { tiles: number[][] }) => {
 	)
 }
 
-export const StaticMapDisplay = (props: { map: MapData }) => {
+export const StaticMapDisplay = (props: { map: BlockMapData }) => {
 	const { map } = props
 	return (
 		<svg
@@ -52,8 +55,8 @@ export const StaticMapDisplay = (props: { map: MapData }) => {
 			width={256 * 32}
 			height={256 * 32}
 		>
-			<ArrayDisplay tiles={map.body.background} />
-			<ArrayDisplay tiles={map.body.foreground} />
+			<ArrayDisplay tiles={map.backgroundBlocks} />
+			<ArrayDisplay tiles={map.foregroundBlocks} />
 		</svg>
 	)
 }

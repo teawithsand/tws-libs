@@ -1,5 +1,5 @@
+import { BLOCK_HEIGHT, BLOCK_WIDTH } from "@app/game/data/map"
 import { CollisionsMap } from "@app/game/entity/collisionMap"
-import { BLOCK_HEIGHT, BLOCK_WIDTH } from "@app/game/map"
 import { computeBlockCollisionData } from "@app/game/map/collision"
 import { Rect } from "@app/util/geometry"
 import { transposeMatrix } from "@app/util/matrix"
@@ -43,7 +43,7 @@ describe("CollisionMap", () => {
 		// expect(firstCollisions.isInWater).toStrictEqual(false)
 		// expect(firstCollisions.leftSideCollisions).toStrictEqual(null)
 		// expect(firstCollisions.rightSideCollisions).toStrictEqual(null)
-		
+
 		const secondCollisions = cm.queryRectMapCollisions(
 			playerRect.translatedY(BLOCK_HEIGHT),
 		)

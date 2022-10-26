@@ -6,7 +6,7 @@ import {
 	Subscribable,
 } from "@teawithsand/tws-stl"
 
-import { EntityData } from "@app/game/entity/external/data"
+import { EntityData } from "@app/game/data/entity"
 import { EntityContext } from "@app/game/entity/manager/defines"
 import { GameReactRendererHook } from "@app/game/entity/manager/renderer"
 import { Point } from "@app/util/geometry"
