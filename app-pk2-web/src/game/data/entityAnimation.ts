@@ -1,3 +1,5 @@
+import { Rect } from "@app/util/geometry"
+
 export enum EntityAnimationType {
 	SIMPLE = 1,
 }
@@ -15,7 +17,7 @@ export type EntityAnimationImage =
 	| {
 			type: EntityAnimationImageType.SUB_IMAGE
 			url: string
-			rect: [number, number, number, number]
+			rect: Rect
 	  }
 
 export type SimpleEntityAnimation = {

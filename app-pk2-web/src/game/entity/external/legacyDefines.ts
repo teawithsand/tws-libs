@@ -1,23 +1,5 @@
-import { EntityAiType } from "@app/game/entity/external/ai"
-import {
-	EntityAnimation,
-	EntityAnimationImageType,
-	EntityAnimationType,
-} from "@app/game/entity/external/animation"
-import {
-	CharacterEntityData,
-	EntityAnimationDisposition,
-	EntityCollisionData,
-	EntityData,
-	EntityDataDisposition,
-	EntityPresentationData,
-	EntitySoundAction,
-	EntitySoundData,
-} from "@app/game/entity/external/data"
-import {
-	LegacyEntityAnimationData,
-	LegacyEntityIdTransformerSync,
-} from "@app/game/entity/external/legacy"
+import { EntityAnimationDisposition, EntitySoundAction } from "@app/game/data/entity"
+import { LegacyEntityAnimationData } from "@app/game/entity/external/legacy"
 import { EnumTranslatorBuilder } from "@app/util/enumTranslator"
 
 export enum LegacyEntityAnimationType {
@@ -151,6 +133,8 @@ export type LegacyEntityData = {
 	}
 }
 
+
+/*
 export const entityDataFromLegacyEntityData = (
 	data: LegacyEntityData,
 	transformer: LegacyEntityIdTransformerSync,
@@ -263,3 +247,4 @@ export const entityDataFromLegacyEntityData = (
 		presentationData,
 	}
 }
+*/

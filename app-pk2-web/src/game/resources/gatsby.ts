@@ -1,6 +1,5 @@
 import { throwExpression } from "@teawithsand/tws-stl"
 
-import { LegacyEntityIdTransformerSync } from "@app/game/entity/external/legacy"
 import { mapDataFromLegacy, parseLegacyMap } from "@app/game/map"
 import { GameResources, LegacyResourceLoader } from "@app/game/resources/res"
 
@@ -9,20 +8,6 @@ export class GatsbyResourceLoader implements LegacyResourceLoader {
 	readonly legacyEpisodesMaps: {
 		[key: string]: string[]
 	}
-
-	private readonly transformer: LegacyEntityIdTransformerSync = {
-		transformSoundId(id) {
-			id = id.replace(".xm", ".mp3")
-			return this.queryPath(`music/${id}`)
-		},
-		resolveBlockData(n) {
-			const p = this.queryPath(``)
-			return {
-				backgroundURL: this.
-			}
-		}
-	}
-
 	private queryPath(p: string): string {
 		return this.res.find(r => r.relativePath === p)?.publicURL || ""
 	}

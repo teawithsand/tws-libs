@@ -1,5 +1,5 @@
-import { EntityAiType } from "@app/game/entity/external/ai"
-import { EntityAnimation } from "@app/game/entity/external/animation"
+import { EntityAiType } from "@app/game/data/entityAi"
+import { EntityAnimation } from "@app/game/data/entityAnimation"
 import { ShouldBeSet } from "@app/util/set"
 
 export enum EntityColorFilter {
@@ -104,7 +104,6 @@ export type EntityCollisionData = {
 	width: number
 	height: number
 	heightCrouch: number
-	noCollision: boolean // set if entity has collisions disabled permanently ex. background entities
 }
 
 export type EntityPresentationData = {

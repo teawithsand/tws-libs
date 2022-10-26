@@ -1,4 +1,4 @@
-import { EntityData } from "@app/game/entity/external/data"
+import { EntityData } from "@app/game/data/entity"
 
 export const BLOCK_WIDTH = 32
 export const BLOCK_HEIGHT = 32
@@ -46,7 +46,9 @@ export type BlockCollisionData = {
 
 export type BlockData = {
 	collisions: BlockCollisionData // ignored when block is in background
-
+    foregroundUrl: string
+    backgroundUrl: string
+    
 	// ignored for background blocks, in foreground blocks, used to determine whether entity is in water or not
 	isWater: boolean
 }
@@ -84,18 +86,20 @@ export const BLOCK_SHIFTER_OFFSET = BLOCK_WIDTH * 3
 // There's no edge at the bottom. Entities should be killed once they are below H line.
 // Also please note that this coordinate system is also used by SVG, so it's reasonable to use here.
 
-export interface PartialMapData {
+export interface BlockMapData {
 	blockData: {
 		[key: BlockId]: BlockData
 	}
+
+    width: number  // computed from any data
+    height: number // computed from any data
 
 	foregroundBlocks: BlockId[][]
 	backgroundBlocks: BlockId[][]
 }
 
-export type MapData = PartialMapData & {
-	width: number
-	height: number
+export type MapData =  {
+	blockData: BlockMapData
 
 	prePlacedEntities: PrePlacedEntity[]
 	

@@ -1,5 +1,5 @@
 export class GatsbyResourcesUtil {
-	constructor(private readonly res: Queries.ResourceFilesQuery) {}
+	constructor(public readonly res: Queries.ResourceFilesQuery) {}
 
 	queryPathPrefix = (p: string): string[] => {
 		return this.res.allFile.nodes

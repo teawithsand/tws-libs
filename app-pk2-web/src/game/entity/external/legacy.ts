@@ -1,11 +1,5 @@
 import { BinaryReader } from "@app/util/binary/reader"
 
-export interface LegacyEntityIdTransformerSync {
-	transformSoundId(id: string): string
-	transformMasterEntitySpritesFile(id: string): string
-	transformScenery(id: string): string
-}
-
 export type RawLegacyEntityData = {
 	version: string // only 1.3 is supported though
 	type: number
@@ -33,6 +27,7 @@ export type RawLegacyEntityData = {
 		animations: LegacyEntityAnimationData[]
 		animationCount: number
 		frameRate: number
+		spriteImagePath: string
 	}
 
 	miscSprites: {
@@ -336,6 +331,7 @@ export const parseLegacyEntityData = (
 			animationCount: inner.animationCount,
 			animations: inner.animations,
 			frameRate: inner.frameRate,
+			spriteImagePath: inner.spriteImagePath,
 		},
 
 		miscSprites: {
