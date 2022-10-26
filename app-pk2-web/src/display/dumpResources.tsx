@@ -2,8 +2,8 @@ import { graphql, useStaticQuery } from "gatsby"
 import React from "react"
 
 export const DumpResources = () => {
-	const rawResources: Queries.ResourceFilesQuery = useStaticQuery(graphql`
-		query ResourceFiles {
+	const rawResources: Queries.ResourceFilesDumpQuery = useStaticQuery(graphql`
+		query ResourceFilesDump {
 			allFile(filter: { sourceInstanceName: { eq: "resources" } }) {
 				nodes {
 					publicURL
