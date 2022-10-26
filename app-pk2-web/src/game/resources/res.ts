@@ -1,4 +1,4 @@
-import { MapData } from "../map"
+import { MapData } from "@app/game/data/map"
 
 /**
  * Game resources for specific map.
