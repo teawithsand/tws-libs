@@ -3,14 +3,14 @@ import { Rect } from "@app/util/geometry"
 export class ImageCutter {
 	private constructor(
 		private readonly imageData: Uint8ClampedArray,
-		private readonly width: number,
-		private readonly height: number,
+		public readonly width: number,
+		public readonly height: number,
 	) {}
 
-	static loadImage = async (url: string, w: number, h: number) => {
+	static loadImage = async (url: string, w?: number, h?: number) => {
 		const img = new Image()
-		img.width = w
-		img.height = h
+		if (w) img.width = w
+		if (h) img.height = h
 		img.loading = "eager"
 
 		const p = new Promise((resolve, reject) => {
@@ -22,8 +22,8 @@ export class ImageCutter {
 		await p
 
 		const canvas = document.createElement("canvas")
-		canvas.width = w
-		canvas.height = h
+		canvas.width = w ?? img.naturalWidth
+		canvas.height = h ?? img.naturalHeight
 		canvas.style.imageRendering = "pixelated"
 		canvas.style.display = "none"
 
