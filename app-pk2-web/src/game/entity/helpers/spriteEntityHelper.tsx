@@ -17,11 +17,20 @@ export class SpriteEntityHelper {
 		animations: Partial<EntityAnimationData>
 		animationDisposition: EntityAnimationDisposition
 		rect: Rect
+		visible: boolean
 	}>({
 		animations: {},
 		animationDisposition: EntityAnimationDisposition.IDLE,
 		rect: new Rect([0, 0, 0, 0]),
+		visible: true,
 	})
+
+	setEntityVisibility = (visible: boolean) => {
+		this.bus.emitEvent({
+			...this.bus.lastEvent,
+			visible,
+		})
+	}
 
 	// TODO(teawithsand): check performance of this stuff
 	setEntityAnimationData = (data: EntityAnimationData) => {
@@ -145,7 +154,6 @@ export class SpriteEntityHelper {
 
 					const displayData = cuttersMap.current.get(frameIndex)
 					if (cuttersMapLoaded && displayData) {
-
 						displayData.cutter.drawFragment(
 							ctx,
 							canvas.width,
@@ -179,6 +187,7 @@ export class SpriteEntityHelper {
 						ref={setCanvas as any} // FIXME: remove this any cast
 						style={{
 							transform: `translate(${busData.rect.p1.x}px, ${busData.rect.p1.y}px)`,
+							display: busData.visible ? undefined : "none",
 						}}
 						height={busData.rect.height}
 						width={busData.rect.width}
