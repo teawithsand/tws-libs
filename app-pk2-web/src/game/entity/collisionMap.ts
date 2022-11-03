@@ -1,9 +1,4 @@
-import {
-	BLOCK_HEIGHT,
-	BLOCK_WIDTH,
-	BlockId,
-	PartialMapData,
-} from "@app/game/map"
+import { BlockId, BlockMapData, BLOCK_HEIGHT, BLOCK_WIDTH } from "@app/game/data/map"
 import { SpatialHashMap } from "@app/util/ds/spatialMap"
 import { Point, Rect } from "@app/util/geometry"
 import { Vec2 } from "@app/util/vector"
@@ -49,7 +44,7 @@ export class CollisionsMap {
 		offsetY: number
 	}>(BLOCK_WIDTH, BLOCK_HEIGHT)
 
-	constructor(private readonly mapData: PartialMapData) {
+	constructor(private readonly mapData: BlockMapData) {
 		for (let i = 0; i < mapData.foregroundBlocks.length; i++) {
 			for (let j = 0; j < mapData.foregroundBlocks[i].length; j++) {
 				const foreground = mapData.foregroundBlocks[i][j]
