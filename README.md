@@ -1,5 +1,7 @@
 # tws-web-misc
 
+Bunch of misc stuff and gigant repo that I test projects in. Why use multiple repo if I can use only one?
+
 # Stability warning(WIP)
 These libs aren't stable so far, so you probably do not want to use them just yet.
 There is ongoing work to port them from my private monorepo and make them usable for public.
