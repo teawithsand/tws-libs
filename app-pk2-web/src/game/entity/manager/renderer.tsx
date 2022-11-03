@@ -12,8 +12,8 @@ export type GameReactRendererHook<P> = {
 }
 
 export enum GameReactRendererContext {
-	MAIN_SVG_SCREEN = 1,
-	MAIN_HTML_SCREEN = 2,
+	MAIN_SVG_SCREEN = "svg",
+	MAIN_HTML_SCREEN = "html",
 }
 
 export type GameReactRendererOptions = {

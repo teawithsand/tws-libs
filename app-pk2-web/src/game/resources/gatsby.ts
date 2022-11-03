@@ -1,3 +1,4 @@
+import { throwExpression } from "@app/../../tws-stl/dist"
 import {
 	CharacterEntityData,
 	EntityAnimationDisposition,
@@ -30,20 +31,21 @@ import {
 	computeRawBlockCollisions,
 } from "@app/game/map/collision"
 import { GatsbyResourcesUtil } from "@app/game/resources/managed"
+import { debugAssert } from "@app/util/assert"
 import { Rect } from "@app/util/geometry"
 
-export interface Resources {
+export interface GameResources {
 	readonly backgroundImageUrl: string
 	readonly mapData: MapData
 
 	release(): void
 }
 
-export interface ResourceLoader {
-	loadLegacyResources(epName: string, mapName: string): Promise<Resources>
+export interface GameResourceLoaders {
+	loadLegacyResources(epName: string, mapName: string): Promise<GameResources>
 }
 
-export class GatsbyResourceLoader implements ResourceLoader {
+export class GatsbyResourceLoader implements GameResourceLoaders {
 	readonly legacyEpisodes: string[]
 	readonly legacyEpisodesMaps: {
 		[key: string]: string[]
@@ -81,6 +83,7 @@ export class GatsbyResourceLoader implements ResourceLoader {
 	}
 
 	private load = async (u: string): Promise<ArrayBuffer> => {
+		if (!u) throw new Error(`Tried to fetch empty url ${u}`)
 		return await (await fetch(u)).arrayBuffer()
 	}
 
@@ -116,6 +119,8 @@ export class GatsbyResourceLoader implements ResourceLoader {
 
 		return {
 			disposition,
+			name: legacy.name,
+			legacy: legacy,
 			characterData: {
 				initialLives: legacy.game.energy,
 			} as CharacterEntityData, // TODO(teawithsand): impl these
@@ -142,49 +147,67 @@ export class GatsbyResourceLoader implements ResourceLoader {
 								{
 									type: EntityAnimationType.SIMPLE,
 									animation: {
-										frames: a.sequence.map(
-											(f): EntityAnimationImage => ({
-												url: this.resUtil.queryPathSegments(
-													[
-														"model",
-														"sprites",
-														legacy.animation
-															.spriteImagePath,
-													],
-												),
-												rect: new Rect([
-													[
-														legacy.display.frames
-															.firstFrameX +
+										frameRate: legacy.animation.frameRate,
+										frames: a.sequence
+											.slice(0, a.frames)
+											.map(v => v - 1) // frames with zero index are ones, which do not exist. 1 indexing is used here
+											.map(
+												(i): EntityAnimationImage => ({
+													url:
+														this.resUtil.queryPathSegments(
+															[
+																"models",
+																"sprites",
+																legacy.animation
+																	.spriteImagePath,
+															],
+															[".bmp", ".png"],
+														) ||
+														throwExpression(
+															new Error(
+																`Invalid sprite image path was provided ${legacy.animation.spriteImagePath}`,
+															),
+														),
+													rect: new Rect([
+														[
 															legacy.display
 																.frames
-																.frameWidth *
-																f,
-														legacy.display.frames
-															.firstFrameX +
+																.firstFrameX +
+																(legacy.display
+																	.frames
+																	.frameWidth +
+																	legacy
+																		.display
+																		.frames
+																		.spaceBetweenFrames) *
+																	i,
 															legacy.display
 																.frames
-																.frameHeight *
-																f,
-													],
-													[
-														legacy.display.frames
-															.firstFrameX +
+																.firstFrameY,
+														],
+														[
 															legacy.display
 																.frames
-																.frameWidth *
-																(f + 1),
-														legacy.display.frames
-															.firstFrameX +
+																.firstFrameX +
+																legacy.display
+																	.frames
+																	.frameWidth *
+																	(i + 1) +
+																legacy.display
+																	.frames
+																	.spaceBetweenFrames *
+																	i,
 															legacy.display
 																.frames
-																.frameHeight *
-																(f + 1),
-													],
-												]),
-												type: EntityAnimationImageType.SUB_IMAGE,
-											}),
-										),
+																.firstFrameY +
+																legacy.display
+																	.frames
+																	.frameHeight,
+														],
+													]),
+													type: EntityAnimationImageType.SUB_IMAGE,
+												}),
+											),
 										loop: a.loop,
 									},
 								},
@@ -199,7 +222,7 @@ export class GatsbyResourceLoader implements ResourceLoader {
 				soundFiles: Object.fromEntries(
 					legacy.sound.soundTypes
 						.map((v, i): [LegacyEntitySoundType, string] => [
-							v,
+							i,
 							legacy.sound.soundPaths[i],
 						])
 						.filter(([t, p]) => t >= 0 && p !== "")
@@ -215,13 +238,15 @@ export class GatsbyResourceLoader implements ResourceLoader {
 	loadLegacyResources = async (
 		epName: string,
 		mapName: string,
-	): Promise<Resources> => {
+	): Promise<GameResources> => {
 		const map = await this.resolveLegacyMap(epName, mapName)
 
 		const backgroundImageUrl = this.resUtil.queryPathSegments(
 			["scenery", map.backgroundImagePath],
-			[".xm", ".bmp"],
+			[".bmp", ".png"],
 		)
+
+		debugAssert(!!backgroundImageUrl, "No background image")
 
 		const palettePathSegments = map.blockPaletteImagePath.split("/")
 		const paletteName = palettePathSegments[
@@ -263,12 +288,15 @@ export class GatsbyResourceLoader implements ResourceLoader {
 		for (const col of map.body.sprites) {
 			let y = 0
 			for (const s of col) {
-				if (s >= 0) {
+				if (s >= 0 && s !== 255) {
 					prePlacedEntities.push({
 						x,
 						y,
 						entityData: await this.resolveEntityData(
-							map.prototypes[s] ?? "",
+							map.prototypes[s] ||
+								throwExpression(
+									new Error(`No sprite with id ${s}`),
+								),
 						),
 					})
 				}

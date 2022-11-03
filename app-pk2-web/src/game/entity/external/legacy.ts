@@ -321,7 +321,7 @@ export const parseLegacyEntityData = (
 				frameWidth: inner.frameWidth,
 				frameHeight: inner.frameHeight,
 				framesPath: inner.spriteImagePath,
-				spaceBetweenFrames: inner.spaceBetweenFrames,
+				spaceBetweenFrames: 3 // apparently it's always 3 and that value does not make any sense //inner.spaceBetweenFrames,
 			},
 			height: inner.height,
 			width: inner.width,

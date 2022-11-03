@@ -1,4 +1,7 @@
-import { EntityAnimationDisposition, EntitySoundAction } from "@app/game/data/entity"
+import {
+	EntityAnimationDisposition,
+	EntitySoundAction,
+} from "@app/game/data/entity"
 import { LegacyEntityAnimationData } from "@app/game/entity/external/legacy"
 import { EnumTranslatorBuilder } from "@app/util/enumTranslator"
 
@@ -41,6 +44,7 @@ export const translateLegacyEntityAnimationType = new EnumTranslatorBuilder<
 	)
 	.value(LegacyEntityAnimationType.SQUAT, EntityAnimationDisposition.SQUAT)
 	.value(LegacyEntityAnimationType.DEATH, EntityAnimationDisposition.DEATH)
+	.value(LegacyEntityAnimationType.DAMAGE, EntityAnimationDisposition.DAMAGE)
 	.build()
 
 export enum LegacyEntitySoundType {
@@ -132,7 +136,6 @@ export type LegacyEntityData = {
 		[key in LegacyEntitySoundType]?: LegacyEntityResourceLocator
 	}
 }
-
 
 /*
 export const entityDataFromLegacyEntityData = (

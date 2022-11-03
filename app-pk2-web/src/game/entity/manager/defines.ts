@@ -10,6 +10,7 @@ import {
 	GameReactRendererOptions,
 } from "@app/game/entity/manager/renderer"
 import { GameState } from "@app/game/entity/manager/state"
+import { GameResources } from "@app/game/resources/gatsby"
 
 export interface EntityManager {
 	addEntity(entity: Entity): void
@@ -28,6 +29,9 @@ export interface EntityManager {
 export interface EntityContext {
 	readonly manager: EntityManager
 	readonly gameState: StickySubscribable<GameState>
+	readonly resources: {
+		currentMapResources: GameResources
+	}
 
 	readonly gameConfig: {
 		currentTickIndex: number

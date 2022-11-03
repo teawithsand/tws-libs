@@ -23,6 +23,7 @@ export type EntityAnimationImage =
 export type SimpleEntityAnimation = {
 	frames: EntityAnimationImage[] // each frame is URL,
 	loop: boolean // whether animation is single-use only or should be looped or should stop at last frame.
+	frameRate: number
 }
 
 export type EntityAnimation = {

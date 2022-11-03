@@ -1,7 +1,7 @@
 import { throwExpression } from "@teawithsand/tws-stl"
 
-import { BinaryReader } from "../../util/binary/reader"
-import { MapBackgroundMovementType, MapClimate } from "./defines"
+import { MapBackgroundMovementType, MapClimate } from "@app/game/data/map"
+import { BinaryReader } from "@app/util/binary/reader"
 
 export const DEFAULT_MAP_WIDTH = 256
 export const DEFAULT_MAP_HEIGHT = 224
@@ -83,7 +83,7 @@ export const parseLegacyMap = (buffer: ArrayBuffer): LegacyMapData => {
 			)
 		const blockPaletteImagePath = rd.readStringFixed(13)
 		const backgroundImagePath = rd.readStringFixed(13)
-		const musicFilePath = rd.readStringFixed(13)
+		const musicFilePath = rd.readStringFixed(13).trim()
 		const mapName = rd.readStringFixed(40).replace(/Ì.*$/, "") // replace required, this is what pk2 code does
 		const authorName = rd.readStringFixed(40).replace(/Ì.*$/, "") // like above
 

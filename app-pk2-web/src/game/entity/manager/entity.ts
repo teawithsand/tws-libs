@@ -56,11 +56,11 @@ export abstract class Entity {
 	public readonly id = generateUUID()
 
 	protected readonly lcResRegistry = new EntityResourceRegistry()
-	private innerTickBus = new DefaultStickyEventBus<EntityContext>(
+	private innerContextBus = new DefaultStickyEventBus<EntityContext>(
 		null as any as EntityContext,
 	)
 	protected readonly contextSubscribable: StickySubscribable<EntityContext> =
-		this.innerTickBus
+		this.innerContextBus
 
 	private innerLcBus = new DefaultEventBus<EntityLifecycleEvent>()
 	protected readonly lcSubscribable: Subscribable<EntityLifecycleEvent> =
@@ -104,22 +104,40 @@ export abstract class Entity {
 	}
 
 	public readonly init = (ctx: EntityContext): void => {
-		if (this.innerTickBus.lastEvent !== ctx)
-			this.innerTickBus.emitEvent(ctx)
+		if (this.innerContextBus.lastEvent !== ctx)
+			this.innerContextBus.emitEvent(ctx)
+
 		this.registerHooksOnce.do(() => this.registerHooks())
 		this.innerInit(ctx)
+
+		this.innerLcBus.emitEvent({
+			type: "init",
+			ctx,
+		})
 	}
 
 	public readonly tick = (
 		ctx: EntityContext,
 	): { isDead?: boolean } | undefined => {
 		const res = this.innerTick(ctx)
-		this.innerTickBus.emitEvent(ctx)
+		this.innerContextBus.emitEvent(ctx)
+
+		this.innerLcBus.emitEvent({
+			type: "tick",
+			ctx,
+		})
+
 		return res
 	}
 
 	public readonly release = (ctx: EntityContext): void => {
 		this.innerRelease(ctx)
+
+		this.innerLcBus.emitEvent({
+			type: "release",
+			ctx,
+		})
+
 		this.lcResRegistry.release()
 	}
 }

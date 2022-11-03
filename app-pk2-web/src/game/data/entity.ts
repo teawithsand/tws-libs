@@ -1,5 +1,7 @@
 import { EntityAiType } from "@app/game/data/entityAi"
 import { EntityAnimation } from "@app/game/data/entityAnimation"
+import { RawLegacyEntityData } from "@app/game/entity/external/legacy"
+import { LegacyEntityData } from "@app/game/entity/external/legacyDefines"
 import { ShouldBeSet } from "@app/util/set"
 
 export enum EntityColorFilter {
@@ -107,10 +109,12 @@ export type EntityCollisionData = {
 }
 
 export type EntityPresentationData = {
-	animations: {
-		[key in EntityAnimationDisposition]: EntityAnimation
-	}
+	animations: EntityAnimationData
 	colorFilter: EntityColorFilter | null
+}
+
+export type EntityAnimationData = {
+	[key in EntityAnimationDisposition]: EntityAnimation
 }
 
 export type CharacterEntityData = {
@@ -136,6 +140,9 @@ export type CharacterEntityData = {
 
 export type EntityData = {
 	disposition: EntityDataDisposition
+	name: string
+
+	legacy?: RawLegacyEntityData | LegacyEntityData // for debugging reasons
 
 	collisionData: EntityCollisionData
 	soundData: EntitySoundData

@@ -14,8 +14,23 @@ import {
 	ReactGameRendererHelper,
 } from "@app/game/entity/manager/renderer"
 import { GameState } from "@app/game/entity/manager/state"
+import { GameResources } from "@app/game/resources/gatsby"
 
-const DisplayRoot = styled.svg`
+const DisplayRoot = styled.div`
+	display: grid;
+	* {
+		grid-row: 1;
+		grid-column: 1;
+	}
+`
+
+const HTMLDisplayRoot = styled.div`
+	height: inherit;
+	width: inherit;
+	overflow: hidden;
+`
+
+const SVGDisplayRoot = styled.svg`
 	border: 1px solid black;
 
 	background-image: linear-gradient(45deg, #808080 25%, transparent 25%),
@@ -31,7 +46,10 @@ const DisplayRoot = styled.svg`
 
 export class EntityManagerImpl implements EntityManager {
 	private svgHelper = new ReactGameRendererHelper()
+	private htmlHelper = new ReactGameRendererHelper()
 	private entities: Map<string, Entity> = new Map()
+
+	constructor(private readonly resources: GameResources) {}
 
 	/**
 	 * It's ok to access this context from outside.
@@ -54,6 +72,13 @@ export class EntityManagerImpl implements EntityManager {
 				firstUpdatePerformanceTimestamp: 0 as PerformanceTimestampMs,
 				lastUpdatePerformanceTimestamp: 0 as PerformanceTimestampMs,
 			},
+			// TODO(teawithsand): consider removing these resources and replacing them with in-entity resources
+			//  or use some buses in order to dynamically swap resources in entities, which in general
+			//  is bad as we do not really want to replace stuff like mob AI decision trees OTF
+			// IE. use constructor of entity
+			resources: {
+				currentMapResources: this.resources,
+			},
 			manager: this,
 			spawn: entity => {
 				if (this.entities.has(entity.id))
@@ -65,12 +90,28 @@ export class EntityManagerImpl implements EntityManager {
 			obtainReactRenderer: (component, props, options) => {
 				const ctx =
 					options?.context ?? GameReactRendererContext.MAIN_SVG_SCREEN
-				if (ctx !== GameReactRendererContext.MAIN_SVG_SCREEN) {
-					throw new Error("non-svg renderers are NIY")
+
+				if (ctx === GameReactRendererContext.MAIN_SVG_SCREEN) {
+					return this.svgHelper.obtainReactRenderer(
+						component,
+						props,
+						{
+							zIndex: options?.zIndex ?? undefined,
+						},
+					)
+				} else if (ctx === GameReactRendererContext.MAIN_HTML_SCREEN) {
+					return this.htmlHelper.obtainReactRenderer(
+						component,
+						props,
+						{
+							zIndex: options?.zIndex ?? undefined,
+						},
+					)
+				} else {
+					throw new Error(
+						`Unexpected game react renderer context ${ctx}`,
+					)
 				}
-				return this.svgHelper.obtainReactRenderer(component, props, {
-					zIndex: options?.zIndex ?? undefined,
-				})
 			},
 			updateGameState(state) {
 				gameState.emitEvent(state(gameState.lastEvent))
@@ -80,15 +121,29 @@ export class EntityManagerImpl implements EntityManager {
 
 	public readonly renderer: FC<{}> = () => {
 		const display = useStickySubscribable(this.ctx.gameState).display
-		const Component = this.svgHelper.component
+		const SVGComponent = this.svgHelper.component
+		const HTMLComponent = this.htmlHelper.component
 
 		return (
 			<DisplayRoot
-				width={display.width}
-				height={display.height}
-				viewBox={`${display.screenOffsetX} ${display.screenOffsetY} ${display.width} ${display.height}`}
+				style={{
+					width: display.width + "px",
+					height: display.height + "px",
+				}}
 			>
-				<Component />
+				<SVGDisplayRoot
+					width={display.width}
+					height={display.height}
+					viewBox={`${display.screenOffsetX} ${display.screenOffsetY} ${display.width} ${display.height}`}
+				>
+					<SVGComponent />
+				</SVGDisplayRoot>
+				<HTMLDisplayRoot>
+					{/*
+						TODO(teawithsand): apply transforms here in order to emulate screen moving like svg does with viewBox
+					*/}
+					<HTMLComponent />
+				</HTMLDisplayRoot>
 			</DisplayRoot>
 		)
 	}
@@ -121,6 +176,13 @@ export class EntityManagerImpl implements EntityManager {
 			if (predicate(v)) return v
 		}
 		return null
+	}
+
+	release = () => {
+		const keys = [...this.entities.keys()]
+		for (const k of keys) {
+			this.removeEntity(k)
+		}
 	}
 
 	doTick = () => {
