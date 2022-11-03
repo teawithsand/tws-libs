@@ -14,3 +14,5 @@ Files with exporting single react component only should be named UpperCamelCase 
 
 As much as I love them, they are real pain while developing libraries. Long story short do not use them until
 I or someone else creates automated util parsing ts-compiled js, which rewrites absolute imports from current lib to relative ones.
+
+Above does not apply to applications of course, as there absolute imports can be quite easily and painlessly configured.
