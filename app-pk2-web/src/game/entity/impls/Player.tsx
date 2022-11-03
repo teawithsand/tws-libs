@@ -3,7 +3,6 @@ import {
 	EntityData,
 	EntityDataDisposition,
 } from "@app/game/data/entity"
-import { BLOCK_HEIGHT, BLOCK_WIDTH } from "@app/game/data/map"
 import { SpriteEntityHelper } from "@app/game/entity/helpers/spriteEntityHelper"
 import { Entity } from "@app/game/entity/manager/entity"
 import { Point, Rect } from "@app/util/geometry"
@@ -38,9 +37,13 @@ export class PlayerEntity extends Entity {
 			this.data.presentationData.animations,
 		)
 
+		this.r = this.r.translated(new Point([100, 0]))
+
 		this.lcSubscribable.addSubscriber(e => {
 			if (e.type === "tick") {
-				this.r = this.r.translated(new Point([1, 0]))
+				this.r = this.r.translated(
+					new Point([(Math.random() - 0.45) * 10, 0]),
+				)
 				this.spriteHelper.setRect(this.r)
 			}
 		})
