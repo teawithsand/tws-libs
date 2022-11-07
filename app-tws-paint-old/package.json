@@ -23,7 +23,7 @@
 		"@teawithsand/tws-stl": "^0.0.1",
 		"@teawithsand/tws-stl-react": "^0.0.1",
 		"@teawithsand/tws-trans": "^0.0.1",
-		"@teawithsand/tws-ui": "^0.0.1",
+		"@teawithsand/tws-ui": "^0.0.2",
 		"@use-gesture/react": "^10.2.16",
 		"babel-plugin-styled-components": "^2.0.7",
 		"bootstrap": "^5.2.2",
