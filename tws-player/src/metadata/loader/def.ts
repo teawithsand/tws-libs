@@ -2,7 +2,7 @@ import { PlayerSourceResolver } from "../../source"
 import { ID3Metadata, Metadata } from "../metadata"
 import { MetadataLoader } from "./abstract"
 
-import * as jsMediaTags from "jsmediatags"
+import * as jsMediaTags from "@teawithsand/jsmediatags"
 
 export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 	constructor(private readonly resolver: PlayerSourceResolver<T>) {}

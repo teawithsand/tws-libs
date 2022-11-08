@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-player",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"description": "Complete audio player, like ExoPlayer for android",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -17,13 +17,12 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/jest": "^29.0.3",
-		"@types/jsmediatags": "^3.9.3",
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
+		"@teawithsand/jsmediatags": "^3.9.1008",
 		"@teawithsand/tws-stl": "^0.0.2",
-		"immer": "^9.0.15",
-		"jsmediatags": "^3.9.7"
+		"immer": "^9.0.15"
 	},
 	"files": [
 		"dist/**"
