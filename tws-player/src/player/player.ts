@@ -1,18 +1,18 @@
-import {
-	DefaultTaskAtom,
-	StickyEventBus,
-	DefaultStickyEventBus,
-} from "@teawithsand/tws-stl"
-import { produce, castDraft, current, isDraft, Draft } from "immer"
 import { MediaPlayerError } from "../error"
 import { WebAudioFilterManager } from "../filter"
+import { PlayerSourceProvider, PlayerSourceResolver } from "../source"
 import {
 	PlayerNetworkState,
 	PlayerReadyState,
 	readHTMLPlayerState,
 } from "../util/native"
-import { PlayerSourceProvider, PlayerSourceResolver } from "../source"
 import { PlayerConfig, PlayerState } from "./state"
+import {
+	DefaultStickyEventBus,
+	DefaultTaskAtom,
+	StickyEventBus,
+} from "@teawithsand/tws-stl"
+import { castDraft, current, isDraft, produce } from "immer"
 import { WritableDraft } from "immer/dist/internal"
 
 type Element = HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
@@ -61,8 +61,13 @@ export class Player<S, SK> {
 	private lastState: PlayerState<SK> = IDLE_PORTABLE_PLAYER_STATE
 	private readonly loadSourceTaskAtom = new DefaultTaskAtom()
 
+	get sourceProvider(): PlayerSourceProvider<S, SK> {
+		return this.innerSourceProvider
+	}
+
 	constructor(
-		public readonly sourceProvider: PlayerSourceProvider<S, SK>,
+		// TODO(teawithsand): make this read only for public only
+		private innerSourceProvider: PlayerSourceProvider<S, SK>,
 		public readonly sourceResolver: PlayerSourceResolver<S>,
 		private readonly element: Element = new Audio()
 	) {
@@ -88,6 +93,19 @@ export class Player<S, SK> {
 
 	public get state(): Readonly<PlayerState<SK>> {
 		return this.innerPlayerState.lastEvent
+	}
+
+	/**
+	 * Overrides source provided with different one, but same data type.
+	 * For now recasting player + config is not supported.
+	 *
+	 * Current source is overridden to be null.
+	 */
+	public setSourceProvider = (p: PlayerSourceProvider<S, SK>) => {
+		this.innerSourceProvider = p
+		this.mutateConfig((draft) => {
+			draft.currentSourceKey = null
+		})
 	}
 
 	private readonly onStateChange = (newState: PlayerState<SK>) => {
@@ -152,7 +170,9 @@ export class Player<S, SK> {
 
 		if (targetSourceKey !== this.lastState.config.currentSourceKey) {
 			const src = targetSourceKey
-				? this.sourceProvider.providerSourceWithKey(targetSourceKey)
+				? this.innerSourceProvider.providerSourceWithKey(
+						targetSourceKey
+				  )
 				: null
 			const prevSourceCleanup = this.sourceCleanup
 
@@ -307,7 +327,7 @@ export class Player<S, SK> {
 		this.innerPlayerState.emitEvent(
 			produce(this.innerPlayerState.lastEvent, (draft) => {
 				draft.config.currentSourceKey = castDraft(
-					this.sourceProvider.getNextSourceKey(
+					this.innerSourceProvider.getNextSourceKey(
 						isDraft(draft.config.currentSourceKey)
 							? current(draft.config.currentSourceKey)
 							: (draft.config.currentSourceKey as any) // any cast hack, but this code should be ok. Fix it if it's not
