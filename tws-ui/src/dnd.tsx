@@ -129,7 +129,7 @@ const SortableChild = <T,>(props: {
 //  this can be fixed by introducing a phantom element, which is not rendered and is removed after drop had happened.
 //  that element should replace element, which started dragging
 
-const Sortable = <T,>(props: {
+export const Sortable = <T,>(props: {
 	dragAndDropDataIdentifier: string
 	renderElement: SortableItemRenderer<T>
 	renderParent: ParentRenderer
@@ -201,9 +201,6 @@ const Sortable = <T,>(props: {
 		</RenderParent>
 	)
 }
-
-export default Sortable
-
 /*
 // Quick example: 
 import React, { useState } from "react"
