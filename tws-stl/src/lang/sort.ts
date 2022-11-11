@@ -21,10 +21,30 @@ export const compareBigInt = (a: bigint, b: bigint) => {
  * Easy ordering enum for more clear comparator stuff.
  */
 export enum Ordering {
-    LESS = -1,
-    EQUAL = 0,
-    GREATER = 1,
+	LESS = -1,
+	EQUAL = 0,
+	GREATER = 1,
 }
 
-export const compareStrings = (a: string, b: string) => a.localeCompare(b)
-export const compareNumbers = (a: number, b: number) => a - b
+export const compareStrings: Comparator<string> = (a: string, b: string) =>
+	a.localeCompare(b)
+export const compareNumbers: Comparator<number | bigint> = (a, b) => {
+	if (typeof a !== typeof b) {
+		// one is bigint
+		a = BigInt(a)
+		b = BigInt(b)
+	}
+	const r: number | bigint = (a as any) - (b as any)
+	if (r > 0) return Ordering.GREATER
+	if (r < 0) return Ordering.LESS
+	return Ordering.EQUAL
+}
+
+export const compareStringsNatural: Comparator<string> = (
+	a: string,
+	b: string
+) =>
+	a.localeCompare(b, undefined, {
+		numeric: true,
+		sensitivity: "base",
+	})
