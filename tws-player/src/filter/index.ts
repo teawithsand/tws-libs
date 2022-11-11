@@ -21,14 +21,23 @@ export class WebAudioFilterManager {
 	private readonly sourceNode: MediaElementAudioSourceNode
 
 	private currentNodes: AudioNode[] = []
+	private currentFilters: AudioFilter[] = []
 
 	constructor(
 		element: HTMLAudioElement | HTMLVideoElement | HTMLMediaElement
 	) {
 		this.sourceNode = this.context.createMediaElementSource(element)
+		this.applyFiltersInner([])
 	}
 
 	applyFilters = (filters: AudioFilter[]) => {
+		if (filters === this.currentFilters) return
+
+		this.applyFiltersInner(filters)
+		this.currentFilters = filters
+	}
+
+	private applyFiltersInner = (filters: AudioFilter[]) => {
 		for (const n of this.currentNodes) {
 			n.disconnect(0)
 		}
