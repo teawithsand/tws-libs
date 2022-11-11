@@ -139,6 +139,8 @@ export class Player<S, SK> {
 		if (newState.config.volume !== this.element.volume) {
 			this.element.volume = newState.config.volume
 		}
+
+		if (this.element.muted) this.element.muted = false
 	}
 
 	private syncFilters = (newState: PlayerState<SK>) => {
@@ -153,6 +155,9 @@ export class Player<S, SK> {
 	private syncIsPlayingWhenReady = (newState: PlayerState<SK>) => {
 		if (!this.isLoadingSource && newState.config.isPlayingWhenReady) {
 			this.element.play().catch(() => {
+				// TODO(teawithsand): this can be used to check if autoplay was banned or not
+				// It's useful to detect it somehow. This should be implemented in the future.
+
 				// noop here
 				// ignore playing error, we will reset it when we want if needed
 			})
