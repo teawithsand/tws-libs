@@ -326,13 +326,20 @@ export class Player<S, SK> {
 				draft.networkState = playerState.networkState
 				draft.readyState = playerState.readyState
 
-				// TODO(teawithsand): consider reporting error only when there is some source set + is not laoding
-				draft.playerError = playerState.error
-					? new MediaPlayerError(
-							"Player state reported an error",
-							playerState.error
-					  )
-					: null
+				// Do not report an error of player if we are loading or no source is set
+				if (
+					this.isLoadingSource ||
+					draft.config.currentSourceKey == null
+				) {
+					draft.playerError = null
+				} else {
+					draft.playerError = playerState.error
+						? new MediaPlayerError(
+								"Player state reported an error",
+								playerState.error
+						  )
+						: null
+				}
 
 				if (
 					draft.config.allowExternalSetIsPlayingWhenReady &&
