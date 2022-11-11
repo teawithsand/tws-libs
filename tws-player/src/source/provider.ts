@@ -26,13 +26,13 @@ export class MapPlayerSourceProvider<S>
 	> = new Map()
 
 	constructor(
-		public readonly arr: S[],
+		public readonly sources: S[],
 		private readonly idLoader: (source: S) => string
 	) {
-		for (let i = 0; i < arr.length; i++) {
-			const s = arr[i]
-			const next = arr[i + 1] ?? null
-			const prev = arr[i - 1] ?? null
+		for (let i = 0; i < sources.length; i++) {
+			const s = sources[i]
+			const next = sources[i + 1] ?? null
+			const prev = sources[i - 1] ?? null
 
 			const id = this.idLoader(s)
 			if (this.map.has(id))
@@ -47,17 +47,18 @@ export class MapPlayerSourceProvider<S>
 	}
 
 	getNextSourceKey = (sk: string | null): string | null => {
-		if (sk === null) sk = this.idLoader(this.arr[0])
+		if (sk === null) {
+			return this.idLoader(this.sources[0]) // just return first element
+		}
 
 		return this.map.get(sk)?.next ?? null
 	}
 
 	getPrevSourceKey = (sk: string | null): string | null => {
-		if (sk === null) sk = this.idLoader(this.arr[0])
-
+		if (sk === null) return null
 		return this.map.get(sk)?.prev ?? null
 	}
-	
+
 	providerSourceWithKey = (key: string): S => {
 		return (
 			this.map.get(key)?.source ??
@@ -71,24 +72,24 @@ export class MapPlayerSourceProvider<S>
 export class ArrayPlayerSourceProvider<S>
 	implements PlayerSourceProvider<S, number>
 {
-	constructor(public readonly arr: S[]) {}
+	constructor(public readonly sources: S[]) {}
 
 	getNextSourceKey = (sk: number | null): number | null => {
 		sk = sk ?? 0
-		if (sk >= this.arr.length) return null
+		if (sk >= this.sources.length) return null
 		return sk + 1
 	}
 
 	getPrevSourceKey = (sk: number | null): number | null => {
 		sk = sk ?? 0
-		if (sk === 0 || sk >= this.arr.length) return null
+		if (sk === 0 || sk >= this.sources.length) return null
 		return sk - 1
 	}
 
 	providerSourceWithKey = (i: number): S => {
-		if (i < this.arr.length) return this.arr[i]
+		if (i < this.sources.length) return this.sources[i]
 		throw new SourcePlayerError(
-			`Source with index ${i} is not available in array with ${this.arr.length} elements`
+			`Source with index ${i} is not available in array with ${this.sources.length} elements`
 		)
 	}
 }
