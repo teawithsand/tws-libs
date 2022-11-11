@@ -102,10 +102,11 @@ export class Player<S, SK> {
 	 * Current source is overridden to be null.
 	 */
 	public setSourceProvider = (p: PlayerSourceProvider<S, SK>) => {
-		this.innerSourceProvider = p
+		// 1. Set CSK to null in order to ensure that no playback happens
 		this.mutateConfig((draft) => {
 			draft.currentSourceKey = null
 		})
+		this.innerSourceProvider = p
 	}
 
 	private readonly onStateChange = (newState: PlayerState<SK>) => {
@@ -153,11 +154,14 @@ export class Player<S, SK> {
 	}
 
 	private syncIsPlayingWhenReady = (newState: PlayerState<SK>) => {
-		if (!this.isLoadingSource && newState.config.isPlayingWhenReady) {
+		if (
+			!this.isLoadingSource &&
+			newState.config.currentSourceKey !== null && // if CSK is null(and we can unset prev source, even though we've tried)
+			newState.config.isPlayingWhenReady
+		) {
 			this.element.play().catch(() => {
 				// TODO(teawithsand): this can be used to check if autoplay was banned or not
 				// It's useful to detect it somehow. This should be implemented in the future.
-
 				// noop here
 				// ignore playing error, we will reset it when we want if needed
 			})
@@ -174,11 +178,12 @@ export class Player<S, SK> {
 		const targetSourceKey = newState.config.currentSourceKey
 
 		if (targetSourceKey !== this.lastState.config.currentSourceKey) {
-			const src = targetSourceKey
-				? this.innerSourceProvider.providerSourceWithKey(
-						targetSourceKey
-				  )
-				: null
+			const src =
+				targetSourceKey !== null
+					? this.innerSourceProvider.providerSourceWithKey(
+							targetSourceKey
+					  )
+					: null
 			const prevSourceCleanup = this.sourceCleanup
 
 			if (prevSourceCleanup) prevSourceCleanup()
@@ -229,10 +234,19 @@ export class Player<S, SK> {
 					}
 				})
 			} else {
-				if (this.element.src !== "") {
-					this.element.src = ""
-					this.readAndEmitHTMLElementState()
-				}
+				// apparently, this does not work
+				// instead try to simply always set pause, unless there is source key provided
+				// if (this.element.src !== "") {
+				// 	this.element.src = ""
+				// 	this.readAndEmitHTMLElementState()
+				// }
+
+				// TODO(teawithsand): debug this and discover wth actually happens here
+				// and hope that some event triggers event update, but we won't trigger it manually
+				// as this may trigger infinite recursion, although it shouldn't
+				// so idk let's leave this as is for now, seems to work.
+				this.element.src = ""
+				this.element.load()
 				this.isLoadingSource = false
 			}
 		}
@@ -312,6 +326,7 @@ export class Player<S, SK> {
 				draft.networkState = playerState.networkState
 				draft.readyState = playerState.readyState
 
+				// TODO(teawithsand): consider reporting error only when there is some source set + is not laoding
 				draft.playerError = playerState.error
 					? new MediaPlayerError(
 							"Player state reported an error",
