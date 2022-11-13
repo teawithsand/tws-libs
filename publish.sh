@@ -8,3 +8,4 @@ publish "tws-gatsby-plugin";
 publish "tws-player";
 publish "tws-trans";
 publish "tws-ui";
+publish "tws-seo";
