@@ -14,11 +14,11 @@ export type OGProfile = {
 
 export type OGImage = {
 	httpUrl: string // must be absolute
-	httpsUrl: string // must be absolute
+	httpsUrl?: string | undefined // must be absolute
 
-	alt?: string
-	width?: number
-	height?: number
+	alt?: string | undefined
+	width?: number | undefined
+	height?: number | undefined
 }
 
 export type OGArticle = {
