@@ -1,0 +1,32 @@
+{
+	"name": "@teawithsand/tws-seo",
+	"version": "0.0.1",
+	"description": "Some utils for creating SEO object and website <head> section",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest"
+	},
+	"keywords": [
+		"teawithsand",
+		"react",
+		"seo"
+	],
+	"author": "teawithsand",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/react": "^18.0.21"
+	},
+	"dependencies": {
+		"@teawithsand/tws-stl": "^0.0.3",
+		"@teawithsand/tws-stl-react": "^0.0.1"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
+	},
+	"files": [
+		"dist/**"
+	]
+}
