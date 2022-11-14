@@ -13,6 +13,19 @@ export interface PlayerSourceProvider<S, SK> {
 	providerSourceWithKey(key: SK): S
 }
 
+export class EmptyPlayerSourceProvider implements PlayerSourceProvider<any, any> {
+	getNextSourceKey = (sk: any) => {
+		return null
+	}
+	getPrevSourceKey = (sk: any) => {
+		return null
+	}
+	providerSourceWithKey(key: any) {
+		throw new SourcePlayerError(`Tried to get source with key ${key} from empty player`)
+	}
+
+}
+
 export class MapPlayerSourceProvider<S>
 	implements PlayerSourceProvider<S, string>
 {
