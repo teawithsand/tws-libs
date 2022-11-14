@@ -29,11 +29,11 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any> = {
 
 	config: {
 		isPlayingWhenReady: false,
-		speed: 0,
+		speed: 1,
 		preservePitchForSpeed: false,
-		volume: 0,
+		volume: 1,
 		filters: [],
-		allowExternalSetIsPlayingWhenReady: false,
+		allowExternalSetIsPlayingWhenReady: true,
 		currentSourceKey: null,
 		currentPositionSeek: null,
 	},
