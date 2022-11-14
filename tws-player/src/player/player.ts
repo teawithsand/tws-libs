@@ -10,7 +10,7 @@ import {
 	PlayerReadyState,
 	readHTMLPlayerState,
 } from "../util/native"
-import { PlayerConfig, PlayerConfigFileEndHandlingMode, PlayerState } from "./state"
+import { PlayerConfig, PlayerState } from "./state"
 import {
 	DefaultStickyEventBus,
 	DefaultTaskAtom,
@@ -43,7 +43,6 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 		seekPosition: null,
 
 		forceReloadOnSourceProviderSwap: true, // by default true for backwrards compatibility
-		fileEndHandlingMode: PlayerConfigFileEndHandlingMode.GO_TO_NEXT_ALWAYS, // by default, for backwards compatibility
 	},
 }
 
@@ -382,25 +381,15 @@ export class Player<S, SK> {
 	private onPlaybackEnded = () => {
 		this.innerPlayerState.emitEvent(
 			produce(this.innerPlayerState.lastEvent, (draft) => {
-				const mode = draft.config.fileEndHandlingMode
-				if (
-					mode === PlayerConfigFileEndHandlingMode.GO_TO_NEXT_ALWAYS ||
-					mode === PlayerConfigFileEndHandlingMode.GO_TO_NEXT_IF_PROVIDED
-				) {
-					const nextSourceKey = castDraft(
-						draft.config.sourceProvider.getNextSourceKey(
-							isDraft(draft.config.sourceKey)
-								? current(draft.config.sourceKey)
-								: (draft.config.sourceKey as any) // any cast hack, but this code should be ok. Fix it if it's not
-						)
+				const nextSourceKey = castDraft(
+					draft.config.sourceProvider.getNextSourceKey(
+						isDraft(draft.config.sourceKey)
+							? current(draft.config.sourceKey)
+							: (draft.config.sourceKey as any) // any cast hack, but this code should be ok. Fix it if it's not
 					)
-					if (
-						nextSourceKey !== null ||
-						mode === PlayerConfigFileEndHandlingMode.GO_TO_NEXT_ALWAYS
-					) {
-						draft.config.sourceKey = nextSourceKey
-					}
-				}
+				)
+
+				draft.config.sourceKey = nextSourceKey
 			})
 		)
 	}

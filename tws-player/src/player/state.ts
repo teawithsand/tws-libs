@@ -3,27 +3,6 @@ import { AudioFilter } from "../filter"
 import { PlayerSourceProvider } from "../source"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
-/**
- * Defines what should player do once it reaches end of file.
- */
-export enum PlayerConfigFileEndHandlingMode {
-	/**
-	 * Do nothing. Set ended flag and wait for user to do something.
-	 */
-	NOTHING = 1,
-
-	/**
-	 * Go to next file, provided via provider. Even if provided source key is null, set it to config.
-	 */
-	GO_TO_NEXT_ALWAYS = 2,
-
-	/**
-	 * Go to next file, provided via provider. Do not set null source, if one was provided. Set ended flag
-	 * and wait for user to handle this situaton.
-	 */
-	GO_TO_NEXT_IF_PROVIDED = 3,
-}
-
 export type PlayerConfig<S, SK> = {
 	isPlayingWhenReady: boolean
 
@@ -54,7 +33,7 @@ export type PlayerConfig<S, SK> = {
 	allowExternalSetIsPlayingWhenReady: boolean
 
 	/**
-	 * Ended state when this is set to null.
+	 * Stopped/Ended state is when this is set to null. This is method to detect end of playlist.
 	 */
 	sourceKey: SK | null
 
@@ -77,11 +56,6 @@ export type PlayerConfig<S, SK> = {
 	 * Once seek is done, this value is set to null again.
 	 */
 	seekPosition: number | null
-
-	/**
-	 * What should player do once it reaches the end of file. Enum definition contains more info about actions.
-	 */
-	fileEndHandlingMode: PlayerConfigFileEndHandlingMode
 }
 
 export type PlayerState<S, SK> = {
@@ -93,7 +67,6 @@ export type PlayerState<S, SK> = {
 
 	isPlaying: boolean
 	isSeeking: boolean
-	// isEnded: boolean // now handled by currentSourceIndex
 
 	networkState: PlayerNetworkState
 	readyState: PlayerReadyState
