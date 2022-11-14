@@ -1,4 +1,5 @@
-import { MetadataLoadingResultType } from "./metadata"
+import { isTimeNumber } from "../util"
+import { Metadata, MetadataLoadingResultType } from "./metadata"
 import { MetadataLoadingResult } from "./metadata"
 
 /**
@@ -13,7 +14,7 @@ export class MetadataBag {
 	constructor(
 		results:
 			| (MetadataLoadingResult | null)[]
-			| Map<number, MetadataLoadingResult>,
+			| Map<number, MetadataLoadingResult>
 	) {
 		if (results instanceof Map) {
 			const arr = new Array(results.size)
@@ -27,7 +28,7 @@ export class MetadataBag {
 
 		this.innerResults = [...results]
 
-		this.innerIsDone = this.innerResults.every(r => r !== null)
+		this.innerIsDone = this.innerResults.every((r) => r !== null)
 
 		this.sumDurationToIndex = []
 		let sum: number | null = 0
@@ -67,6 +68,24 @@ export class MetadataBag {
 	getResult = (i: number): MetadataLoadingResult | null => {
 		if (i >= this.innerResults.length) return null
 		return this.innerResults[i]
+	}
+
+	getSuccessOrNull = (i: number): Metadata | null => {
+		const r = this.getResult(i)
+		if (!r || r.type !== MetadataLoadingResultType.OK) return null
+		return r.metadata
+	}
+
+	getDurationOrNull = (i: number): number | null => {
+		const r = this.getResult(i)
+		if (
+			!r ||
+			r.type !== MetadataLoadingResultType.OK ||
+			!isTimeNumber(r.metadata.duration)
+		)
+			return null
+
+		return r.metadata.duration
 	}
 
 	/**
