@@ -3,6 +3,27 @@ import { AudioFilter } from "../filter"
 import { PlayerSourceProvider } from "../source"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
+/**
+ * Defines what should player do once it reaches end of file.
+ */
+export enum PlayerConfigFileEndHandlingMode {
+	/**
+	 * Do nothing. Set ended flag and wait for user to do something.
+	 */
+	NOTHING = 1,
+
+	/**
+	 * Go to next file, provided via provider. Even if provided source key is null, set it to config.
+	 */
+	GO_TO_NEXT_ALWAYS = 2,
+
+	/**
+	 * Go to next file, provided via provider. Do not set null source, if one was provided. Set ended flag
+	 * and wait for user to handle this situaton.
+	 */
+	GO_TO_NEXT_IF_PROVIDED = 3,
+}
+
 export type PlayerConfig<S, SK> = {
 	isPlayingWhenReady: boolean
 
@@ -28,8 +49,7 @@ export type PlayerConfig<S, SK> = {
 	 * parameter on it's own.
 	 *
 	 * Firefox does this when no media session is registered.
-	 * If you use media session set this to false, as media session should catch all headset command and stuff.
-	 * If you use
+	 * If you use media session set this to false, as media session should catch all headset commands and stuff.
 	 */
 	allowExternalSetIsPlayingWhenReady: boolean
 
@@ -46,17 +66,22 @@ export type PlayerConfig<S, SK> = {
 	/**
 	 * If true, swapping source provider even if key didn't change causes player to reload source. New provider
 	 * may have different source at same key. However this behavior sometimes may be not desired.
-	 * 
+	 *
 	 * This flag is capable of changing this. It's user responsibility to ensure that new provider has same
 	 * source at given key.
 	 */
 	forceReloadOnSourceProviderSwap: boolean
 
 	/**
-	 * Defaults to null. Causes player to perform seek to given position in millis. 
+	 * Defaults to null. Causes player to perform seek to given position in millis.
 	 * Once seek is done, this value is set to null again.
 	 */
 	seekPosition: number | null
+
+	/**
+	 * What should player do once it reaches the end of file. Enum definition contains more info about actions.
+	 */
+	fileEndHandlingMode: PlayerConfigFileEndHandlingMode
 }
 
 export type PlayerState<S, SK> = {
