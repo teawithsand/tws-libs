@@ -107,7 +107,8 @@ export class Player<S, SK> {
 	private syncSeek = (newState: PlayerState<S, SK>) => {
 		const canSeek =
 			!this.isLoadingSource &&
-			this.stateBus.lastEvent.config.sourceKey !== null
+			this.stateBus.lastEvent.config.sourceKey !== null &&
+			newState.readyState !== PlayerReadyState.NOTHING
 
 		// Note: if this seeking model does not work
 		// add UUID of seek and check IT rather than seek value
@@ -116,8 +117,7 @@ export class Player<S, SK> {
 			// Seek in last state should be ignored?
 			// I guess so, since it should be quickly set to null once it was
 			// performed(also in lastState)
-			this.lastState.config.seekPosition !==
-				newState.config.seekPosition &&
+			// this.lastState.config.seekPosition !== newState.config.seekPosition &&
 			newState.config.seekPosition !== null
 		) {
 			this.element.currentTime = newState.config.seekPosition
