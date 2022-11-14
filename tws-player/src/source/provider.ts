@@ -2,6 +2,18 @@ import { SourcePlayerError } from "../error"
 import { throwExpression } from "@teawithsand/tws-stl"
 
 /**
+ * Player source provider, which has all sources comming from some array.
+ *
+ * Their order(get prev/next source key) may differ though when ordered is false.
+ * Looping providers(providing prev of fist as last either/or providing first as next of last element) should have
+ * ordered flag set if aside from that they are ordered.
+ */
+export interface CollectionPlayerSourceProvider<S> {
+	readonly ordered: boolean
+	readonly sources: Readonly<S[]>
+}
+
+/**
  * Provides source for specified index.
  * It *should* return same source for same index always.
  *
@@ -13,7 +25,14 @@ export interface PlayerSourceProvider<S, SK> {
 	providerSourceWithKey(key: SK): S
 }
 
-export class EmptyPlayerSourceProvider implements PlayerSourceProvider<any, any> {
+export class EmptyPlayerSourceProvider
+	implements
+		PlayerSourceProvider<any, any>,
+		CollectionPlayerSourceProvider<any>
+{
+	public readonly ordered: boolean = true
+	public readonly sources: readonly any[] = []
+
 	getNextSourceKey = (sk: any) => {
 		return null
 	}
@@ -21,14 +40,18 @@ export class EmptyPlayerSourceProvider implements PlayerSourceProvider<any, any>
 		return null
 	}
 	providerSourceWithKey(key: any) {
-		throw new SourcePlayerError(`Tried to get source with key ${key} from empty player`)
+		throw new SourcePlayerError(
+			`Tried to get source with key ${key} from empty player`
+		)
 	}
-
 }
 
 export class MapPlayerSourceProvider<S>
-	implements PlayerSourceProvider<S, string>
+	implements
+		PlayerSourceProvider<S, string>,
+		CollectionPlayerSourceProvider<S>
 {
+	public readonly ordered = true
 	private readonly map: Map<
 		string,
 		{
@@ -60,7 +83,7 @@ export class MapPlayerSourceProvider<S>
 	}
 
 	getNextSourceKey = (sk: string | null): string | null => {
-		if(this.sources.length === 0) return null
+		if (this.sources.length === 0) return null
 		if (sk === null) {
 			return this.idLoader(this.sources[0]) // just return first element
 		}
@@ -69,7 +92,7 @@ export class MapPlayerSourceProvider<S>
 	}
 
 	getPrevSourceKey = (sk: string | null): string | null => {
-		if(this.sources.length === 0) return null
+		if (this.sources.length === 0) return null
 		if (sk === null) return null
 		return this.map.get(sk)?.prev ?? null
 	}
@@ -85,8 +108,12 @@ export class MapPlayerSourceProvider<S>
 }
 
 export class ArrayPlayerSourceProvider<S>
-	implements PlayerSourceProvider<S, number>
+	implements
+		PlayerSourceProvider<S, number>,
+		CollectionPlayerSourceProvider<S>
 {
+	public readonly ordered: boolean = true
+
 	constructor(public readonly sources: S[]) {}
 
 	getNextSourceKey = (sk: number | null): number | null => {
