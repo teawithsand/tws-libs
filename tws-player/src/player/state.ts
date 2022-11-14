@@ -36,7 +36,7 @@ export type PlayerConfig<S, SK> = {
 	/**
 	 * Ended state when this is set to null.
 	 */
-	currentSourceKey: SK | null
+	sourceKey: SK | null
 
 	/**
 	 * Source provider used to provide sources for this player. Can be swapped.
@@ -47,7 +47,7 @@ export type PlayerConfig<S, SK> = {
 	 * Defaults to null. Causes player to perform seek to given position in millis. 
 	 * Once seek is done, this value is set to null again.
 	 */
-	currentPositionSeek: number | null
+	seekPosition: number | null
 }
 
 export type PlayerState<S, SK> = {

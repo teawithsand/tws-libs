@@ -49,23 +49,23 @@ export class MediaSessionPlayerManager implements Manager {
 						state.type === MediaSessionEventType.NEXT_TRACK
 					) {
 						this.player.mutateConfig((draft) => {
-							draft.currentSourceKey =
+							draft.sourceKey =
 								this.player.sourceProvider.getNextSourceKey(
-									draft.currentSourceKey
+									draft.sourceKey
 								)
 						})
 					} else if (
 						state.type === MediaSessionEventType.PREVIOUS_TRACK
 					) {
 						this.player.mutateConfig((draft) => {
-							draft.currentSourceKey =
+							draft.sourceKey =
 								this.player.sourceProvider.getPrevSourceKey(
-									draft.currentSourceKey
+									draft.sourceKey
 								)
 						})
 					} else if (state.type === MediaSessionEventType.STOP) {
 						this.player.mutateConfig((draft) => {
-							draft.currentSourceKey = null
+							draft.sourceKey = null
 						})
 					}
 

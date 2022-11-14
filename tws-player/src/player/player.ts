@@ -38,9 +38,9 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 		volume: 1,
 		filters: [],
 		allowExternalSetIsPlayingWhenReady: true,
-		currentSourceKey: null,
+		sourceKey: null,
 		sourceProvider: new EmptyPlayerSourceProvider(),
-		currentPositionSeek: null,
+		seekPosition: null,
 	},
 }
 
@@ -105,7 +105,7 @@ export class Player<S, SK> {
 	private syncSeek = (newState: PlayerState<S, SK>) => {
 		const canSeek =
 			!this.isLoadingSource &&
-			this.stateBus.lastEvent.config.currentSourceKey !== null
+			this.stateBus.lastEvent.config.sourceKey !== null
 
 		// Note: if this seeking model does not work
 		// add UUID of seek and check IT rather than seek value
@@ -114,17 +114,17 @@ export class Player<S, SK> {
 			// Seek in last state should be ignored?
 			// I guess so, since it should be quickly set to null once it was
 			// performed(also in lastState)
-			this.lastState.config.currentPositionSeek !==
-				newState.config.currentPositionSeek &&
-			newState.config.currentPositionSeek !== null
+			this.lastState.config.seekPosition !==
+				newState.config.seekPosition &&
+			newState.config.seekPosition !== null
 		) {
-			this.element.currentTime = newState.config.currentPositionSeek
+			this.element.currentTime = newState.config.seekPosition
 
 			// Note: doing this is kind of crappy and in general should not be done
 			// but who really cares
 			// I do not
 			this.mutateConfig((draft) => {
-				draft.currentPositionSeek = null
+				draft.seekPosition = null
 			})
 		}
 	}
@@ -181,7 +181,7 @@ export class Player<S, SK> {
 	private syncIsPlayingWhenReady = (newState: PlayerState<S, SK>) => {
 		if (
 			!this.isLoadingSource &&
-			newState.config.currentSourceKey !== null && // if CSK is null(and we can unset prev source, even though we've tried)
+			newState.config.sourceKey !== null && // if CSK is null(and we can unset prev source, even though we've tried)
 			newState.config.isPlayingWhenReady
 		) {
 			this.element.play().catch(() => {
@@ -201,10 +201,10 @@ export class Player<S, SK> {
 
 	private syncSource = (newState: PlayerState<S, SK>) => {
 		const provider = newState.config.sourceProvider
-		const targetSourceKey = newState.config.currentSourceKey
+		const targetSourceKey = newState.config.sourceKey
 
 		if (
-			targetSourceKey !== this.lastState.config.currentSourceKey ||
+			targetSourceKey !== this.lastState.config.sourceKey ||
 			newState.config.sourceProvider !==
 				this.lastState.config.sourceProvider
 		) {
@@ -357,7 +357,7 @@ export class Player<S, SK> {
 				// Do not report an error of player if we are loading or no source is set
 				if (
 					this.isLoadingSource ||
-					draft.config.currentSourceKey == null
+					draft.config.sourceKey == null
 				) {
 					draft.playerError = null
 				} else {
@@ -381,11 +381,11 @@ export class Player<S, SK> {
 	private onPlaybackEnded = () => {
 		this.innerPlayerState.emitEvent(
 			produce(this.innerPlayerState.lastEvent, (draft) => {
-				draft.config.currentSourceKey = castDraft(
+				draft.config.sourceKey = castDraft(
 					draft.config.sourceProvider.getNextSourceKey(
-						isDraft(draft.config.currentSourceKey)
-							? current(draft.config.currentSourceKey)
-							: (draft.config.currentSourceKey as any) // any cast hack, but this code should be ok. Fix it if it's not
+						isDraft(draft.config.sourceKey)
+							? current(draft.config.sourceKey)
+							: (draft.config.sourceKey as any) // any cast hack, but this code should be ok. Fix it if it's not
 					)
 				)
 			})
