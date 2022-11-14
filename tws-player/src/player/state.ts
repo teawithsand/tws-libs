@@ -36,6 +36,12 @@ export type PlayerConfig<SK> = {
 	 * Ended state when this is set to null.
 	 */
 	currentSourceKey: SK | null
+
+	/**
+	 * Defaults to null. Causes player to perform seek to given position in millis. 
+	 * Once seek is done, this value is set to null again.
+	 */
+	currentPositionSeek: number | null
 }
 
 export type PlayerState<SK> = {

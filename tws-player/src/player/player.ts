@@ -35,6 +35,7 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any> = {
 		filters: [],
 		allowExternalSetIsPlayingWhenReady: false,
 		currentSourceKey: null,
+		currentPositionSeek: null,
 	},
 }
 
@@ -60,6 +61,8 @@ export class Player<S, SK> {
 
 	private lastState: PlayerState<SK> = IDLE_PORTABLE_PLAYER_STATE
 	private readonly loadSourceTaskAtom = new DefaultTaskAtom()
+
+	private cachedLocalSeek: number | null = null
 
 	get sourceProvider(): PlayerSourceProvider<S, SK> {
 		return this.innerSourceProvider
@@ -95,6 +98,33 @@ export class Player<S, SK> {
 		return this.innerPlayerState.lastEvent
 	}
 
+	private syncSeek = (newState: PlayerState<SK>) => {
+		const canSeek =
+			!this.isLoadingSource &&
+			this.stateBus.lastEvent.config.currentSourceKey !== null
+
+		// Note: if this seeking model does not work
+		// add UUID of seek and check IT rather than seek value
+		if (
+			canSeek &&
+			// Seek in last state should be ignored?
+			// I guess so, since it should be quickly set to null once it was 
+			// performed(also in lastState)
+			this.lastState.config.currentPositionSeek !==
+				newState.config.currentPositionSeek &&
+			newState.config.currentPositionSeek !== null
+		) {
+			this.element.currentTime = newState.config.currentPositionSeek
+
+			// Note: doing this is kind of crappy and in general should not be done
+			// but who really cares
+			// I do not
+			this.mutateConfig((draft) => {
+				draft.currentPositionSeek = null
+			})
+		}
+	}
+
 	/**
 	 * Overrides source provided with different one, but same data type.
 	 * For now recasting player + config is not supported.
@@ -114,6 +144,11 @@ export class Player<S, SK> {
 		this.syncIsPlayingWhenReady(newState)
 		this.syncSource(newState)
 		this.syncPlaybackOptions(newState)
+
+		// This has to be below source loading code
+		// since if both source and seek are set in single config
+		// then we want to seek on the new file rather than the old file
+		this.syncSeek(newState)
 
 		this.lastState = newState
 	}
