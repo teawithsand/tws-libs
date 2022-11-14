@@ -41,6 +41,8 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 		sourceKey: null,
 		sourceProvider: new EmptyPlayerSourceProvider(),
 		seekPosition: null,
+
+		forceReloadOnSourceProviderSwap: true, // by default true for backwrards compatibility
 	},
 }
 
@@ -205,8 +207,9 @@ export class Player<S, SK> {
 
 		if (
 			targetSourceKey !== this.lastState.config.sourceKey ||
-			newState.config.sourceProvider !==
-				this.lastState.config.sourceProvider
+			(newState.config.forceReloadOnSourceProviderSwap &&
+				newState.config.sourceProvider !==
+					this.lastState.config.sourceProvider)
 		) {
 			const src =
 				targetSourceKey !== null
@@ -355,10 +358,7 @@ export class Player<S, SK> {
 				draft.readyState = playerState.readyState
 
 				// Do not report an error of player if we are loading or no source is set
-				if (
-					this.isLoadingSource ||
-					draft.config.sourceKey == null
-				) {
+				if (this.isLoadingSource || draft.config.sourceKey == null) {
 					draft.playerError = null
 				} else {
 					draft.playerError = playerState.error

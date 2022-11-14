@@ -44,6 +44,15 @@ export type PlayerConfig<S, SK> = {
 	sourceProvider: PlayerSourceProvider<S, SK>
 
 	/**
+	 * If true, swapping source provider even if key didn't change causes player to reload source. New provider
+	 * may have different source at same key. However this behavior sometimes may be not desired.
+	 * 
+	 * This flag is capable of changing this. It's user responsibility to ensure that new provider has same
+	 * source at given key.
+	 */
+	forceReloadOnSourceProviderSwap: boolean
+
+	/**
 	 * Defaults to null. Causes player to perform seek to given position in millis. 
 	 * Once seek is done, this value is set to null again.
 	 */
