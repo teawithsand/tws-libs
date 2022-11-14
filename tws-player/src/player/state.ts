@@ -1,8 +1,9 @@
 import { MediaPlayerError, SourcePlayerError } from "../error"
 import { AudioFilter } from "../filter"
+import { PlayerSourceProvider } from "../source"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
-export type PlayerConfig<SK> = {
+export type PlayerConfig<S, SK> = {
 	isPlayingWhenReady: boolean
 
 	speed: number
@@ -38,13 +39,18 @@ export type PlayerConfig<SK> = {
 	currentSourceKey: SK | null
 
 	/**
+	 * Source provider used to provide sources for this player. Can be swapped.
+	 */
+	sourceProvider: PlayerSourceProvider<S, SK>
+
+	/**
 	 * Defaults to null. Causes player to perform seek to given position in millis. 
 	 * Once seek is done, this value is set to null again.
 	 */
 	currentPositionSeek: number | null
 }
 
-export type PlayerState<SK> = {
+export type PlayerState<S, SK> = {
 	playerError: MediaPlayerError | null
 	sourceError: SourcePlayerError | null
 
@@ -58,5 +64,5 @@ export type PlayerState<SK> = {
 	networkState: PlayerNetworkState
 	readyState: PlayerReadyState
 
-	config: PlayerConfig<SK>
+	config: PlayerConfig<S, SK>
 }
