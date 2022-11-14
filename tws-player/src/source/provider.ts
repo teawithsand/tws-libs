@@ -47,6 +47,7 @@ export class MapPlayerSourceProvider<S>
 	}
 
 	getNextSourceKey = (sk: string | null): string | null => {
+		if(this.sources.length === 0) return null
 		if (sk === null) {
 			return this.idLoader(this.sources[0]) // just return first element
 		}
@@ -55,6 +56,7 @@ export class MapPlayerSourceProvider<S>
 	}
 
 	getPrevSourceKey = (sk: string | null): string | null => {
+		if(this.sources.length === 0) return null
 		if (sk === null) return null
 		return this.map.get(sk)?.prev ?? null
 	}
