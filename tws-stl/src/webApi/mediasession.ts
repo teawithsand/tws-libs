@@ -1,7 +1,4 @@
 import { DefaultEventBus, Subscribable } from "../eventBus"
-import { LOG } from "../log"
-
-const LOG_TAG = "@teawithsand/tws-stl/mediaSession"
 
 export type MediaSessionMetadata = {
 	title: string
@@ -156,8 +153,7 @@ export class MediaSessionApiHelper {
 	private initialized = false
 	private ensureInitialized = () => {
 		if (!this.initialized) {
-			if (this.checkSupport())
-				this.setSupportedActions(allMediaSessionActions)
+			if (this.checkSupport()) this.setSupportedActions([])
 			this.initialized = true
 		}
 	}
@@ -261,6 +257,11 @@ export class MediaSessionApiHelper {
 		],
 	])
 
+	/**
+	 * Sets actions that will be handled on event bus.
+	 *
+	 * Automatically removes actions, which are not supported by browser.
+	 */
 	setSupportedActions = (
 		actions:
 			| MediaSessionActionType[]
@@ -278,9 +279,19 @@ export class MediaSessionApiHelper {
 			(v) => !this.supportedActions.has(v)
 		)
 
+		const unsupportedActions = new Set<MediaSessionActionType>()
+
 		if (this.checkSupport()) {
 			for (const a of removedActions) {
-				navigator.mediaSession.setActionHandler(a, null)
+				try {
+					navigator.mediaSession.setActionHandler(a, null)
+				} catch (e) {
+					// HACK(teawithsand): in chrome skipad may not be set, which causes this to throw
+					// so just ignore it for now
+					// see https://github.com/w3c/mediasession/issues/228 for more info
+
+					unsupportedActions.add(a)
+				}
 			}
 
 			for (const a of addedActions) {
@@ -294,15 +305,14 @@ export class MediaSessionApiHelper {
 				} catch (e) {
 					// HACK(teawithsand): in chrome skipad may not be set, which causes this to throw
 					// so just ignore it for now
+					// see https://github.com/w3c/mediasession/issues/228 for more info
 
-					LOG.info(
-						LOG_TAG,
-						`Setting error handler for ${a} had thrown`,
-						e
-					)
+					unsupportedActions.add(a)
 				}
 			}
 		}
+
+		unsupportedActions.forEach((a) => castedActions.delete(a))
 
 		this.supportedActions = castedActions
 	}
@@ -363,7 +373,7 @@ export class MediaSessionApiHelper {
 				// Even though MDN says otherwise
 				// Firefox does not like duration which is +Infinity
 				// Tested at ff between 102 and 104
-				// I forgot to note the version down ¯\_(ツ)_/¯
+				// I forgot to write the exact version down ¯\_(ツ)_/¯
 				if (!isFinite(duration)) {
 					duration = 24 * 60 * 60 * 30
 				}
