@@ -62,8 +62,6 @@ export class Player<S, SK> {
 	private lastState: PlayerState<SK> = IDLE_PORTABLE_PLAYER_STATE
 	private readonly loadSourceTaskAtom = new DefaultTaskAtom()
 
-	private cachedLocalSeek: number | null = null
-
 	get sourceProvider(): PlayerSourceProvider<S, SK> {
 		return this.innerSourceProvider
 	}
