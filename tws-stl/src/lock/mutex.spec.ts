@@ -7,7 +7,7 @@ describe("SimpleLock", () => {
 		const lock = new Lock(new MutexLockAdapter())
 
 		let isTaskRunning = false
-		const promises = []
+		const promises: Promise<any>[] = []
 		for (let i = 0; i < 30; i++) {
 			const t = async () => {
 				const unlock = await lock.lock()

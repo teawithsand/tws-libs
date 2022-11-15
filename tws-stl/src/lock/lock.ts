@@ -1,8 +1,25 @@
+import { latePromise } from "../lang"
+
 export type Unlock = () => void
 
 export const NoopLockAdapter: LockAdapter = {
 	lock: async () => () => {
 		// noop
+	},
+	lockAbortable: (): AbortableLockRequest => {
+		let aborted = false
+		return {
+			promise: (async () => () => {
+				// noop
+			})(),
+			abort: () => {
+				aborted = true
+			},
+			get aborted() {
+				return aborted
+			},
+			isAborted: () => aborted,
+		}
 	},
 }
 
@@ -11,8 +28,22 @@ export const NoopRWLockAdapter: RWLockAdapter = {
 	write: NoopLockAdapter,
 }
 
+export type AbortableLockRequest = {
+	promise: Promise<Unlock | null>
+	abort: () => void
+	readonly aborted: boolean
+	isAborted: () => boolean
+}
+
+export type TypedAbortableLockRequest<T> = [
+	Promise<T>,
+	() => void,
+	() => boolean
+]
+
 export interface LockAdapter {
 	lock(): Promise<Unlock>
+	lockAbortable(): AbortableLockRequest
 }
 
 export interface RWLockAdapter {
@@ -23,7 +54,7 @@ export interface RWLockAdapter {
 export class RWLock {
 	public readonly readLock: Lock
 	public readonly writeLock: Lock
-	
+
 	constructor(public readonly adapter: RWLockAdapter) {
 		this.readLock = new Lock(adapter.read)
 		this.writeLock = new Lock(adapter.write)
@@ -70,6 +101,7 @@ export class Lock {
 	constructor(public readonly adapter: LockAdapter) {}
 
 	lock = () => this.adapter.lock()
+	lockAbortable = () => this.adapter.lockAbortable()
 
 	withLock = async <T>(cb: () => Promise<T>): Promise<T> => {
 		const unlock = await this.lock()
@@ -78,5 +110,32 @@ export class Lock {
 		} finally {
 			unlock()
 		}
+	}
+
+	withLockAbortable = <T>(
+		cb: (locked: boolean) => Promise<T>
+	): TypedAbortableLockRequest<T> => {
+		const req = this.lockAbortable()
+
+		return [
+			(async () => {
+				const unlocker = await req.promise
+				if (unlocker) {
+					try {
+						return await cb(true)
+					} finally {
+						unlocker()
+					}
+				} else {
+					return await cb(false)
+				}
+			})(),
+			() => {
+				req.abort()
+			},
+			() => {
+				return req.aborted
+			},
+		]
 	}
 }

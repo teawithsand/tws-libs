@@ -1,5 +1,5 @@
 import { latePromise } from "../../lang"
-import { LockAdapter, RWLockAdapter } from "../lock"
+import { AbortableLockRequest, LockAdapter, RWLockAdapter } from "../lock"
 import { KeyedLockOptions, KeyedLocks } from "./keyedLocks"
 import { WebLockEx } from "./webLock"
 
@@ -24,6 +24,52 @@ export class WebKeyedLocks extends KeyedLocks {
 				await locked
 
 				return () => resolveDone()
+			},
+			lockAbortable: (): AbortableLockRequest => {
+				let aborted = false
+
+				const abort = new AbortController()
+
+				const lockCancellable = async () => {
+					const [locked, resolveLocked] = latePromise<boolean>()
+					const [done, resolveDone] = latePromise<void>()
+
+					wl.claim({
+						exclusive: options.mode === "exclusive",
+						signal: abort.signal,
+						opWhenNotAcquired: async () => {
+							resolveLocked(false)
+						},
+						opWhenAcquired: async () => {
+							resolveLocked(true)
+
+							await done
+						},
+					})
+
+					const isLocked = await locked
+					if (aborted && isLocked) {
+						// we aborted, but locked
+						// but abort was first, so just release lock
+						resolveDone()
+					} else if (isLocked) {
+						return () => resolveDone()
+					}
+
+					return null
+				}
+
+				return {
+					promise: lockCancellable(),
+					abort: () => {
+						aborted = true
+						abort.abort()
+					},
+					get aborted() {
+						return aborted
+					},
+					isAborted: () => aborted,
+				}
 			},
 		}
 	}
