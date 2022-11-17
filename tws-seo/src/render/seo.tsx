@@ -144,7 +144,9 @@ const renderImage = (image: OGImage): Meta[] => {
  * Renders SEO data to CONTENTS of head element.
  * It DOES NOT RENDER head element itself.
  */
-export const SEORender = (seo: SEO) => {
+export const SEORender = (props: { seo: SEO }) => {
+	const seo = props.seo
+	
 	const metas: Meta[] = []
 	const links: Link[] = []
 
@@ -281,7 +283,7 @@ export const SEORender = (seo: SEO) => {
 				name: "twitter:creator",
 				content: twitter.creator,
 			})
-			
+
 		if (twitter.site)
 			metas.push({
 				name: "twitter:site",
