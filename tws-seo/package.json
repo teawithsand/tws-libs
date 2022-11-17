@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-seo",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Some utils for creating SEO object and website <head> section",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

@@ -78,7 +78,7 @@ export type SEO = {
 	 * In gatsby use gatsby-ssr or in future tws-gatsby-plugin.
 	 * In react-helmet use parameter on <Helmet>.
 	 */
-	langauge?: string | undefined
+	language?: string | undefined
 	/**
 	 * See https://developers.google.com/search/docs/specialty/international/localized-versions for more info.
 	 */

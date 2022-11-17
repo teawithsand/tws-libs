@@ -6,7 +6,7 @@ export type Meta = {
 }
 
 /**
- * Simplified way to redner multiple meta headers.
+ * Simplified way to render multiple meta headers.
  */
 export const MetaRenderer = (props: { metas: Meta[] }) => {
 	return (
@@ -26,7 +26,7 @@ export type Link = {
 }
 
 /**
- * Simplified way to redner multiple meta headers.
+ * Simplified way to render multiple meta headers.
  */
 export const LinkRenderer = (props: { links: Link[] }) => {
 	return (
