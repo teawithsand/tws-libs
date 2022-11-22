@@ -5,9 +5,7 @@ import {
 	SubscriptionCanceler,
 } from "./subscribable"
 
-export interface StickyEventBus<T>
-	extends EventBus<T>,
-		StickySubscribable<T> {
+export interface StickyEventBus<T> extends EventBus<T>, StickySubscribable<T> {
 	readonly lastEvent: T
 }
 
@@ -29,11 +27,12 @@ export class DefaultStickyEventBus<T> implements StickyEventBus<T> {
 
 	addSubscriber = (
 		subscriber: Subscriber<T>,
-		emitLastEventToNewSubscriber = true,
+		emitLastEventToNewSubscriber = true
 	): SubscriptionCanceler => {
+		const canceler = this.innerBus.addSubscriber(subscriber)
 		if (emitLastEventToNewSubscriber) {
-			subscriber(this.lastEvent)
+			subscriber(this.lastEvent, canceler)
 		}
-		return this.innerBus.addSubscriber(subscriber)
+		return canceler
 	}
 }

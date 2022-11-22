@@ -12,8 +12,8 @@ export class MappingSubscribable<T, E> implements Subscribable<E> {
 	) {}
 
 	addSubscriber = (subscriber: Subscriber<E>): SubscriptionCanceler =>
-		this.innerSubscribable.addSubscriber((v) => {
-			subscriber(this.converter(v))
+		this.innerSubscribable.addSubscriber((v, c) => {
+			subscriber(this.converter(v), c)
 		})
 }
 
@@ -28,7 +28,7 @@ export class MappingStickySubscribable<T, E> implements StickySubscribable<E> {
 	}
 
 	addSubscriber = (subscriber: Subscriber<E>): SubscriptionCanceler =>
-		this.innerSubscribable.addSubscriber((v) => {
-			subscriber(this.converter(v))
+		this.innerSubscribable.addSubscriber((v, c) => {
+			subscriber(this.converter(v), c)
 		})
 }

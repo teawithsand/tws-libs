@@ -11,7 +11,11 @@ export class DefaultEventBus<T> implements EventBus<T> {
 	private subscribers: Subscriber<T>[] = []
 
 	emitEvent = (event: T) => {
-		this.subscribers.forEach(s => s(event))
+		this.subscribers.forEach((s) =>
+			s(event, () => {
+				this.removeSubscriber(s)
+			})
+		)
 	}
 
 	addSubscriber = (subscriber: Subscriber<T>): SubscriptionCanceler => {
@@ -21,7 +25,7 @@ export class DefaultEventBus<T> implements EventBus<T> {
 	}
 
 	private removeSubscriber = (subscriber: Subscriber<T>) => {
-		const i = this.subscribers.findIndex(e => e === subscriber)
+		const i = this.subscribers.findIndex((e) => e === subscriber)
 		if (i < 0) return // warn maybe?
 		this.subscribers.splice(i, 1)
 	}

@@ -1,4 +1,4 @@
-export type Subscriber<S> = (state: S) => void
+export type Subscriber<S> = (state: S, canceler: SubscriptionCanceler) => void
 export type DeltaSubscriber<S> = (previousState: S, newState: S) => void
 export type Extractor<S, E> = (state: S) => E
 export type SubscriptionCanceler = () => void
