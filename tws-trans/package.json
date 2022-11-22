@@ -20,7 +20,7 @@
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
-		"@teawithsand/tws-stl": "^0.0.6",
+		"@teawithsand/tws-stl": "^0.0.7",
 		"@teawithsand/tws-stl-react": "^0.0.2"
 	},
 	"peerDependencies": {

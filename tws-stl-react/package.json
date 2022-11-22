@@ -21,7 +21,7 @@
 		"@types/react": "^18.0.21"
 	},
 	"peerDependencies": {
-		"@teawithsand/tws-stl": "^0.0.6",
+		"@teawithsand/tws-stl": "^0.0.7",
 		"react": "^18.2.0"
 	},
 	"files": [
