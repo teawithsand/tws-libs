@@ -5,3 +5,4 @@ npm-error.log
 .cache
 /*/public
 gatsby-types.d.ts
+/__old_to_fix
