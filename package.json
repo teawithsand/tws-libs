@@ -6,7 +6,8 @@
     "tws-ui",
     "tws-player",
     "tws-seo",
-    "tws-gatsby-plugin"
+    "tws-gatsby-plugin",
+    "tws-gallery"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"

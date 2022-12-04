@@ -1,0 +1,33 @@
+{
+	"name": "@teawithsand/tws-gallery",
+	"version": "0.0.1",
+	"description": "Another implementation of web gallery",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest"
+	},
+	"keywords": [
+		"teawithsand",
+		"react",
+		"gallery"
+	],
+	"author": "teawithsand",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/react": "^18.0.21",
+		"@types/styled-components": "^5.1.26"
+	},
+	"dependencies": {
+		"@teawithsand/tws-stl": "^0.0.8",
+		"@teawithsand/tws-stl-react": "^0.0.2"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
+	},
+	"files": [
+		"dist/**"
+	]
+}
