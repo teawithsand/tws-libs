@@ -21,7 +21,7 @@
 		"@types/styled-components": "^5.1.26"
 	},
 	"dependencies": {
-		"@teawithsand/tws-stl": "^0.0.7",
+		"@teawithsand/tws-stl": "^0.0.8",
 		"@teawithsand/tws-stl-react": "^0.0.2",
 		"@types/react-dnd": "^3.0.2",
 		"react-dnd": "^16.0.1"

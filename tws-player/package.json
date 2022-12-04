@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@teawithsand/jsmediatags": "^3.9.1008",
-		"@teawithsand/tws-stl": "^0.0.7",
+		"@teawithsand/tws-stl": "^0.0.8",
 		"immer": "^9.0.15"
 	},
 	"files": [
