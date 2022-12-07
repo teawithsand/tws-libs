@@ -1,8 +1,0 @@
-node_modules/
-.cache/
-public
-src/gatsby-types.d.ts
-
-/pk2-orig-res
-/pk2-orig
-/res
