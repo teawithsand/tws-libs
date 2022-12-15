@@ -18,14 +18,20 @@
 	"devDependencies": {
 		"@types/jest": "^29.0.3",
 		"@types/react": "^18.0.21",
+		"@types/react-transition-group": "^4.4.5",
 		"@types/styled-components": "^5.1.26"
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.9",
-		"@teawithsand/tws-stl-react": "^0.0.2"
+		"@use-gesture/react": "^10.2.23",
+		"react-transition-group": "^4.4.5",
+		"styled-components": "^5.3.6"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
+	},
+	"resolutions": {
+		"styled-components": "^5"
 	},
 	"files": [
 		"dist/**"

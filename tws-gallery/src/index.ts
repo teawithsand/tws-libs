@@ -1,2 +1,5 @@
-export * from "./Gallery"
-export * from "./AutonomousGallery"
+export * from "./defines"
+export * from "./controls"
+export * from "./context"
+export * from "./gallery"
+export * from "./image"
