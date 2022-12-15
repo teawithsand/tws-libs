@@ -1,6 +1,6 @@
 import { FullscreenApiHelper, FullscreenEventType } from "@teawithsand/tws-stl"
 import React, { CSSProperties, useEffect, useMemo, useState } from "react"
-import styled from "styled-components"
+import styled, { css } from "styled-components"
 import { GalleryBottomBar, GalleryMiddleBar, GalleryTopBar } from "./bar"
 import {
 	GalleryControlsContext,
@@ -11,11 +11,25 @@ import {
 import { GalleryControls } from "./controls"
 import { GalleryDisplayType, GalleryEntry, GalleryState } from "./defines"
 
-const Container = styled.div`
+const Container = styled.div<{
+	$mode: GalleryDisplayType
+}>`
+	overflow: hidden;
+	
 	display: grid;
 	grid-auto-flow: row;
 	gap: 0.3em;
-	grid-template-rows: min-content minmax(0, 90%) max(10vh, 10%);
+	${({ $mode }) =>
+		$mode === GalleryDisplayType.MAIN
+			? css`
+					grid-template-rows: min-content minmax(0, 90%) max(
+							10vh,
+							10%
+						);
+			  `
+			: css`
+					grid-template-rows: 100%;
+			  `}
 
 	background-color: black;
 
@@ -23,6 +37,39 @@ const Container = styled.div`
 	border-radius: 5px;
 
 	box-sizing: border-box;
+
+	& * {
+		::-webkit-scrollbar {
+			height: 6px;
+			width: 6px;
+			background: black;
+
+			padding: 0;
+			margin: 0;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: white;
+			-webkit-border-radius: 1ex;
+			-webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+
+			padding: 0;
+			margin: 0;
+		}
+
+		::-webkit-scrollbar-corner {
+			background: black;
+
+			padding: 0;
+			margin: 0;
+		}
+
+		@media (pointer: none) {
+			::-webkit-scrollbar {
+				display: none;
+			}
+		}
+	}
 `
 
 export const AutonomousGallery = (props: {
@@ -104,10 +151,12 @@ const InnerGallery = (props: { className?: string; style?: CSSProperties }) => {
 	const [element, setElement] = useState<HTMLDivElement | null>(null)
 
 	const controls = useGalleryControls()
+
 	useEffect(() => {
 		FullscreenApiHelper.instance.bus.addSubscriber((s) => {
 			if (s.type === FullscreenEventType.DISABLED) {
 				controls.setFullscreen(false)
+				controls.setMode(GalleryDisplayType.MAIN)
 			}
 		})
 	}, [])
@@ -125,6 +174,8 @@ const InnerGallery = (props: { className?: string; style?: CSSProperties }) => {
 			}
 		}
 	}, [isFsc])
+
+	const state = useGalleryState()
 
 	return (
 		<Container
@@ -145,11 +196,22 @@ const InnerGallery = (props: { className?: string; style?: CSSProperties }) => {
 					  }
 					: {}),
 			}}
+			$mode={state.mode}
 			className={props.className}
 		>
-			<GalleryTopBar />
+			<GalleryTopBar
+				style={{
+					display:
+						state.mode === GalleryDisplayType.ZOOM ? "none" : "",
+				}}
+			/>
 			<GalleryMiddleBar />
-			<GalleryBottomBar />
+			<GalleryBottomBar
+				style={{
+					display:
+						state.mode === GalleryDisplayType.ZOOM ? "none" : "",
+				}}
+			/>
 		</Container>
 	)
 }

@@ -11,25 +11,25 @@ import { useGalleryControls, useGalleryState } from "../context"
 import { GalleryEntryDisplay, GalleryEntryDisplayType } from "../display"
 
 const InnerContainer = styled.div`
-	display: grid;
-	grid-auto-flow: column;
-	grid-auto-columns: 33%;
-
-	gap: 0.3em;
-	margin-left: 0.3em;
-	margin-right: 0.3em;
+	display: flex;
+	gap: 2.5%;
+	flex-flow: row nowrap;
 
 	overflow: hidden;
 	overflow-x: visible;
 
-	width: 100%;
-	height: 100%;
+	padding-left: 2.5%;
+	padding-right: 2.5%;
+	padding-bottom: .3em;
+	padding-top: .3em;
 
-	align-items: justify;
+	width: 100%;
+	height: calc(100% - .3em - .3em);
 `
 
 const OuterContainer = styled.div`
 	overflow: hidden;
+
 	width: 100%;
 	height: 100%;
 
@@ -39,9 +39,13 @@ const OuterContainer = styled.div`
 const ItemContainer = styled.div<{
 	$isActive: boolean
 }>`
-	width: 80%; // this width is percentage
 	margin-left: auto;
 	margin-right: auto;
+
+	flex: 0 0 20%;
+	@media (max-width: 500px) {
+		flex: 0 0 33%;
+	}
 
 	overflow: hidden;
 	border: 1px solid white;
@@ -120,8 +124,8 @@ export const GalleryBottomBar = (props: {
 	}, [scrollChild])
 
 	return (
-		<OuterContainer ref={setOuterContainer}>
-			<InnerContainer {...props}>
+		<OuterContainer ref={setOuterContainer} {...props}>
+			<InnerContainer>
 				{state.entries.map((v, i) => (
 					<ItemContainer
 						key={i}

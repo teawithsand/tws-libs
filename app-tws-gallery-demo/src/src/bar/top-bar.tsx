@@ -1,7 +1,6 @@
-import { CSSProperties } from "react"
+import React, { CSSProperties } from "react"
 import styled, { css } from "styled-components"
 import { useGalleryControls, useGalleryState } from "../context"
-import React from "react"
 
 const Container = styled.div`
 	display: grid;
@@ -15,6 +14,8 @@ const centerCss = css`
 	justify-content: center;
 	align-self: center;
 	text-align: center;
+
+	overflow: hidden;
 `
 
 const Left = styled.div`
@@ -58,7 +59,6 @@ export const GalleryTopBar = (props: {
 				) : null}
 			</Left>
 			<Center>
-				Name: 
 				{state.entries.length
 					? state.entries[state.currentEntryIndex]?.title || null
 					: null}

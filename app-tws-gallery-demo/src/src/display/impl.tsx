@@ -224,6 +224,22 @@ export const DefaultGalleryDisplay = (props: {
 		}
 	}, [outerContainer, isGalleryVisible, controls, state.mode])
 
+	useEffect(() => {
+		if (!isGalleryVisible) return
+		const l = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				if (state.mode === GalleryDisplayType.ZOOM) {
+					controls.setMode(GalleryDisplayType.MAIN)
+				}
+			}
+		}
+
+		document.addEventListener("keydown", l)
+		return () => {
+			document.removeEventListener("keydown", l)
+		}
+	}, [state.mode, isGalleryVisible])
+
 	return (
 		<Container {...bind()} {...props} ref={setOuterContainer}>
 			{state.entries.map((v, i) => (

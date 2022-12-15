@@ -19,7 +19,7 @@ const entries: GalleryEntry[] = [
 			<GatsbyImageWrapper>
 				<StaticImage
 					alt=""
-					src="http://placekitten.com/2000/100"
+					src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Wikipe-tan_in_Different_Anime_Styles.png/1024px-Wikipe-tan_in_Different_Anime_Styles.png"
 					layout="fixed"
 				/>
 			</GatsbyImageWrapper>
