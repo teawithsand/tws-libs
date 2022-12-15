@@ -46,10 +46,7 @@ const mainCss = css`
 `
 
 const zoomCss = css`
-	width: fit-content;
-	height: fit-content;
-	max-width: none;
-	max-height: none;
+	display: contents; // now that's a hack, but hey, it works
 
 	& > * {
 		max-width: none;

@@ -68,14 +68,7 @@ type InnerItemContainerProps = {
 	type: GalleryEntryDisplayType
 }
 
-const InnerItemContainer = styled.div.attrs<InnerItemContainerProps>(
-	(props) => ({
-		style: {
-			width: props.type === GalleryEntryDisplayType.ZOOM ? "" : "100%",
-			height: props.type === GalleryEntryDisplayType.ZOOM ? "" : "100%",
-		},
-	})
-)<InnerItemContainerProps>`
+const InnerItemContainer = styled.div<InnerItemContainerProps>`
 	display: grid;
 	align-items: center;
 	justify-items: center;
@@ -84,6 +77,11 @@ const InnerItemContainer = styled.div.attrs<InnerItemContainerProps>(
 
 	grid-template-rows: minmax(0, auto);
 	grid-template-columns: minmax(0, auto);
+
+	// Otherwise margin auto does not always center images, if they are not tall enough in zoom mode
+	width: 100%;
+	height: 100%;
+	overflow: visible;
 `
 
 const Item = (props: {

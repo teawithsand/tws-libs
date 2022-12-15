@@ -19,7 +19,7 @@ const entries: GalleryEntry[] = [
 			<GatsbyImageWrapper>
 				<StaticImage
 					alt=""
-					src="http://placekitten.com/2000/2000"
+					src="http://placekitten.com/2000/100"
 					layout="fixed"
 				/>
 			</GatsbyImageWrapper>
@@ -66,7 +66,7 @@ export function Demo() {
 			<div>
 				<AutonomousGallery
 					style={{
-						height: "50vh",
+						height: "70vh",
 						width: "80vw",
 						marginRight: "auto",
 						marginLeft: "auto",
