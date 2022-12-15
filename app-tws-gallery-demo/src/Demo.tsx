@@ -1,10 +1,7 @@
+import { AutonomousGallery, GalleryEntry, GatsbyImageWrapper, RawImageDisplay } from "@teawithsand/tws-gallery"
 import { StaticImage } from "gatsby-plugin-image"
 import React from "react"
 import { createGlobalStyle } from "styled-components"
-import { GalleryEntry } from "./src"
-import { AutonomousGallery } from "./src/gallery"
-import { RawImageDisplay } from "./src/image"
-import { GatsbyImageWrapper } from "./src/image/gatsby"
 
 const BodyStyle = createGlobalStyle`
 	html, body { 
