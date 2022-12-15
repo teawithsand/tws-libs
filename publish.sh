@@ -9,4 +9,4 @@ publish "tws-player";
 publish "tws-trans";
 publish "tws-ui";
 publish "tws-seo";
-# publish "tws-gallery";
+publish "tws-gallery";
