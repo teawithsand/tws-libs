@@ -3,6 +3,15 @@
  */
 export type Comparator<T> = (a: T, b: T) => number
 
+/**
+ * Returns sorted copy of given array.
+ */
+export const sorted = <T>(arr: T[], cmp?: Comparator<T>): T[] => {
+	const cpy = [...arr]
+	cpy.sort(cmp)
+	return cpy
+}
+
 export const inverseSortResult = (r: number): number => -r
 
 export const inverseComparator =
