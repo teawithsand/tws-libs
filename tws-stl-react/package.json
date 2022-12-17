@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-stl-react",
-	"version": "0.0.2",
+	"version": "0.0.4",
 	"description": "Bunch of misc utils that I've used at least in three projects, which use react",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,13 +21,13 @@
 		"@types/react": "^18.0.21"
 	},
 	"peerDependencies": {
-		"@teawithsand/tws-stl": "^0.0.9",
 		"react": "^18.2.0"
 	},
 	"files": [
 		"dist/**"
 	],
 	"dependencies": {
+		"@teawithsand/tws-stl": "^0.0.9",
 		"react-error-boundary": "^3.1.4"
 	}
 }
