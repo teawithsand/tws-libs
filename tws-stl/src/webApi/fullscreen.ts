@@ -41,7 +41,7 @@ export class FullscreenApiHelper {
 		return this.innerInstance
 	}
 
-	get isSupported() {
+	get isSupported(): boolean {
 		return (
 			typeof document !== "undefined" &&
 			(typeof document.exitFullscreen !== "undefined" ||
@@ -49,8 +49,8 @@ export class FullscreenApiHelper {
 		)
 	}
 
-	get isFullscreen() {
-		return this.isSupported && document.fullscreenElement
+	get isFullscreen(): boolean {
+		return this.isSupported && !!document.fullscreenElement
 	}
 
 	exitFullscreen = async () => {
