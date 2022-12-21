@@ -150,7 +150,7 @@ const GatsbyTransformerRemarkPlugins = [
 /**
  * Adds gatsby transformer remark with some plugins and ones added by user.
  */
-const makeGatsbyTransformerRemarkPlugins = userPlugins => [
+const makeGatsbyTransformerRemarkPlugins = (userPlugins) => [
 	{
 		resolve: `gatsby-transformer-remark`,
 		options: {
@@ -184,8 +184,8 @@ const makeGatsbyTransformerRemarkPlugins = userPlugins => [
 ]
 
 const mergePlugins = (...configs) => {
-	configs = configs.map(c =>
-		c.map(entry => {
+	configs = configs.map((c) =>
+		c.map((entry) => {
 			if (typeof entry === "string") {
 				return {
 					resolve: entry,
@@ -193,7 +193,7 @@ const mergePlugins = (...configs) => {
 			} else {
 				return entry
 			}
-		}),
+		})
 	)
 	let theConfig = [...configs[0]]
 
@@ -202,7 +202,7 @@ const mergePlugins = (...configs) => {
 		for (const plugin of config) {
 			try {
 				const currentPluginDefinitionIndex = theConfig.findIndex(
-					currentPlugin => currentPlugin.resolve === plugin.resolve,
+					(currentPlugin) => currentPlugin.resolve === plugin.resolve
 				)
 
 				if (
@@ -225,11 +225,21 @@ const mergePlugins = (...configs) => {
 const customizeDefaultPlugins = (...configs) =>
 	mergePlugins(BasicSitePluginsStart, ...configs, BasicSitePluginsEnd)
 
+const loadConfig = () => {
+	return {
+		siteUrl: process.env.DEPLOYER_SITE_URL,
+		projectName: process.env.DEPLOYER_PROJECT_NAME,
+	}
+}
+
 const makeConfig = (siteMetadata, plugins) => ({
 	flags: {
 		DEV_SSR: !!process.env.GATSBY_DEV_SSR,
 	},
-	siteMetadata: siteMetadata,
+	siteMetadata: {
+		...loadConfig(),
+		...siteMetadata,
+	},
 	// More easily incorporate content into your pages through automatic TypeScript type generation and better GraphQL IntelliSense.
 	// If you use VSCode you can also use the GraphQL plugin
 	// Learn more at: https://gatsby.dev/graphql-typegen
@@ -238,7 +248,7 @@ const makeConfig = (siteMetadata, plugins) => ({
 	trailingSlash: "never",
 })
 
-const makeSelfPlugin = options => {
+const makeSelfPlugin = (options) => {
 	return {
 		resolve: "@teawithsand/tws-gatsby-plugin",
 		options,
@@ -258,5 +268,7 @@ module.exports = {
 	customizeDefaultPlugins,
 	mergePlugins,
 	makeLayoutPlugin,
+
 	makeConfig,
+	loadConfig,
 }
