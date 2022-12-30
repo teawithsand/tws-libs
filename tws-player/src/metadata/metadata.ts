@@ -1,3 +1,5 @@
+import { Milliseconds } from "../unit"
+
 export type ID3Metadata = {
 	title: string | null
 	artist: string | null
@@ -6,8 +8,7 @@ export type ID3Metadata = {
 }
 
 export type Metadata = {
-	/** In milliseconds. */
-	duration: number | null
+	duration: Milliseconds | null
 } & ID3Metadata
 
 export enum MetadataLoadingResultType {

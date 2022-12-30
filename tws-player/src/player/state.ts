@@ -1,6 +1,7 @@
 import { MediaPlayerError, SourcePlayerError } from "../error"
 import { AudioFilter } from "../filter"
 import { PlayerSourceProvider } from "../source"
+import { Milliseconds } from "../unit"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
 export type PlayerConfig<S, SK> = {
@@ -52,20 +53,18 @@ export type PlayerConfig<S, SK> = {
 	forceReloadOnSourceProviderSwap: boolean
 
 	/**
-	 * Defaults to null. Causes player to perform seek to given position in seconds floating point(just like HTML api wants it).
+	 * Defaults to null. Causes player to perform seek to given position.
 	 * Once seek is done, this value is set to null again.
 	 */
-	seekPosition: number | null
+	seekPosition: Milliseconds | null
 }
 
 export type PlayerState<S, SK> = {
 	playerError: MediaPlayerError | null
 	sourceError: SourcePlayerError | null
 
-	/** In seconds */
-	position: number | null
-	/** In seconds */
-	duration: number | null
+	position: Milliseconds | null
+	duration: Milliseconds | null
 
 	isPlaying: boolean
 	isSeeking: boolean

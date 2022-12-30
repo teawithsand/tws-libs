@@ -42,7 +42,7 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 		sourceProvider: new EmptyPlayerSourceProvider(),
 		seekPosition: null,
 
-		forceReloadOnSourceProviderSwap: true, // by default true for backwrards compatibility
+		forceReloadOnSourceProviderSwap: true, // by default true for backwards compatibility
 	},
 }
 
@@ -120,7 +120,8 @@ export class Player<S, SK> {
 			// this.lastState.config.seekPosition !== newState.config.seekPosition &&
 			newState.config.seekPosition !== null
 		) {
-			this.element.currentTime = newState.config.seekPosition
+			const seekPositionSeconds = newState.config.seekPosition / 1000
+			this.element.currentTime = seekPositionSeconds
 
 			// Note: doing this is kind of crappy and in general should not be done
 			// but who really cares

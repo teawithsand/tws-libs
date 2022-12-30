@@ -1,9 +1,15 @@
-import { PlayerNetworkState, PlayerReadyState, simplePlayerNetworkStateFromNative, simplePlayerReadyStateFromNative } from "./state"
+import { Milliseconds } from "../../unit"
+import {
+	PlayerNetworkState,
+	PlayerReadyState,
+	simplePlayerNetworkStateFromNative,
+	simplePlayerReadyStateFromNative,
+} from "./state"
 
 type Element = HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
 
 const sanitizeTime = (t: number): number | null =>
-	isFinite(t) && t >= 0 ? t : null
+	isFinite(t) && t >= 0 ? t * 1000 : null
 
 const flattenBuffered = (ranges: TimeRanges) => {
 	const res: {
@@ -11,9 +17,13 @@ const flattenBuffered = (ranges: TimeRanges) => {
 		end: number
 	}[] = []
 	for (let i = 0; i < ranges.length; i++) {
+		const start = sanitizeTime(ranges.start(i))
+		const end = sanitizeTime(ranges.end(i))
+		if (typeof start !== "number" || typeof end !== "number") continue
+
 		res.push({
-			start: ranges.start(i),
-			end: ranges.end(i),
+			start,
+			end,
 		})
 	}
 	return res
@@ -32,12 +42,12 @@ export type HTMLPlayerState = {
 
 	isPlaying: boolean
 
-	currentTime: number | null
-	duration: number | null
+	currentTime: Milliseconds | null
+	duration: Milliseconds | null
 
 	buffered: {
-		start: number
-		end: number
+		start: Milliseconds
+		end: Milliseconds
 	}[]
 }
 
