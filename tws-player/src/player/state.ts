@@ -52,7 +52,7 @@ export type PlayerConfig<S, SK> = {
 	forceReloadOnSourceProviderSwap: boolean
 
 	/**
-	 * Defaults to null. Causes player to perform seek to given position in millis.
+	 * Defaults to null. Causes player to perform seek to given position in seconds floating point(just like HTML api wants it).
 	 * Once seek is done, this value is set to null again.
 	 */
 	seekPosition: number | null
@@ -62,7 +62,9 @@ export type PlayerState<S, SK> = {
 	playerError: MediaPlayerError | null
 	sourceError: SourcePlayerError | null
 
+	/** In seconds */
 	position: number | null
+	/** In seconds */
 	duration: number | null
 
 	isPlaying: boolean
