@@ -6,7 +6,7 @@ export type ID3Metadata = {
 }
 
 export type Metadata = {
-	/** In seconds */
+	/** In milliseconds. */
 	duration: number | null
 } & ID3Metadata
 

@@ -28,11 +28,12 @@ export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 				)
 			}
 			metadataListener = () => {
-				let duration: number | null = audio.duration
+				let duration: number | null = audio.duration * 1000 // to millis
 				if (
 					duration < 0 ||
 					duration > Number.MAX_SAFE_INTEGER ||
-					!isFinite(duration)
+					!isFinite(duration) ||
+					isNaN(duration)
 				)
 					duration = null
 
