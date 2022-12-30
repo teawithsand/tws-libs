@@ -7,6 +7,9 @@ import * as jsMediaTags from "@teawithsand/jsmediatags"
 export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 	constructor(private readonly resolver: PlayerSourceResolver<T>) {}
 
+	/**
+	 * Returns duration in SECONDS NOT MILLIS!
+	 */
 	private loadDuration = async (
 		src: T,
 		url: string
