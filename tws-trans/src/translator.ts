@@ -65,7 +65,6 @@ export const makeTranslationHooks = <T extends TranslationObject, P>(
 	},
 	useTranslationSelector: <E>(s: (obj: T) => E): E => {
 		const params = paramsLoaderHook()
-
 		const lang = useLanguage()
 		const translator = useTranslator(ctx)
 
