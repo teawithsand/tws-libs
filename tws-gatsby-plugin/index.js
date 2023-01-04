@@ -226,14 +226,11 @@ const customizeDefaultPlugins = (...configs) =>
 	mergePlugins(BasicSitePluginsStart, ...configs, BasicSitePluginsEnd)
 
 const loadConfig = (require) => {
-	const { 
-		DEPLOYER_SITE_URL,
-		DEPLOYER_PROJECT_NAME
-	} = process.env
+	const { DEPLOYER_SITE_URL, DEPLOYER_PROJECT_NAME } = process.env
 
 	const obj = {
 		DEPLOYER_SITE_URL,
-		DEPLOYER_PROJECT_NAME
+		DEPLOYER_PROJECT_NAME,
 	}
 
 	const config = {
@@ -241,14 +238,17 @@ const loadConfig = (require) => {
 		projectName: DEPLOYER_PROJECT_NAME,
 	}
 
-	if(require) {
-		for(const k of Object.keys(obj)) {
-			if(!obj[k]) throw new Error(`loadConfig required, but env var ${k} not set`)
+	if (require) {
+		for (const k of Object.keys(obj)) {
+			if (!obj[k])
+				throw new Error(`loadConfig required, but env var ${k} not set`)
 		}
 	}
 
 	return config
 }
+
+// TODO(teawithsand): sth like https://github.com/gakimball/gatsby-plugin-global-context
 
 const makeConfig = (siteMetadata, plugins) => ({
 	flags: {
@@ -266,21 +266,37 @@ const makeConfig = (siteMetadata, plugins) => ({
 	trailingSlash: "never",
 })
 
-const makeConfigRequired = (siteMetadata, plugins) => ({
-	flags: {
-		DEV_SSR: ["yes", "y", "on"].includes((process.env.GATSBY_DEV_SSR || "").toLowerCase()),
-	},
-	siteMetadata: {
-		...loadConfig(true),
-		...siteMetadata,
-	},
-	// More easily incorporate content into your pages through automatic TypeScript type generation and better GraphQL IntelliSense.
-	// If you use VSCode you can also use the GraphQL plugin
-	// Learn more at: https://gatsby.dev/graphql-typegen
-	graphqlTypegen: true,
-	plugins,
-	trailingSlash: "never",
-})
+const makeConfigRequired = (siteMetadata, plugins, options = {}) => {
+	const loadedConfig = loadConfig(true)
+
+	options = options ?? {}
+
+	if (!options.allowOverride) {
+		for (const k of Object.keys(siteMetadata)) {
+			if (k in loadedConfig)
+				throw new Error(
+					`Tried to override external configuration key ${k}`
+				)
+		}
+	}
+	return {
+		flags: {
+			DEV_SSR: ["yes", "y", "on"].includes(
+				(process.env.GATSBY_DEV_SSR || "").toLowerCase().trim()
+			),
+		},
+		siteMetadata: {
+			...loadedConfig,
+			...siteMetadata,
+		},
+		// More easily incorporate content into your pages through automatic TypeScript type generation and better GraphQL IntelliSense.
+		// If you use VSCode you can also use the GraphQL plugin
+		// Learn more at: https://gatsby.dev/graphql-typegen
+		graphqlTypegen: true,
+		plugins,
+		trailingSlash: "never",
+	}
+}
 
 const makeSelfPlugin = (options) => {
 	return {
