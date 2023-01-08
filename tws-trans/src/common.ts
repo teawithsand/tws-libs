@@ -1,7 +1,7 @@
 import { Language, SimpleLanguage, simplifyLanguage } from "./language"
 
 /**
- * Format, in which date translation component acceps date.
+ * Format, in which date translation component accepts date.
  */
 export type TranslatableDate = string | number | Date
 
@@ -22,10 +22,35 @@ export interface CommonTranslation {
 	formatDateTime: (date: TranslatableDate) => string
 }
 
+/**
+ * Config, which can be loaded from tws-gatsby-plugin config makeExposeConfigGloballyPlugin.
+ */
+export interface CommonConfig {
+	projectName: string
+	siteUrl: string
+}
+
 const makeDateObject = (date: string | number | Date): Date => {
 	if (typeof date === "string" || typeof date === "number")
 		date = new Date(date)
 	return date
+}
+
+export const readCommonConfig = (prefix: string = ""): CommonConfig => {
+	const env = process.env
+	const object: CommonConfig = {
+		projectName: "",
+		siteUrl: "",
+	}
+
+	for (const k in object) {
+		const v = env[prefix + k]
+		if (typeof v !== "string")
+			throw new Error(`Key ${prefix + k} is not provided in process.env`)
+		;(object as any)[k] = v
+	}
+
+	return object
 }
 
 export const makeCommonTranslation = (
