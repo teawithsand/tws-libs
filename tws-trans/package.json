@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-trans",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Simple, yet powerful translation library for react",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.9",
-		"@teawithsand/tws-stl-react": "^0.0.2"
+		"@teawithsand/tws-stl-react": "^0.0.4"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
