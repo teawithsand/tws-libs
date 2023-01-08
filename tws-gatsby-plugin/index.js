@@ -327,6 +327,7 @@ module.exports = {
 	mergePlugins,
 	makeLayoutPlugin,
 
+	makeExposeConfigGloballyPlugin,
 	makeConfig,
 	makeConfigRequired,
 	loadConfig,
