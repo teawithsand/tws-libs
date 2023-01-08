@@ -84,6 +84,18 @@ export const gatsbyMarkdownWrapperStyles = css`
 			font-size: 1rem;
 		}
 	}
+
+	ol,
+	ul {
+		padding-left: 2rem;
+	}
+
+	@media ${breakpointMediaDown(BREAKPOINT_MD)} {
+		ol,
+		ul {
+			padding-left: 1rem;
+		}
+	}
 `
 
 /**
