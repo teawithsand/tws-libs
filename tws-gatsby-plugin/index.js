@@ -1,5 +1,13 @@
 const path = require("path")
 
+const runDotEnv = () => {
+	require("dotenv").config({
+		path: `.env`,
+	})
+}
+
+runDotEnv()
+
 const imageBreakpoints = [350, 750, 1080, 1366, 1920]
 const imageQuality = 50
 
@@ -226,7 +234,7 @@ const mergePlugins = (...configs) => {
  * Creates plugin that makes all loaded variables(provided via loadConfig) exported in process.env.PREFIX*
  * where * denotes name of object key returned by loadConfig.
  */
-const makeExposeConfigGloballyPlugin = (prefix = "") => {
+const makeExposeConfigGloballyPlugins = (prefix = "") => {
 	const config = loadConfig(true)
 	let res = {}
 	if (prefix) {
@@ -236,6 +244,7 @@ const makeExposeConfigGloballyPlugin = (prefix = "") => {
 	} else {
 		res = config
 	}
+
 	return [
 		{
 			resolve: `gatsby-source-custom`,
@@ -343,7 +352,7 @@ module.exports = {
 	mergePlugins,
 	makeLayoutPlugin,
 
-	makeExposeConfigGloballyPlugin,
+	makeExposeConfigGloballyPlugin: makeExposeConfigGloballyPlugins,
 	makeConfig,
 	makeConfigRequired,
 	loadConfig,
