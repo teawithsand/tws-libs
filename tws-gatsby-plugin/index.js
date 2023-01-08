@@ -230,31 +230,6 @@ const mergePlugins = (...configs) => {
 	return theConfig
 }
 
-/**
- * Creates plugin that makes all loaded variables(provided via loadConfig) exported in process.env.PREFIX*
- * where * denotes name of object key returned by loadConfig.
- */
-const makeExposeConfigGloballyPlugins = (prefix = "") => {
-	const config = loadConfig(true)
-	let res = {}
-	if (prefix) {
-		for (const k in config) {
-			res[prefix + k] = config[k]
-		}
-	} else {
-		res = config
-	}
-
-	return [
-		{
-			resolve: `gatsby-source-custom`,
-			options: {
-				...res,
-			},
-		},
-	]
-}
-
 const customizeDefaultPlugins = (...configs) =>
 	mergePlugins(BasicSitePluginsStart, ...configs, BasicSitePluginsEnd)
 
@@ -352,7 +327,6 @@ module.exports = {
 	mergePlugins,
 	makeLayoutPlugin,
 
-	makeExposeConfigGloballyPlugin: makeExposeConfigGloballyPlugins,
 	makeConfig,
 	makeConfigRequired,
 	loadConfig,

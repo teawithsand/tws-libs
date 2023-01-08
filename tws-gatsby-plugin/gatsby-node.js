@@ -3,6 +3,8 @@ const path = require("path")
 const { exists, writeFile, ensureDir } = require("fs")
 const { resolve } = require("path")
 
+const { loadConfig } = require("./index")
+
 function getMetaRedirect(toPath) {
 	let url = toPath.trim()
 
@@ -140,6 +142,7 @@ const onCreatePage = async ({ page, actions }, config) => {
 
 const onCreateWebpackConfig = ({
 	actions,
+	plugins,
 	getConfig,
 	rules,
 	stage,
@@ -220,6 +223,19 @@ const onCreateWebpackConfig = ({
 		]
 		actions.replaceWebpackConfig(config)
 	}
+
+	const exportedVariablesObject = loadConfig(false)
+
+	let res = {}
+	for (const k in exportedVariablesObject) {
+		res[`process.env.${k}`] = JSON.stringify(exportedVariablesObject[k])
+	}
+
+	if (Object.keys(res).length) {
+		config.plugins = [...config.plugins, plugins.define(res)]
+	}
+
+	actions.replaceWebpackConfig(config)
 }
 
 const onPostBuild = ({ store }) => {
