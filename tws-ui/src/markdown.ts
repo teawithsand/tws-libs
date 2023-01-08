@@ -1,3 +1,4 @@
+import { breakpointMediaDown, BREAKPOINT_MD } from "@teawithsand/tws-stl-react"
 import { css } from "styled-components"
 
 /**
@@ -9,6 +10,11 @@ export const gatsbyMarkdownWrapperStyles = css`
 	& h1 {
 		font-size: 2.3rem;
 		font-weight: 400;
+
+		// On small devices it's required to decrease font size
+		@media ${breakpointMediaDown(BREAKPOINT_MD)} {
+			font-size: 2rem;
+		}
 	}
 
 	.gatsby-highlight pre[class*="language-"].line-numbers {
