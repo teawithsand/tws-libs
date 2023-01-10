@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-seo",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Some utils for creating SEO object and website <head> section",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.9",
-		"@teawithsand/tws-stl-react": "^0.0.2"
+		"@teawithsand/tws-stl-react": "^0.0.4"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
