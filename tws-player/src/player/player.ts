@@ -25,6 +25,7 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 	playerError: null,
 	sourceError: null,
 	duration: null,
+	positionUpdatedAfterSeek: true,
 	position: null,
 	isPlaying: false,
 	isSeeking: false,
@@ -110,6 +111,8 @@ export class Player<S, SK> {
 			this.stateBus.lastEvent.config.sourceKey !== null &&
 			newState.readyState !== PlayerReadyState.NOTHING
 
+		const seekPositionMillis = newState.config.seekPosition
+
 		// Note: if this seeking model does not work
 		// add UUID of seek and check IT rather than seek value
 		if (
@@ -118,17 +121,21 @@ export class Player<S, SK> {
 			// I guess so, since it should be quickly set to null once it was
 			// performed(also in lastState)
 			// this.lastState.config.seekPosition !== newState.config.seekPosition &&
-			newState.config.seekPosition !== null
+			seekPositionMillis !== null
 		) {
-			const seekPositionSeconds = newState.config.seekPosition / 1000
+			const seekPositionSeconds = seekPositionMillis / 1000
 			this.element.currentTime = seekPositionSeconds
 
-			// Note: doing this is kind of crappy and in general should not be done
+			// Note: doing this(modifying parent in event) is kind of crappy and in general should not be done
+			// as it may lead to infinite recursion
 			// but who really cares
 			// I do not
-			this.mutateConfig((draft) => {
-				draft.seekPosition = null
-			})
+			this.innerPlayerState.emitEvent(
+				produce(this.innerPlayerState.lastEvent, (draft) => {
+					draft.positionUpdatedAfterSeek = false
+					draft.config.seekPosition = null
+				})
+			)
 		}
 	}
 
@@ -355,6 +362,7 @@ export class Player<S, SK> {
 				draft.isSeeking = playerState.isSeeking
 				draft.duration = playerState.duration
 				draft.position = playerState.currentTime
+				draft.positionUpdatedAfterSeek = true
 				draft.networkState = playerState.networkState
 				draft.readyState = playerState.readyState
 

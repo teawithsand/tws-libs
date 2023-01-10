@@ -63,6 +63,14 @@ export type PlayerState<S, SK> = {
 	playerError: MediaPlayerError | null
 	sourceError: SourcePlayerError | null
 
+	/**
+	 * Once seek is performed, position is not automatically updated.
+	 * That is for a simple reason - it's inner player responsibility to report new one, once we changed it.
+	 * 
+	 * New position may be out of bound or be unreachable or some other thing may go wrong, so it can't be set directly.
+	 * Any position reading(which should occur ASAP after seek) will set this value to true
+	 */
+	positionUpdatedAfterSeek: boolean
 	position: Milliseconds | null
 	duration: Milliseconds | null
 
