@@ -9,3 +9,5 @@ It does:
 - (configurable) Removes generator tag. By default it removes gatsby version only, and replaces tag with just "Gatsby"
 - (configurable) Prefixes routes with one of languages provided and passes that language via page context
 - (configurable) Simplifies gatsby config creation via providing some predefined values and builders for configs
+
+This plugin is opinionated to large extent and does some more thing, that are not documented here.
