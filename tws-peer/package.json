@@ -21,7 +21,7 @@
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
-		"@teawithsand/tws-stl": "^0.0.9",
+		"@teawithsand/tws-stl": "^0.0.13",
 		"peerjs": "^1.4.7",
 		"qrcode": "^1.5.1"
 	},
