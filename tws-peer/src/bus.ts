@@ -153,10 +153,6 @@ export const makePeerBus = (
 			type: PeerEventType.CONNECT,
 			conn,
 		})
-
-		conn.on("open", () => {})
-		conn.on("close", () => {})
-		conn.on("data", (data) => {})
 	}
 	const onDisconnect = (currentId: string) => {
 		b.emitEvent({
