@@ -1,6 +1,13 @@
 import { DefaultEventBus, Subscribable } from "@teawithsand/tws-stl"
 import { DataConnection, MediaConnection, Peer } from "./peer"
 
+/**
+ * Helper type, which is Subscribable that may be closed.
+ */
+export type ClosableSubscribable<T> = Subscribable<T> & {
+	close: () => void
+}
+
 export enum PeerConnEventType {
 	OPEN = 1,
 	CLOSE = 2,
@@ -72,9 +79,7 @@ export type PeerEvent = {
 export const makeDataConnBus = (
 	peer: Peer,
 	conn: DataConnection
-): Subscribable<PeerConnEvent> & {
-	close: () => void
-} => {
+): ClosableSubscribable<PeerConnEvent> => {
 	const b = new DefaultEventBus<PeerConnEvent>()
 
 	const onOpen = () => {
@@ -135,7 +140,7 @@ export const makeDataConnBus = (
 
 export const makePeerBus = (
 	peer: Peer
-): Subscribable<PeerEvent> & {
+): ClosableSubscribable<PeerEvent> & {
 	close: () => void
 } => {
 	const b = new DefaultEventBus<PeerEvent>()
