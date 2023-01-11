@@ -1,0 +1,23 @@
+{
+	"name": "@teawithsand/tws-goatcounter-gatsby-plugin",
+	"version": "0.0.1-b1",
+	"description": "Plugin which integrates goatcounter with gatsby",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsc",
+		"test": "echo asdf > /dev/null"
+	},
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/react": "^18.0.21"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0",
+		"gatsby": "^5"
+	},
+	"files": [
+		"/dist",
+		"gatsby-node.js",
+		"gatsby-ssr.js"
+	]
+}
