@@ -17,12 +17,14 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/jest": "^29.0.3",
+		"@types/qrcode": "^1.5.0",
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.9",
 		"@teawithsand/tws-stl-react": "^0.0.4",
-		"peerjs": "^1.4.7"
+		"peerjs": "^1.4.7",
+		"qrcode": "^1.5.1"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
