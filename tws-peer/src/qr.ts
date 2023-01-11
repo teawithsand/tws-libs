@@ -29,6 +29,12 @@ export const makeQrCode = (
 	const operate = <T>(
 		onDrawnOnCanvas: (canvas: HTMLCanvasElement) => T
 	): T => {
+		if (typeof document === "undefined")
+			throw new Error(
+				"tws-peer can't create qr codes on node right now, as it uses " +
+					"document.createElement in order to create canvas that QR will be drawn to."
+			)
+			
 		const canvas = document.createElement("canvas")
 		canvas.style.display = "none"
 		canvas.width = options.width
