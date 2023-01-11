@@ -1,5 +1,7 @@
 /**
  * As STUN servers are cheap, there is a lot of them available in public.
+ * 
+ * Though, they should be transformed before being used in WebRTC.
  */
 export const STUNServers = [
 	"stun.l.google.com:19302",

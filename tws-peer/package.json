@@ -22,8 +22,7 @@
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.9",
 		"@teawithsand/tws-stl-react": "^0.0.4",
-		"peerjs": "^1.4.7",
-		"tweetnacl": "^1.0.3"
+		"peerjs": "^1.4.7"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
