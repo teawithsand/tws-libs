@@ -8,7 +8,9 @@
     "tws-seo",
     "tws-gatsby-plugin",
     "tws-goatcounter-gatsby-plugin",
-    "tws-gallery"
+    "tws-gallery",
+    "tws-peer",
+    "tws-peer-react"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"

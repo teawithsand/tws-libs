@@ -1,0 +1,31 @@
+{
+	"name": "@teawithsand/tws-peer",
+	"version": "0.0.1-b2",
+	"description": "Peer to peer communication abstraction layer and some utils",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest"
+	},
+	"keywords": [
+		"teawithsand",
+		"react",
+		"translation"
+	],
+	"author": "teawithsand",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/qrcode": "^1.5.0",
+		"@types/react": "^18.0.21"
+	},
+	"dependencies": {
+		"@teawithsand/tws-stl": "^0.0.13",
+		"peerjs": "^1.4.7",
+		"qrcode": "^1.5.1"
+	},
+	"files": [
+		"dist/**"
+	]
+}
