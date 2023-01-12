@@ -4,10 +4,16 @@ publish() {
 
 publish "tws-stl";
 publish "tws-stl-react";
-publish "tws-gatsby-plugin";
-publish "tws-player";
-publish "tws-trans";
 publish "tws-ui";
+
+publish "tws-gatsby-plugin";
+publish "tws-goatcounter-gatsby-plugin";
+
 publish "tws-seo";
+publish "tws-trans";
+
 publish "tws-gallery";
+publish "tws-player";
+
 publish "tws-peer";
+publish "tws-peer-react";
