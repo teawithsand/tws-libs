@@ -45,6 +45,7 @@ export const makeQrCode = (
 		try {
 			toCanvas(canvas, data, {
 				errorCorrectionLevel: options.errorCorrectionLevel,
+				width: Math.min(canvas.height, canvas.width),
 			})
 			return onDrawnOnCanvas(canvas)
 		} finally {
@@ -68,6 +69,7 @@ export const makeQrCode = (
 		drawToCanvas: (canvas) => {
 			toCanvas(canvas, data, {
 				errorCorrectionLevel: options.errorCorrectionLevel,
+				width: Math.min(canvas.height, canvas.width),
 			})
 		},
 	}
