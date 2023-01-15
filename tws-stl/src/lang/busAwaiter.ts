@@ -23,6 +23,27 @@ export class BusAwaiter<T> {
 		})
 	}
 
+	get eventQueueSize(): number {
+		return this.eventQueue.length
+	}
+
+	get listenerQueueSize(): number {
+		return this.latePromiseQueue.length
+	}
+
+	/**
+	 * Returns event if one was already enqueued and drops it from queue.
+	 * Returns null otherwise.
+	 *
+	 * Always returns as fast as possible.
+	 *
+	 * Note: running it in infinite loop will cause that loop to never end, as it does not allow
+	 * JS fiber switching, so that another fiber may enqueue that event.
+	 */
+	popEvent = (): T | null => {
+		return this.eventQueue.pop()
+	}
+
 	readEvent = (): Promise<T> => {
 		if (this.innerIsClosed) throw new Error("Already closed")
 
