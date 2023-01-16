@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-peer",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Peer to peer communication abstraction layer and some utils",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
