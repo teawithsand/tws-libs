@@ -46,9 +46,7 @@ export type PeerEvent = {
 	  }
 )
 
-export const makePeerBus = (
-	peer: Peer
-): PeerSubscribable => {
+export const makePeerBus = (peer: Peer): PeerSubscribable => {
 	const b = new DefaultEventBus<PeerEvent>()
 
 	const onError = (err: Error) => {
@@ -102,10 +100,15 @@ export const makePeerBus = (
 	peer.on("close", onClose)
 	peer.on("open", onOpen)
 
+	let wasBusClosed = false
+
 	return {
 		peer,
 		addSubscriber: b.addSubscriber,
 		close: () => {
+			if (wasBusClosed) return
+			wasBusClosed = true
+
 			peer.off("error", onError)
 			peer.off("connection", onConnect)
 			peer.off("disconnected", onDisconnect)
