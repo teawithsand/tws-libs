@@ -3,3 +3,5 @@ export * from "./dataConnBus"
 
 export * from "./dataConnRunHelper"
 export * from "./peerRunHelper"
+
+export * from "./peerHelper"
