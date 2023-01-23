@@ -9,6 +9,7 @@ export enum PeerEventType {
 	DISCONNECT = 5,
 	CLOSE = 6,
 	OPEN = 7,
+	BUS_CLOSE = 8,
 }
 export type PeerEvent = {
 	peer: Peer
@@ -36,8 +37,10 @@ export type PeerEvent = {
 			type: PeerEventType.OPEN
 			id: string
 	  }
+	| {
+			type: PeerEventType.BUS_CLOSE
+	  }
 )
-
 
 export const makePeerBus = (
 	peer: Peer
@@ -106,6 +109,11 @@ export const makePeerBus = (
 			peer.off("call", onCall)
 			peer.off("open", onOpen)
 			peer.off("close", onClose)
+
+			b.emitEvent({
+				type: PeerEventType.BUS_CLOSE,
+				peer,
+			})
 		},
 	}
 }
