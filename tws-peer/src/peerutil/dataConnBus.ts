@@ -14,7 +14,7 @@ export enum PeerDataConnEventType {
 	DATA = 3,
 	ERROR = 4,
 	ICE_STATE_CHANGE = 5,
-	BUS_CLOSED = 6,
+	BUS_CLOSE = 6,
 }
 
 export type PeerDataConnEvent = {
@@ -40,7 +40,7 @@ export type PeerDataConnEvent = {
 			state: RTCIceConnectionState
 	  }
 	| {
-			type: PeerDataConnEventType.BUS_CLOSED
+			type: PeerDataConnEventType.BUS_CLOSE
 	  }
 )
 
@@ -111,7 +111,7 @@ export const makePeerDataConnBus = (
 			conn.off("iceStateChanged", onIceStateChange)
 
 			b.emitEvent({
-				type: PeerDataConnEventType.BUS_CLOSED,
+				type: PeerDataConnEventType.BUS_CLOSE,
 				peer,
 				conn,
 			})
