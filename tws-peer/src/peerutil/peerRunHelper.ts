@@ -1,11 +1,13 @@
 import {
 	BusAwaiter,
 	DefaultEventBus,
+	DefaultStickyEventBus,
+	StickySubscribable,
 	Subscribable,
 	SubscriptionCanceler,
 } from "@teawithsand/tws-stl"
 import Peer, { DataConnection, MediaConnection } from "peerjs"
-import { makePeerBus, PeerEvent, PeerEventType } from "./peerBus"
+import { PeerEvent, PeerEventType } from "./peerBus"
 
 /**
  * State, which describes data connection.
@@ -15,15 +17,6 @@ export interface PeerState {
 	readonly isClosed: boolean
 	readonly error: Error | null
 }
-
-/**
- * Method, which has some domain logic implemented to deal with events incoming from Peer.
- */
-export type PeerRunner = (
-	peer: Peer,
-	state: PeerState,
-	receiver: PeerReceiver
-) => Promise<void>
 
 /**
  * Error, which may be thrown when receiving data from Peer.
@@ -51,18 +44,18 @@ export interface PeerReceiver {
 	 * Also: automatically closes any media connections received.
 	 */
 	receiveDataConn: (
-		onUnhandledEvent?: (e: PeerEvent) => Promise<void>
+		onEvent?: (e: PeerEvent) => Promise<void>
 	) => Promise<DataConnection>
 
 	/**
 	 * Also: automatically closes any data connections received.
 	 */
 	receiveMediaConn: (
-		onUnhandledEvent?: (e: PeerEvent) => Promise<void>
+		onEvent?: (e: PeerEvent) => Promise<void>
 	) => Promise<MediaConnection>
 
 	receiveDataOrMediaConn: (
-		onUnhandledEvent?: (e: PeerEvent) => Promise<void>
+		onEvent?: (e: PeerEvent) => Promise<void>
 	) => Promise<MediaConnection | DataConnection>
 
 	/**
@@ -74,137 +67,149 @@ export interface PeerReceiver {
 }
 
 /**
- * Adds some features to DataConnection, that make it more useful when developing apps with awaiter.
+ * Default implementation of PeerReceiver, which uses peer's bus.
  *
- * In order to ensure that this handler will be called first, passed bus should not be used anymore in favour of bus
- * returned via `.bus` parameter.
+ * It does not take ownership of peer or bus it's given.
+ * It automatically closes itself on bus closed event.
+ *
+ * It also maintains PeerState, so it's simpler to use with all conn/event receiving methods.
  */
-class PeerStateHelperImpl implements PeerState {
-	private readonly innerBus = new DefaultEventBus<PeerEvent>()
-	private canceler: SubscriptionCanceler | null = null
+export class DefaultPeerReceiver implements PeerReceiver {
+	private closerUnsubscribe: SubscriptionCanceler | null
+	private readonly innerStateBus = new DefaultStickyEventBus<PeerState>({
+		error: null,
+		isClosed: false,
+	})
 
-	private innerLastError: Error | null = null
-	private innerWasClosed: boolean = false
+	private readonly awaiterBus = new DefaultEventBus<PeerEvent>()
 
-	get error(): Error | null {
-		return this.innerLastError
+	constructor(
+		private readonly bus: Subscribable<PeerEvent>,
+		public readonly peer: Peer
+	) {
+		this.closerUnsubscribe = this.bus.addSubscriber((e) => {
+			if (e.type === PeerEventType.ERROR) {
+				this.innerStateBus.emitEvent({
+					...this.innerStateBus.lastEvent,
+					error: e.error,
+				})
+			} else if (e.type === PeerEventType.CLOSE) {
+				this.innerStateBus.emitEvent({
+					...this.innerStateBus.lastEvent,
+					isClosed: true,
+				})
+			} else if (e.type === PeerEventType.BUS_CLOSE) {
+				this.close()
+			}
+
+			this.awaiterBus.emitEvent(e)
+		})
+	}
+	private readonly awaiter = new BusAwaiter(this.awaiterBus)
+	private innerIsClosed = false
+
+	get stateBus(): StickySubscribable<PeerState> {
+		return this.innerStateBus
 	}
 
-	get bus(): Subscribable<PeerEvent> {
-		return this.innerBus
+	get state(): Readonly<PeerState> {
+		return this.innerStateBus.lastEvent
 	}
 
 	get isClosed() {
-		return this.innerWasClosed || !!this.innerLastError
+		return this.innerIsClosed
 	}
 
-	/**
-	 * Unsubscribes this helper from bus it was given, allowing it to release resources.
-	 * State won't be updated anymore.
-	 */
-	closeBus = () => {
-		if (this.canceler) {
-			this.canceler()
-			this.canceler = null
+	close = () => {
+		if (!this.innerIsClosed) {
+			if (this.closerUnsubscribe) {
+				this.closerUnsubscribe()
+				this.closerUnsubscribe = null // free res for gc
+			}
+
+			this.innerIsClosed = true
+			this.awaiter.close()
 		}
 	}
 
-	constructor(connBus: Subscribable<PeerEvent>) {
-		this.canceler = connBus.addSubscriber((event) => {
-			this.updateState(event)
-			this.innerBus.emitEvent(event)
-		})
-	}
+	receiveDataConn = async (
+		onEvent?: ((e: PeerEvent) => Promise<void>) | undefined
+	): Promise<DataConnection> => {
+		for (;;) {
+			if (this.isClosed || this.state.isClosed)
+				throw new ClosedPeerReceiveError()
+			const ev = await this.awaiter.readEvent()
 
-	private readonly updateState = (event: PeerEvent) => {
-		if (event.type === PeerEventType.ERROR) {
-			this.innerLastError = event.error
-		} else if (event.type === PeerEventType.CLOSE) {
-			this.innerWasClosed = true
+			if (onEvent) await onEvent(ev)
+
+			if (ev.type === PeerEventType.ERROR) {
+				throw new PeerReceiverError(ev.error)
+			} else if (ev.type === PeerEventType.CALL) {
+				ev.call.close()
+			} else if (ev.type === PeerEventType.CONNECT) {
+				return ev.conn
+			} else if (
+				ev.type === PeerEventType.CLOSE ||
+				ev.type === PeerEventType.BUS_CLOSE
+			) {
+				throw new ClosedPeerReceiveError()
+			}
 		}
 	}
-}
 
-/**
- * Function, which executes runner on Peer.
- *
- * It destroys peer on before it returns.
- */
-export const runPeerRunner = async (
-	peer: Peer,
-	runner: PeerRunner
-) => {
-	const bus = makePeerBus(peer)
-	const helper = new PeerStateHelperImpl(bus)
-	const awaiter = new BusAwaiter(helper.bus)
+	receiveMediaConn = async (
+		onEvent?: ((e: PeerEvent) => Promise<void>) | undefined
+	): Promise<MediaConnection> => {
+		for (;;) {
+			if (this.isClosed || this.state.isClosed)
+				throw new ClosedPeerReceiveError()
+			const ev = await this.awaiter.readEvent()
 
-	const connAwaiter: PeerReceiver = {
-		receiveDataConn: async (cb) => {
-			if (helper.isClosed) throw new ClosedPeerReceiveError()
+			if (onEvent) await onEvent(ev)
 
-			for (;;) {
-				const ev = await awaiter.readEvent()
-
-				if (cb) await cb(ev)
-
-				if (ev.type === PeerEventType.ERROR) {
-					throw new PeerReceiverError(ev.error)
-				} else if (ev.type === PeerEventType.CALL) {
-					ev.call.close()
-				} else if (ev.type === PeerEventType.CONNECT) {
-					return ev.conn
-				} else if (ev.type === PeerEventType.CLOSE) {
-					throw new ClosedPeerReceiveError()
-				}
+			if (ev.type === PeerEventType.ERROR) {
+				throw new PeerReceiverError(ev.error)
+			} else if (ev.type === PeerEventType.CALL) {
+				return ev.call
+			} else if (ev.type === PeerEventType.CONNECT) {
+				ev.conn.close()
+			} else if (
+				ev.type === PeerEventType.CLOSE ||
+				ev.type === PeerEventType.BUS_CLOSE
+			) {
+				throw new ClosedPeerReceiveError()
 			}
-		},
-		receiveMediaConn: async (cb) => {
-			if (helper.isClosed) throw new ClosedPeerReceiveError()
-
-			for (;;) {
-				const ev = await awaiter.readEvent()
-
-				if (cb) await cb(ev)
-
-				if (ev.type === PeerEventType.ERROR) {
-					throw new PeerReceiverError(ev.error)
-				} else if (ev.type === PeerEventType.CALL) {
-					return ev.call
-				} else if (ev.type === PeerEventType.CONNECT) {
-					ev.conn.close()
-				} else if (ev.type === PeerEventType.CLOSE) {
-					throw new ClosedPeerReceiveError()
-				}
-			}
-		},
-		receiveDataOrMediaConn: async (cb) => {
-			if (helper.isClosed) throw new ClosedPeerReceiveError()
-
-			for (;;) {
-				const ev = await awaiter.readEvent()
-
-				if (cb) await cb(ev)
-
-				if (ev.type === PeerEventType.ERROR) {
-					throw new PeerReceiverError(ev.error)
-				} else if (ev.type === PeerEventType.CALL) {
-					return ev.call
-				} else if (ev.type === PeerEventType.CONNECT) {
-					return ev.conn
-				} else if (ev.type === PeerEventType.CLOSE) {
-					throw new ClosedPeerReceiveError()
-				}
-			}
-		},
-		receiveEvent: async () => await awaiter.readEvent(),
+		}
 	}
 
-	try {
-		await runner(peer, helper, connAwaiter)
-	} finally {
-		awaiter.close()
-		bus.close()
+	receiveDataOrMediaConn = async (
+		onEvent?: ((e: PeerEvent) => Promise<void>) | undefined
+	): Promise<DataConnection | MediaConnection> => {
+		for (;;) {
+			if (this.isClosed || this.state.isClosed)
+				throw new ClosedPeerReceiveError()
+			const ev = await this.awaiter.readEvent()
 
-		peer.destroy()
+			if (onEvent) await onEvent(ev)
+
+			if (ev.type === PeerEventType.ERROR) {
+				throw new PeerReceiverError(ev.error)
+			} else if (ev.type === PeerEventType.CALL) {
+				return ev.call
+			} else if (ev.type === PeerEventType.CONNECT) {
+				return ev.conn
+			} else if (
+				ev.type === PeerEventType.CLOSE ||
+				ev.type === PeerEventType.BUS_CLOSE
+			) {
+				throw new ClosedPeerReceiveError()
+			}
+		}
+	}
+
+	receiveEvent = async (): Promise<PeerEvent> => {
+		if (this.isClosed || this.state.isClosed)
+			throw new ClosedPeerReceiveError()
+		return await this.awaiter.readEvent()
 	}
 }

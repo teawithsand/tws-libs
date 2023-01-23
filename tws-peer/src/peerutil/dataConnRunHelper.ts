@@ -1,34 +1,22 @@
 import {
 	BusAwaiter,
 	DefaultEventBus,
+	DefaultStickyEventBus,
+	StickySubscribable,
 	Subscribable,
 	SubscriptionCanceler,
 } from "@teawithsand/tws-stl"
 import Peer, { DataConnection } from "peerjs"
-import {
-	makePeerDataConnBus,
-	PeerDataConnEvent,
-	PeerDataConnEventType,
-} from "./dataConnBus"
+import { PeerDataConnEvent, PeerDataConnEventType } from "./dataConnBus"
 
 /**
  * State, which describes data connection.
  * It's assembled from events and simplifies running protocol on data connection.
  */
-export interface PeerDataConnectionState {
+export interface PeerDataConnState {
 	readonly isClosed: boolean
 	readonly error: Error | null
 }
-
-/**
- * Method, which has some domain logic implemented to deal with events incoming from DataConnection.
- */
-export type PeerDataConnectionRunner = (
-	peer: Peer,
-	conn: DataConnection,
-	state: PeerDataConnectionState,
-	awaiter: PeerDataConnReceiver
-) => Promise<void>
 
 /**
  * Error, which may be thrown when receiving data.
@@ -61,7 +49,7 @@ export interface PeerDataConnReceiver {
 	 * Before handled, all events go through optional callback provided as argument.
 	 */
 	receiveData: (
-		onUnhandledEvent?: (e: PeerDataConnEvent) => Promise<void>
+		onEvent?: (e: PeerDataConnEvent) => Promise<void>
 	) => Promise<any>
 
 	/**
@@ -72,101 +60,92 @@ export interface PeerDataConnReceiver {
 	receiveEvent: () => Promise<PeerDataConnEvent>
 }
 
-/**
- * Adds some features to DataConnection, that make it more useful when developing apps with awaiter.
- *
- * In order to ensure that this handler will be called first, passed bus should not be used anymore in favour of bus
- * returned via `.bus` parameter.
- */
-class DataConnStateHelperImpl implements PeerDataConnectionState {
-	private readonly innerBus = new DefaultEventBus<PeerDataConnEvent>()
-	private canceler: SubscriptionCanceler | null = null
+export class PeerDataConnReceiverImpl implements PeerDataConnReceiver {
+	private closerUnsubscribe: SubscriptionCanceler | null
+	private readonly innerStateBus =
+		new DefaultStickyEventBus<PeerDataConnState>({
+			error: null,
+			isClosed: false,
+		})
 
-	private innerLastError: Error | null = null
-	private innerWasClosed: boolean = false
+	private readonly awaiterBus = new DefaultEventBus<PeerDataConnEvent>()
 
-	get error(): Error | null {
-		return this.innerLastError
+	constructor(
+		private readonly bus: Subscribable<PeerDataConnEvent>,
+		public readonly peer: Peer,
+		public readonly conn: DataConnection
+	) {
+		this.closerUnsubscribe = this.bus.addSubscriber((e) => {
+			if (e.type === PeerDataConnEventType.ERROR) {
+				this.innerStateBus.emitEvent({
+					...this.innerStateBus.lastEvent,
+					error: e.error,
+				})
+			} else if (e.type === PeerDataConnEventType.CLOSE) {
+				this.innerStateBus.emitEvent({
+					...this.innerStateBus.lastEvent,
+					isClosed: true,
+				})
+			} else if (e.type === PeerDataConnEventType.BUS_CLOSE) {
+				this.close()
+			}
+
+			this.awaiterBus.emitEvent(e)
+		})
+	}
+	private readonly awaiter = new BusAwaiter(this.awaiterBus)
+	private innerIsClosed = false
+
+	get stateBus(): StickySubscribable<PeerDataConnState> {
+		return this.innerStateBus
 	}
 
-	get bus(): Subscribable<PeerDataConnEvent> {
-		return this.innerBus
+	get state(): Readonly<PeerDataConnState> {
+		return this.innerStateBus.lastEvent
 	}
 
 	get isClosed() {
-		return this.innerWasClosed || !!this.innerLastError
+		return this.innerIsClosed
 	}
 
-	/**
-	 * Unsubscribes this helper from bus it was given, allowing it to release resources.
-	 * State won't be updated anymore.
-	 */
-	closeBus = () => {
-		if (this.canceler) {
-			this.canceler()
-			this.canceler = null
-		}
-	}
-
-	constructor(connBus: Subscribable<PeerDataConnEvent>) {
-		this.canceler = connBus.addSubscriber((event) => {
-			this.updateState(event)
-			this.innerBus.emitEvent(event)
-		})
-	}
-
-	private readonly updateState = (event: PeerDataConnEvent) => {
-		if (event.type === PeerDataConnEventType.ERROR) {
-			this.innerLastError = event.error
-		} else if (event.type === PeerDataConnEventType.CLOSE) {
-			this.innerWasClosed = true
-		}
-	}
-}
-
-/**
- * Function, which executes runner on PeerDataConnection.
- *
- * Automatically closes connection given just before it returns.
- *
- * It rethrows any exception that runner may throw.
- */
-export const runPeerDataConnectionRunner = async (
-	peer: Peer,
-	conn: DataConnection,
-	runner: PeerDataConnectionRunner
-) => {
-	const bus = makePeerDataConnBus(peer, conn)
-	const helper = new DataConnStateHelperImpl(bus)
-	const awaiter = new BusAwaiter(helper.bus)
-
-	const connAwaiter: PeerDataConnReceiver = {
-		receiveData: async (cb) => {
-			if (helper.isClosed) throw new ClosedPeerDataConnAwaiterError()
-
-			for (;;) {
-				const ev = await awaiter.readEvent()
-
-				if (cb) await cb(ev)
-
-				if (ev.type === PeerDataConnEventType.ERROR) {
-					throw new PeerDataConnAwaiterError(ev.error)
-				} else if (ev.type === PeerDataConnEventType.DATA) {
-					return ev.data
-				} else if (ev.type === PeerDataConnEventType.CLOSE) {
-					throw new ClosedPeerDataConnAwaiterError()
-				}
+	close = () => {
+		if (!this.innerIsClosed) {
+			if (this.closerUnsubscribe) {
+				this.closerUnsubscribe()
+				this.closerUnsubscribe = null // free res for gc
 			}
-		},
-		receiveEvent: async () => await awaiter.readEvent(),
+
+			this.innerIsClosed = true
+			this.awaiter.close()
+		}
 	}
 
-	try {
-		await runner(peer, conn, helper, connAwaiter)
-	} finally {
-		awaiter.close()
-		bus.close()
+	receiveData = async (
+		onEvent?: ((e: PeerDataConnEvent) => Promise<void>) | undefined
+	): Promise<any> => {
+		for (;;) {
+			if (this.isClosed || this.state.isClosed)
+				throw new ClosedPeerDataConnAwaiterError()
+			const ev = await this.awaiter.readEvent()
 
-		conn.close()
+			if (onEvent) await onEvent(ev)
+
+			if (ev.type === PeerDataConnEventType.ERROR) {
+				throw new PeerDataConnAwaiterError(ev.error)
+			} else if (ev.type === PeerDataConnEventType.DATA) {
+				return ev.data
+			} else if (
+				ev.type === PeerDataConnEventType.CLOSE ||
+				ev.type === PeerDataConnEventType.BUS_CLOSE
+			) {
+				throw new ClosedPeerDataConnAwaiterError()
+			}
+		}
+	}
+
+	receiveEvent = async (): Promise<PeerDataConnEvent> => {
+		if (this.isClosed || this.state.isClosed)
+			throw new ClosedPeerDataConnAwaiterError()
+		return await this.awaiter.readEvent()
 	}
 }
