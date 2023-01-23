@@ -8,3 +8,5 @@ export * from "./peerHelper"
 
 export * from "./dataConnRunHelper"
 export * from "./peerRunHelper"
+
+export * from "./connRegistry"
