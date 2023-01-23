@@ -2,6 +2,10 @@ import { DefaultEventBus } from "@teawithsand/tws-stl"
 import Peer, { DataConnection, MediaConnection } from "peerjs"
 import { ClosableSubscribable } from "../util"
 
+export interface PeerSubscribable extends ClosableSubscribable<PeerEvent> {
+	readonly peer: Peer
+}
+
 export enum PeerEventType {
 	ERROR = 1,
 	CALL = 3,
@@ -44,9 +48,7 @@ export type PeerEvent = {
 
 export const makePeerBus = (
 	peer: Peer
-): ClosableSubscribable<PeerEvent> & {
-	close: () => void
-} => {
+): PeerSubscribable => {
 	const b = new DefaultEventBus<PeerEvent>()
 
 	const onError = (err: Error) => {
@@ -101,6 +103,7 @@ export const makePeerBus = (
 	peer.on("open", onOpen)
 
 	return {
+		peer,
 		addSubscriber: b.addSubscriber,
 		close: () => {
 			peer.off("error", onError)
