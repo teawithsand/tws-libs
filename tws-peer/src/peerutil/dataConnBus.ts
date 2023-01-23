@@ -2,6 +2,12 @@ import { DefaultEventBus } from "@teawithsand/tws-stl"
 import Peer, { DataConnection } from "peerjs"
 import { ClosableSubscribable } from "../util"
 
+export interface PeerDataConnSubscribable
+	extends ClosableSubscribable<PeerDataConnEvent> {
+	readonly peer: Peer
+	readonly conn: DataConnection
+}
+
 export enum PeerDataConnEventType {
 	OPEN = 1,
 	CLOSE = 2,
@@ -37,7 +43,7 @@ export type PeerDataConnEvent = {
 export const makePeerDataConnBus = (
 	peer: Peer,
 	conn: DataConnection
-): ClosableSubscribable<PeerDataConnEvent> => {
+): PeerDataConnSubscribable => {
 	const b = new DefaultEventBus<PeerDataConnEvent>()
 
 	const onOpen = () => {
@@ -85,6 +91,8 @@ export const makePeerDataConnBus = (
 	conn.on("iceStateChanged", onIceStateChange)
 
 	return {
+		peer,
+		conn,
 		addSubscriber: b.addSubscriber,
 		close: () => {
 			conn.off("open", onOpen)
