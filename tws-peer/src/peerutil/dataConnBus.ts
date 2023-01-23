@@ -14,6 +14,7 @@ export enum PeerDataConnEventType {
 	DATA = 3,
 	ERROR = 4,
 	ICE_STATE_CHANGE = 5,
+	BUS_CLOSED = 6,
 }
 
 export type PeerDataConnEvent = {
@@ -37,6 +38,9 @@ export type PeerDataConnEvent = {
 	| {
 			type: PeerDataConnEventType.ICE_STATE_CHANGE
 			state: RTCIceConnectionState
+	  }
+	| {
+			type: PeerDataConnEventType.BUS_CLOSED
 	  }
 )
 
@@ -90,16 +94,27 @@ export const makePeerDataConnBus = (
 	conn.on("error", onError)
 	conn.on("iceStateChanged", onIceStateChange)
 
+	let wasBusClosed = false
+
 	return {
 		peer,
 		conn,
 		addSubscriber: b.addSubscriber,
 		close: () => {
+			if (wasBusClosed) return
+			wasBusClosed = true
+			
 			conn.off("open", onOpen)
 			conn.off("close", onClose)
 			conn.off("data", onData)
 			conn.off("error", onError)
 			conn.off("iceStateChanged", onIceStateChange)
+
+			b.emitEvent({
+				type: PeerDataConnEventType.BUS_CLOSED,
+				peer,
+				conn,
+			})
 		},
 	}
 }
