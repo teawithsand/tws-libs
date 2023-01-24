@@ -2,6 +2,21 @@ import { Subscribable, SubscriptionCanceler } from "../eventBus"
 import { latePromise } from "./latePromise"
 import { Queue } from "./queue"
 
+/**
+ * Creates promise that awaits single event from bus it's given.
+ */
+export const busAwaitSingleEvent = async <T>(
+	bus: Subscribable<T>
+): Promise<T> => {
+	const [p, resolve] = latePromise<T>()
+	bus.addSubscriber((s, canceller) => {
+		resolve(s)
+		canceller()
+	})
+
+	return p
+}
+
 export class BusAwaiter<T> {
 	private readonly canceller: SubscriptionCanceler
 	private readonly latePromiseQueue: Queue<
