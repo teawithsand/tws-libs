@@ -60,7 +60,7 @@ export interface PeerDataConnReceiver {
 	receiveEvent: () => Promise<PeerDataConnEvent>
 }
 
-export class PeerDataConnReceiverImpl implements PeerDataConnReceiver {
+export class DefaultPeerDataConnReceiver implements PeerDataConnReceiver {
 	private closerUnsubscribe: SubscriptionCanceler | null
 	private readonly innerStateBus =
 		new DefaultStickyEventBus<PeerDataConnState>({
