@@ -4,7 +4,9 @@ import { Queue } from "./queue"
 
 export class BusAwaiter<T> {
 	private readonly canceller: SubscriptionCanceler
-	private readonly latePromiseQueue: Queue<(e: T) => void> = new Queue()
+	private readonly latePromiseQueue: Queue<
+		[(e: T) => void, (e: any) => void]
+	> = new Queue()
 	private readonly eventQueue: Queue<T> = new Queue()
 	private innerIsClosed = false
 
@@ -14,9 +16,10 @@ export class BusAwaiter<T> {
 
 	constructor(bus: Subscribable<T>) {
 		this.canceller = bus.addSubscriber((event) => {
-			const latePromise = this.latePromiseQueue.pop()
-			if (latePromise) {
-				latePromise(event)
+			const arr = this.latePromiseQueue.pop()
+			if (arr) {
+				const [resolve] = arr
+				resolve(event)
 			} else {
 				this.eventQueue.push(event)
 			}
@@ -45,13 +48,14 @@ export class BusAwaiter<T> {
 	}
 
 	readEvent = (): Promise<T> => {
-		if (this.innerIsClosed) throw new Error("Already closed")
+		if (this.innerIsClosed)
+			return Promise.reject(new Error("Already closed"))
 
 		const event = this.eventQueue.pop()
 		if (event) return Promise.resolve(event)
 
-		const [lp, resolve] = latePromise<T>()
-		this.latePromiseQueue.push(resolve)
+		const [lp, resolve, reject] = latePromise<T>()
+		this.latePromiseQueue.push([resolve, reject])
 
 		return lp
 	}
@@ -61,7 +65,12 @@ export class BusAwaiter<T> {
 		this.innerIsClosed = true
 
 		while (this.eventQueue.pop()) {}
-		while (this.latePromiseQueue.pop()) {}
+		for (;;) {
+			const v = this.latePromiseQueue.pop()
+			if (!v) break
+			const [_resolve, reject] = v
+			reject(new Error("Already closed"))
+		}
 		this.canceller()
 	}
 }
