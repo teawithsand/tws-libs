@@ -108,6 +108,25 @@ export class ConnRegistry<T, S, C, I> {
 	}
 
 	/**
+	 * Notifies registry that user has read all data from conn that it wanted to read and conn is required no more.
+	 *
+	 * It throws if conn with given id is not closed.
+	 * It is no-op when conn with given id does not exist.
+	 * 
+	 * It's user responsibility via setConfig method to make it closable as soon as possible.
+	 */
+	removeConn = (id: string) => {
+		const v = this.innerStateBus.lastEvent[id]
+		if (v) {
+			if (!v.isClosed) throw new Error("Conn not closed yet")
+
+			const lastEvent = { ...this.innerStateBus.lastEvent }
+			delete lastEvent[id]
+			this.innerStateBus.emitEvent(lastEvent)
+		}
+	}
+
+	/**
 	 * Adds new connection to handle to this registry.
 	 *
 	 * Returns ID of registered connection.
@@ -181,12 +200,6 @@ export class ConnRegistry<T, S, C, I> {
 					...this.innerStateBus.lastEvent,
 					[id]: newHelperConn,
 				})
-
-				const copy = {
-					...this.innerStateBus.lastEvent,
-				}
-				delete copy[id]
-				this.innerStateBus.emitEvent(copy)
 			})
 
 		this.innerStateBus.emitEvent({
