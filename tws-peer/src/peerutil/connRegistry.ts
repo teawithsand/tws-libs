@@ -9,6 +9,7 @@ export interface ConnRegistryAdapterHandle<T, S, C, I> {
 	conn: T
 	initData: I
 	setState: (newConnState: S) => void
+	updateState: (callback: (oldState: Readonly<S>) => S) => void
 	connConfigBus: StickySubscribable<C>
 }
 
@@ -84,6 +85,7 @@ export class ConnRegistry<T, S, C, I> {
 		conn: T,
 		initData: I,
 		stateSetter: (state: S) => void,
+		stateUpdater: (cb: (state: Readonly<S>) => S) => void,
 		configBus: StickySubscribable<C>
 	) => {
 		let error: any | null = null
@@ -92,6 +94,7 @@ export class ConnRegistry<T, S, C, I> {
 			conn,
 			connConfigBus: configBus,
 			setState: stateSetter,
+			updateState: stateUpdater,
 			initData,
 		}
 		try {
@@ -142,6 +145,18 @@ export class ConnRegistry<T, S, C, I> {
 				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
 					...this.innerStateBus.lastEvent[id],
 					state: state,
+				}
+
+				this.innerStateBus.emitEvent({
+					...this.innerStateBus.lastEvent,
+					[id]: newHelperConn,
+				})
+			},
+			(cb) => {
+				const lastEvent = this.innerStateBus.lastEvent[id]
+				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
+					...lastEvent,
+					state: cb(lastEvent.state),
 				}
 
 				this.innerStateBus.emitEvent({
