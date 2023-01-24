@@ -2,23 +2,21 @@ import {
 	DefaultStickyEventBus,
 	generateUUID,
 	StickySubscribable,
-	throwExpression,
 } from "@teawithsand/tws-stl"
 
-export interface ConnRegistryAdapterHandle<T, S, C> {
+export interface ConnRegistryAdapterHandle<T, S, C, I> {
 	id: string
 	conn: T
+	initData: I
 	setState: (newConnState: S) => void
 	connConfigBus: StickySubscribable<C>
 }
 
-export interface ConnRegistryAdapter<T, S, C> {
-	makeInitialState: (conn: T, config: C) => S
+export interface ConnRegistryAdapter<T, S, C, I> {
+	makeInitialConfig: (conn: T, initData: I, id: string) => C
+	makeInitialState: (conn: T, config: C, initData: I, id: string) => S
 
-	handle: (
-		conn: T,
-		handle: ConnRegistryAdapterHandle<T, S, C>
-	) => Promise<void>
+	handle: (handle: ConnRegistryAdapterHandle<T, S, C, I>) => Promise<void>
 
 	/**
 	 * Called after `handle` finishes it's execution in any way, either by returning or throwing exception.
@@ -28,14 +26,12 @@ export interface ConnRegistryAdapter<T, S, C> {
 	 * It's optional to implement, in this sense, that properly implemented `handle` can do the same thing.
 	 */
 	cleanup: (
-		conn: T,
-		state: S,
-		config: C,
+		handle: ConnRegistryAdapterHandle<T, S, C, I>,
 		exception: any | null
 	) => Promise<void>
 }
 
-export type ConnRegistryConn<T, S, C> = {
+export type ConnRegistryConn<T, S, C, I> = {
 	id: string
 	promise: Promise<void> // it never throws, as unhandled throws are no no in js
 
@@ -43,12 +39,13 @@ export type ConnRegistryConn<T, S, C> = {
 	error: any | null
 
 	conn: T
-	adapterState: S
+	initData: I
+	state: S
 	config: C
 }
 
-export type ConnRegistryState<T, S, C> = {
-	[key: string]: ConnRegistryConn<T, S, C> & { id: typeof key }
+export type ConnRegistryState<T, S, C, I> = {
+	[key: string]: ConnRegistryConn<T, S, C, I> & { id: typeof key }
 }
 
 /**
@@ -56,14 +53,14 @@ export type ConnRegistryState<T, S, C> = {
  *
  * It accepts adapter responsible for actual connection handling logic.
  */
-export class ConnRegistry<T, S, C> {
+export class ConnRegistry<T, S, C, I> {
 	// TODO(teawithsand): unit test that class
-	
+
 	private readonly innerStateBus = new DefaultStickyEventBus<
-		ConnRegistryState<T, S, C>
+		ConnRegistryState<T, S, C, I>
 	>({})
 
-	get stateBus(): StickySubscribable<ConnRegistryState<T, S, C>> {
+	get stateBus(): StickySubscribable<ConnRegistryState<T, S, C, I>> {
 		return this.innerStateBus
 	}
 
@@ -71,7 +68,7 @@ export class ConnRegistry<T, S, C> {
 		[key: string]: DefaultStickyEventBus<C>
 	} = {}
 
-	constructor(private readonly adapter: ConnRegistryAdapter<T, S, C>) {}
+	constructor(private readonly adapter: ConnRegistryAdapter<T, S, C, I>) {}
 
 	/**
 	 * Updates config in config bus for connection with id given.
@@ -85,58 +82,66 @@ export class ConnRegistry<T, S, C> {
 	private readonly innerHandle = async (
 		id: string,
 		conn: T,
+		initData: I,
 		stateSetter: (state: S) => void,
 		configBus: StickySubscribable<C>
 	) => {
 		let error: any | null = null
+		const handle = {
+			id,
+			conn,
+			connConfigBus: configBus,
+			setState: stateSetter,
+			initData,
+		}
 		try {
-			await this.adapter.handle(conn, {
-				id,
-				conn,
-				connConfigBus: configBus,
-				setState: stateSetter,
-			})
+			await this.adapter.handle(handle)
 		} catch (e) {
 			error = e
 			throw e
 		} finally {
-			await this.adapter.cleanup(
-				conn,
-				this.innerStateBus.lastEvent[id].adapterState ??
-					throwExpression(new Error("Unreachable code")),
-				this.configBuses[id].lastEvent ??
-					throwExpression(new Error("Unreachable code")),
-				error
-			)
+			await this.adapter.cleanup(handle, error)
 		}
 	}
 
 	/**
 	 * Adds new connection to handle to this registry.
+	 *
+	 * Returns ID of registered connection.
 	 */
-	addConn = (conn: T, config: C) => {
+	addConn = (conn: T, initData: I): string => {
 		const id = generateUUID()
 
-		const helperConn: ConnRegistryConn<T, S, C> = {
-			id: generateUUID(),
-			config,
+		const firstConfig = this.adapter.makeInitialConfig(conn, initData, id)
+		const firstState = this.adapter.makeInitialState(
 			conn,
-			adapterState: this.adapter.makeInitialState(conn, config),
+			firstConfig,
+			initData,
+			id
+		)
+
+		const helperConn: ConnRegistryConn<T, S, C, I> = {
+			id: generateUUID(),
+			initData,
+			config: firstConfig,
+			state: firstState,
+			conn,
 			error: null,
 			isClosed: false,
 			promise: null as any, // HACK(teawithsand): to get types right. It must be overridden later.
 		}
 
-		const bus = new DefaultStickyEventBus<C>(config)
+		const bus = new DefaultStickyEventBus<C>(helperConn.config)
 		this.configBuses[id] = bus
 
 		helperConn.promise = this.innerHandle(
 			id,
 			conn,
+			initData,
 			(state) => {
-				const newHelperConn: ConnRegistryConn<T, S, C> = {
+				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
 					...this.innerStateBus.lastEvent[id],
-					adapterState: state,
+					state: state,
 				}
 
 				this.innerStateBus.emitEvent({
@@ -152,7 +157,7 @@ export class ConnRegistry<T, S, C> {
 			.finally(() => {
 				delete this.configBuses[id]
 
-				const newHelperConn: ConnRegistryConn<T, S, C> = {
+				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
 					...this.innerStateBus.lastEvent[id],
 					isClosed: true,
 				}
@@ -185,5 +190,7 @@ export class ConnRegistry<T, S, C> {
 				[id]: newHelperConn,
 			})
 		})
+
+		return id
 	}
 }
