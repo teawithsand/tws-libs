@@ -72,12 +72,24 @@ export class ConnRegistry<T, S, C, I> {
 	constructor(private readonly adapter: ConnRegistryAdapter<T, S, C, I>) {}
 
 	/**
+	 * Sets new config to config bus for connection with id given.
+	 *
+	 * Call is ignored when connection with given id does not exist.
+	 */
+	setConfig = (id: string, config: C) => {
+		this.configBuses[id]?.emitEvent(config)
+	}
+
+	/**
 	 * Updates config in config bus for connection with id given.
 	 *
 	 * Call is ignored when connection with given id does not exist.
 	 */
-	updateConfig = (id: string, config: C) => {
-		this.configBuses[id]?.emitEvent(config)
+	updateConfig = (id: string, callback: (oldConfig: Readonly<C>) => C) => {
+		const oldConfig = this.configBuses[id]?.lastEvent
+		if (oldConfig) {
+			this.configBuses[id].emitEvent(callback(oldConfig))
+		}
 	}
 
 	private readonly innerHandle = async (
@@ -112,7 +124,7 @@ export class ConnRegistry<T, S, C, I> {
 	 *
 	 * It throws if conn with given id is not closed.
 	 * It is no-op when conn with given id does not exist.
-	 * 
+	 *
 	 * It's user responsibility via setConfig method to make it closable as soon as possible.
 	 */
 	removeConn = (id: string) => {
@@ -143,7 +155,7 @@ export class ConnRegistry<T, S, C, I> {
 		)
 
 		const helperConn: ConnRegistryConn<T, S, C, I> = {
-			id: generateUUID(),
+			id,
 			initData,
 			config: firstConfig,
 			state: firstState,
@@ -153,8 +165,8 @@ export class ConnRegistry<T, S, C, I> {
 			promise: null as any, // HACK(teawithsand): to get types right. It must be overridden later.
 		}
 
-		const bus = new DefaultStickyEventBus<C>(helperConn.config)
-		this.configBuses[id] = bus
+		const configBus = new DefaultStickyEventBus<C>(helperConn.config)
+		this.configBuses[id] = configBus
 
 		helperConn.promise = this.innerHandle(
 			id,
@@ -183,7 +195,7 @@ export class ConnRegistry<T, S, C, I> {
 					[id]: newHelperConn,
 				})
 			},
-			bus
+			configBus
 		)
 			.catch(() => {
 				// ignore errors thrown here
@@ -207,7 +219,7 @@ export class ConnRegistry<T, S, C, I> {
 			[id]: helperConn,
 		})
 
-		bus.addSubscriber((config) => {
+		configBus.addSubscriber((config) => {
 			const newHelperConn = {
 				...this.innerStateBus.lastEvent[id],
 				config,
