@@ -1,6 +1,7 @@
 import {
 	DefaultEventBus,
 	DefaultStickyEventBus,
+	generateUUID,
 	StickySubscribable,
 	Subscribable,
 	SubscriptionCanceler,
@@ -14,10 +15,15 @@ export type PeerHelperConfig = {
 	 * Set this to null in order to disable peer.
 	 */
 	config: PeerJSOption | null
+
+	/**
+	 * ID for peer to use. If null, random one is generated.
+	 */
+	id: string | null
 }
 
 export type PeerHelperState = {
-	config: PeerHelperConfig
+	config: PeerHelperConfig | null
 	peer: Peer | null
 	bus: ClosableSubscribable<PeerEvent> | null
 
@@ -44,6 +50,7 @@ export class PeerHelper {
 		{
 			config: {
 				config: null,
+				id: null,
 			},
 			peer: null,
 			bus: null,
@@ -59,11 +66,13 @@ export class PeerHelper {
 	}
 
 	restart = () => {
-		this.setConfig(this.stateBus.lastEvent.config.config)
+		this.setConfig(this.stateBus.lastEvent.config)
 	}
 
-	setConfig = (config: PeerJSOption | null) => {
-		const newPeer = config ? new Peer(config) : null
+	setConfig = (config: PeerHelperConfig | null) => {
+		const newPeer = config
+			? new Peer(config.id ?? generateUUID(), config.config ?? {})
+			: null
 		const peerBus = newPeer ? makePeerBus(newPeer) : null
 
 		const { peer: prevPeer, bus: prevBus } = this.innerStateBus.lastEvent
@@ -108,7 +117,7 @@ export class PeerHelper {
 			}) ?? null
 
 		this.innerStateBus.emitEvent({
-			config: { config },
+			config,
 			peer: newPeer,
 			bus: peerBus,
 			peerState: {
