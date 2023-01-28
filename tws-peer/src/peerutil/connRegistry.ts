@@ -168,6 +168,7 @@ export class ConnRegistry<T, S, C, I> {
 		const configBus = new DefaultStickyEventBus<C>(helperConn.config)
 		this.configBuses[id] = configBus
 
+		let handlingError: any | null = null
 		helperConn.promise = this.innerHandle(
 			id,
 			conn,
@@ -197,8 +198,8 @@ export class ConnRegistry<T, S, C, I> {
 			},
 			configBus
 		)
-			.catch(() => {
-				// ignore errors thrown here
+			.catch((e) => {
+				handlingError = e
 			})
 			.finally(() => {
 				delete this.configBuses[id]
@@ -206,6 +207,7 @@ export class ConnRegistry<T, S, C, I> {
 				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
 					...this.innerStateBus.lastEvent[id],
 					isClosed: true,
+					error: handlingError,
 				}
 
 				this.innerStateBus.emitEvent({
@@ -214,11 +216,13 @@ export class ConnRegistry<T, S, C, I> {
 				})
 			})
 
+		// Put conn into the bus for the 1st time
 		this.innerStateBus.emitEvent({
 			...this.innerStateBus.lastEvent,
 			[id]: helperConn,
 		})
-
+		
+		// Notify state about config changes
 		configBus.addSubscriber((config) => {
 			const newHelperConn = {
 				...this.innerStateBus.lastEvent[id],
