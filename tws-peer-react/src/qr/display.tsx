@@ -1,4 +1,5 @@
-import { makeQrCode, QRCodeOptions } from "@teawithsand/tws-peer"
+import { makeQrCode } from "@teawithsand/tws-peer"
+import { QRCodeErrorCorrectionLevel } from "qrcode"
 import React, { useEffect, useState } from "react"
 
 /**
@@ -9,24 +10,43 @@ export const QRCodeDisplay = (props: {
 	width: number
 	height: number
 	data: string
-	options?: QRCodeOptions
+	errorCorrectionLevel?: QRCodeErrorCorrectionLevel
 	style?: React.CSSProperties
 	className?: string
 }) => {
-	const { width, height, style, className, data: text, options } = props
+	const {
+		width,
+		height,
+		style,
+		className,
+		data: text,
+		errorCorrectionLevel,
+	} = props
 	const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null)
 
+	// TODO(teawithsand): should this be useLayoutEffect?
+	//  It does not do any measurements(except canvas width/height), but it's ok I guess.
+	
 	useEffect(() => {
 		if (canvas) {
 			const ctx = canvas.getContext("2d")
 			if (ctx) {
-                // Reset canvas
+				// Reset canvas
 				ctx.strokeStyle = "#FFFFFF"
 				ctx.rect(0, 0, width, height)
 			}
-			makeQrCode(text, options).drawToCanvas(canvas)
+			makeQrCode(
+				text,
+				errorCorrectionLevel
+					? {
+							errorCorrectionLevel,
+							width: canvas.width,
+							height: canvas.height,
+					  }
+					: undefined
+			).drawToCanvas(canvas)
 		}
-	}, [canvas, text, options, width, height])
+	}, [canvas, text, errorCorrectionLevel, width, height])
 
 	return (
 		<canvas
