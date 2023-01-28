@@ -223,6 +223,32 @@ describe("conn registry", () => {
 		)
 	})
 
+	it("can remove conn", async () => {
+		const ex = new Error("Whoopsie error")
+		await runCondTest(
+			async (reg) => {
+				const id = reg.addConn(
+					{},
+					{
+						n: 2,
+					}
+				)
+
+				reg.setConfig(id, {
+					n: 1,
+					done: true,
+				})
+
+				return id
+			},
+			async (reg, id) => {
+				const s = await busAwaitSingleEvent(reg.stateBus)
+				if (s[id]?.isClosed ?? false) reg.removeConn(id)
+				return !(id in s)
+			}
+		)
+	})
+
 	it("can wait until conn done using promise", async () => {
 		const ex = new Error("Whoopsie error")
 		await runCondTest(
