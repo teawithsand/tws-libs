@@ -64,8 +64,7 @@ export class AsyncQueue<T> {
 	peek = (): T | null => this.resultQueue.peek()
 
 	popAsync = async () => {
-		if (this.isClosed)
-			throw this.closeError
+		if (this.isClosed) throw this.closeError
 
 		if (this.resultQueue.length) {
 			return this.resultQueue.pop()
@@ -76,7 +75,10 @@ export class AsyncQueue<T> {
 		return p
 	}
 
-	close = () => {
+	close = (error?: Error) => {
+		if (this.isClosed) return
+		this.closeError = error ?? this.closeError
+
 		this.resultQueue.clear()
 
 		this.isClosed = true
