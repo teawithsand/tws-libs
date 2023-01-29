@@ -9,7 +9,7 @@ import {
 	throwExpression,
 } from "@teawithsand/tws-stl"
 import Peer, { MediaConnection, PeerJSOption } from "peerjs"
-import { makePeerBus, PeerEventType } from "../peerutil"
+import { makePeerBus, PeerEventType } from "../innerUtil"
 import { IDataConnection, PeerJSIDataConnection } from "./dataConn"
 
 export type IPeerState = {

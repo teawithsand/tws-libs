@@ -7,7 +7,7 @@ import {
 	Subscribable,
 } from "@teawithsand/tws-stl"
 import { DataConnection } from "peerjs"
-import { makePeerDataConnBus, PeerDataConnEventType } from "../peerutil"
+import { makePeerDataConnBus, PeerDataConnEventType } from "../innerUtil"
 import { IPeer } from "./peer"
 
 export enum IPeerDataConnectionEventType {

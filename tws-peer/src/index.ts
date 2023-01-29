@@ -1,5 +1,5 @@
 export * from "./constants"
 export * from "./peer"
 export * from "./util"
-export * from "./peerutil"
 export * from "./peerAl"
+export * from "./connRegistry"
