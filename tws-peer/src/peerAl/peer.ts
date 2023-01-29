@@ -192,7 +192,7 @@ export class PeerJSIPeer implements IPeer {
 			if (!this.innerPeer) return
 
 			this.innerPeer.destroy()
-			this.innerEventBus.emitEvent({
+			this.innerHandleEvent({
 				type: IPeerEventType.DEACTIVATE,
 				peer: this,
 			})
