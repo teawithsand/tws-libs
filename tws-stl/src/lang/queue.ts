@@ -27,6 +27,13 @@ export class Queue<T> {
 		this.inner = []
 	}
 
+	append = (v: T) => {
+		this.inner.push(v)
+	}
+
+	/**
+	 * @deprecated Use append instead as it's more queue-like function.
+	 */
 	push = (v: T) => {
 		this.inner.push(v)
 	}
