@@ -15,6 +15,9 @@ export class AsyncQueue<T> {
 		reject: (e: any) => void
 	}>()
 	private readonly resultQueue = new Queue<T>()
+	private closeError: Error = new AsyncQueueClosedError(
+		"Async Queue was closed before value to receive was emitted"
+	)
 
 	private isClosed = false
 
@@ -62,7 +65,7 @@ export class AsyncQueue<T> {
 
 	popAsync = async () => {
 		if (this.isClosed)
-			throw new AsyncQueueClosedError("AsyncQueue was closed")
+			throw this.closeError
 
 		if (this.resultQueue.length) {
 			return this.resultQueue.pop()
@@ -73,20 +76,23 @@ export class AsyncQueue<T> {
 		return p
 	}
 
-	close = () => {
+	/**
+	 * Closes AsyncQueue so no more data can be pushed/popped to/from it.
+	 * 
+	 * It may specify error which should be thrown for all append/popAsync calls.
+	 */
+	close = (error?: Error) => {
+		this.isClosed = true
+		this.closeError = error ?? this.closeError
+
 		this.resultQueue.clear()
 
-		this.isClosed = true
 		while (!this.awaitersQueue.isEmpty) {
 			const { reject } =
 				this.awaitersQueue.pop() ??
 				throwExpression(new Error("unreachable code"))
 
-			reject(
-				new AsyncQueueClosedError(
-					"Async Queue was closed before value to receive was emitted"
-				)
-			)
+			reject(this.closeError)
 		}
 	}
 }
