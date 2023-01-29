@@ -1,10 +1,9 @@
 import { DefaultEventBus } from "@teawithsand/tws-stl"
-import Peer, { DataConnection } from "peerjs"
-import { ClosableSubscribable } from "../util"
+import { DataConnection } from "peerjs"
+import { ClosableSubscribable } from "../util/closable"
 
 export interface PeerDataConnSubscribable
 	extends ClosableSubscribable<PeerDataConnEvent> {
-	readonly peer: Peer
 	readonly conn: DataConnection
 }
 
@@ -18,7 +17,6 @@ export enum PeerDataConnEventType {
 }
 
 export type PeerDataConnEvent = {
-	peer: Peer
 	conn: DataConnection
 } & (
 	| {
@@ -45,29 +43,29 @@ export type PeerDataConnEvent = {
 )
 
 export const makePeerDataConnBus = (
-	peer: Peer,
 	conn: DataConnection
 ): PeerDataConnSubscribable => {
 	const b = new DefaultEventBus<PeerDataConnEvent>()
 
+	let wasBusClosed = false
+	let close: () => void
+
 	const onOpen = () => {
 		b.emitEvent({
 			conn,
-			peer,
 			type: PeerDataConnEventType.OPEN,
 		})
 	}
 	const onClose = () => {
 		b.emitEvent({
 			conn,
-			peer,
 			type: PeerDataConnEventType.CLOSE,
 		})
+		close()
 	}
 	const onData = (data: any) => {
 		b.emitEvent({
 			conn,
-			peer,
 			type: PeerDataConnEventType.DATA,
 			data,
 		})
@@ -75,7 +73,6 @@ export const makePeerDataConnBus = (
 	const onError = (error: Error) => {
 		b.emitEvent({
 			conn,
-			peer,
 			type: PeerDataConnEventType.ERROR,
 			error,
 		})
@@ -83,38 +80,36 @@ export const makePeerDataConnBus = (
 	const onIceStateChange = (state: RTCIceConnectionState) => {
 		b.emitEvent({
 			conn,
-			peer,
 			type: PeerDataConnEventType.ICE_STATE_CHANGE,
 			state,
 		})
 	}
+
+	close = () => {
+		if (wasBusClosed) return
+		wasBusClosed = true
+
+		conn.off("open", onOpen)
+		conn.off("close", onClose)
+		conn.off("data", onData)
+		conn.off("error", onError)
+		conn.off("iceStateChanged", onIceStateChange)
+
+		b.emitEvent({
+			type: PeerDataConnEventType.BUS_CLOSE,
+			conn,
+		})
+	}
+
 	conn.on("open", onOpen)
 	conn.on("close", onClose)
 	conn.on("data", onData)
 	conn.on("error", onError)
 	conn.on("iceStateChanged", onIceStateChange)
 
-	let wasBusClosed = false
-
 	return {
-		peer,
 		conn,
 		addSubscriber: b.addSubscriber,
-		close: () => {
-			if (wasBusClosed) return
-			wasBusClosed = true
-			
-			conn.off("open", onOpen)
-			conn.off("close", onClose)
-			conn.off("data", onData)
-			conn.off("error", onError)
-			conn.off("iceStateChanged", onIceStateChange)
-
-			b.emitEvent({
-				type: PeerDataConnEventType.BUS_CLOSE,
-				peer,
-				conn,
-			})
-		},
+		close,
 	}
 }

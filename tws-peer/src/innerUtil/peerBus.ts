@@ -1,6 +1,6 @@
 import { DefaultEventBus } from "@teawithsand/tws-stl"
 import Peer, { DataConnection, MediaConnection } from "peerjs"
-import { ClosableSubscribable } from "../util"
+import { ClosableSubscribable } from "../util/closable"
 
 export interface PeerSubscribable extends ClosableSubscribable<PeerEvent> {
 	readonly peer: Peer
@@ -49,6 +49,9 @@ export type PeerEvent = {
 export const makePeerBus = (peer: Peer): PeerSubscribable => {
 	const b = new DefaultEventBus<PeerEvent>()
 
+	let wasBusClosed = false
+	let close: () => void
+
 	const onError = (err: Error) => {
 		b.emitEvent({
 			peer,
@@ -91,6 +94,25 @@ export const makePeerBus = (peer: Peer): PeerSubscribable => {
 			peer,
 			type: PeerEventType.CLOSE,
 		})
+
+		close()
+	}
+
+	close = () => {
+		if (wasBusClosed) return
+		wasBusClosed = true
+
+		peer.off("error", onError)
+		peer.off("connection", onConnect)
+		peer.off("disconnected", onDisconnect)
+		peer.off("call", onCall)
+		peer.off("open", onOpen)
+		peer.off("close", onClose)
+
+		b.emitEvent({
+			type: PeerEventType.BUS_CLOSE,
+			peer,
+		})
 	}
 
 	peer.on("error", onError)
@@ -100,26 +122,9 @@ export const makePeerBus = (peer: Peer): PeerSubscribable => {
 	peer.on("close", onClose)
 	peer.on("open", onOpen)
 
-	let wasBusClosed = false
-
 	return {
 		peer,
 		addSubscriber: b.addSubscriber,
-		close: () => {
-			if (wasBusClosed) return
-			wasBusClosed = true
-
-			peer.off("error", onError)
-			peer.off("connection", onConnect)
-			peer.off("disconnected", onDisconnect)
-			peer.off("call", onCall)
-			peer.off("open", onOpen)
-			peer.off("close", onClose)
-
-			b.emitEvent({
-				type: PeerEventType.BUS_CLOSE,
-				peer,
-			})
-		},
+		close,
 	}
 }

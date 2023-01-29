@@ -15,6 +15,9 @@ export class AsyncQueue<T> {
 		reject: (e: any) => void
 	}>()
 	private readonly resultQueue = new Queue<T>()
+	private closeError: Error = new AsyncQueueClosedError(
+		"Async Queue was closed before value to receive was emitted"
+	)
 
 	private isClosed = false
 
@@ -62,7 +65,7 @@ export class AsyncQueue<T> {
 
 	popAsync = async () => {
 		if (this.isClosed)
-			throw new AsyncQueueClosedError("AsyncQueue was closed")
+			throw this.closeError
 
 		if (this.resultQueue.length) {
 			return this.resultQueue.pop()
@@ -82,11 +85,7 @@ export class AsyncQueue<T> {
 				this.awaitersQueue.pop() ??
 				throwExpression(new Error("unreachable code"))
 
-			reject(
-				new AsyncQueueClosedError(
-					"Async Queue was closed before value to receive was emitted"
-				)
-			)
+			reject(this.closeError)
 		}
 	}
 }
