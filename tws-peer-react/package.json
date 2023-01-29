@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-peer-react",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Peer to peer communication abstraction layer - react modules for handling pairing",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,9 +21,8 @@
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
-		"@teawithsand/tws-peer": "0.0.3",
-		"@teawithsand/tws-stl": "^0.0.14",
-		"@teawithsand/tws-stl-react": "^0.0.4",
+		"@teawithsand/tws-peer": "0.2.0",
+		"@teawithsand/tws-stl": "^0.0.18",
 		"html5-qrcode": "^2.3.4"
 	},
 	"peerDependencies": {

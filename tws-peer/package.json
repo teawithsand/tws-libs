@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-peer",
-	"version": "0.1.2-b5",
+	"version": "0.2.0",
 	"description": "Peer to peer communication abstraction layer and some utils",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
-		"@teawithsand/tws-stl": "^0.0.15",
+		"@teawithsand/tws-stl": "^0.0.18",
 		"peerjs": "^1.4.7",
 		"qrcode": "^1.5.1"
 	},
