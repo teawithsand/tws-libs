@@ -89,21 +89,42 @@ export class PeerJSIDataConnection implements IDataConnection {
 			isOpen: false,
 		})
 
+	private isReceivedMessagesQueueClosed = false
 	private readonly receivedMessagesQueue = new AsyncQueue<any>()
 	private readonly preSendQueue = new Queue<any>()
+
+	private onCloseCleanup = (error?: Error) => {
+		if (!this.isReceivedMessagesQueueClosed) {
+			this.preSendQueue.clear() // just in case it was not cleared
+			this.receivedMessagesQueue.close(error)
+			this.isReceivedMessagesQueueClosed = true
+		}
+	}
 
 	private readonly innerHandleEvent = (event: IPeerDataConnectionEvent) => {
 		if (event.type === IPeerDataConnectionEventType.ERROR) {
 			this.innerStateBus.emitEvent({
 				...this.innerStateBus.lastEvent,
 				error: event.error,
+				isClosed: true,
 			})
+			this.doOnClose(event.error)
 		} else if (event.type === IPeerDataConnectionEventType.CLOSE) {
 			this.innerStateBus.emitEvent({
 				...this.innerStateBus.lastEvent,
 				isClosed: true,
 			})
+
+			this.doOnClose()
 		} else if (event.type === IPeerDataConnectionEventType.OPEN) {
+			const state = this.innerStateBus.lastEvent
+			if (!state.isClosed && !state.error) {
+				while (!this.preSendQueue.isEmpty) {
+					const v = this.preSendQueue.pop()
+					this.innerSendMessage(v)
+				}
+			}
+
 			this.innerStateBus.emitEvent({
 				...this.innerStateBus.lastEvent,
 				isOpen: true,
@@ -113,14 +134,30 @@ export class PeerJSIDataConnection implements IDataConnection {
 		this.innerEventBus.emitEvent(event)
 	}
 
-	private innerSendMessage = (msg: any) => {
+	private doOnClose = (e?: Error) => {
+		if (!this.isReceivedMessagesQueueClosed) {
+			this.receivedMessagesQueue.close(e)
+			this.isReceivedMessagesQueueClosed = true
+
+			this.onCloseCleanup()
+
+			try {
+				this.innerConn.close()
+			} catch (e) {}
+		}
+	}
+
+	private innerSendMessage = (msg: any, doThrow?: boolean) => {
 		try {
 			this.innerConn.send(msg)
 		} catch (e) {
-			// ignore or log somehow.
-			// In general. it should never happen, but may for some reason
-
-			console.error("PeerJSIDataConnection inner peerjs failure", e)
+			if (doThrow) {
+				throw e
+			} else {
+				if (e instanceof Error) {
+					this.doOnClose(e)
+				}
+			}
 		}
 	}
 
@@ -131,11 +168,6 @@ export class PeerJSIDataConnection implements IDataConnection {
 		const bus = makePeerDataConnBus(innerConn)
 		bus.addSubscriber((event) => {
 			if (event.type === PeerDataConnEventType.OPEN) {
-				while (!this.preSendQueue.isEmpty) {
-					const v = this.preSendQueue.pop()
-					this.innerSendMessage(v)
-				}
-
 				this.innerHandleEvent({
 					type: IPeerDataConnectionEventType.OPEN,
 					conn: this,
@@ -146,7 +178,10 @@ export class PeerJSIDataConnection implements IDataConnection {
 					conn: this,
 				})
 			} else if (event.type === PeerDataConnEventType.DATA) {
-				this.receivedMessagesQueue.append(event.data)
+				if (!this.isReceivedMessagesQueueClosed) {
+					// above condition should always be true.
+					this.receivedMessagesQueue.append(event.data)
+				}
 
 				this.innerHandleEvent({
 					type: IPeerDataConnectionEventType.DATA,
@@ -173,7 +208,7 @@ export class PeerJSIDataConnection implements IDataConnection {
 				return self.receivedMessagesQueue.pop()
 			},
 			receive: async () => {
-				// TODO(teawithsand): intercept and throw custom exception here
+				// custom exception is
 				const v = await self.receivedMessagesQueue.popAsync()
 				return v
 			},
@@ -196,11 +231,11 @@ export class PeerJSIDataConnection implements IDataConnection {
 		if (!state.isOpen) {
 			this.preSendQueue.append(data)
 		} else {
-			this.innerSendMessage(data)
+			this.innerSendMessage(data, true)
 		}
 	}
 
 	close = () => {
-		this.innerConn.close()
+		this.innerConn.close() // this should trigger cascade of events that are required to perform close
 	}
 }
