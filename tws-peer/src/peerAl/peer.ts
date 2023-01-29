@@ -125,7 +125,14 @@ export class PeerJSIPeer implements IPeer {
 		id: null,
 	})
 
-	constructor() {}
+	constructor() {
+		this.innerConfigBus.addSubscriber((config) => {
+			this.innerStateBus.emitEvent({
+				...this.innerStateBus.lastEvent,
+				config,
+			})
+		})
+	}
 
 	get eventBus(): Subscribable<IPeerEvent> {
 		return this.innerEventBus
@@ -295,19 +302,13 @@ export class PeerJSIPeer implements IPeer {
 	}
 
 	setConfig = (config: IPeerConfig) => {
-		this.innerStateBus.emitEvent({
-			...this.innerStateBus.lastEvent,
-			config,
-		})
+		this.innerConfigBus.emitEvent(config)
 	}
 
 	updateConfig = (
 		callback: (oldConfig: Readonly<IPeerConfig>) => IPeerConfig
 	) => {
-		this.innerStateBus.emitEvent({
-			...this.innerStateBus.lastEvent,
-			config: callback(this.innerStateBus.lastEvent.config),
-		})
+		this.innerConfigBus.emitEvent(callback(this.innerConfigBus.lastEvent))
 	}
 
 	connect = async (remoteId: string): Promise<IDataConnection> => {
