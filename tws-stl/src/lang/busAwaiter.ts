@@ -17,6 +17,7 @@ export const busAwaitSingleEvent = async <T>(
 	return p
 }
 
+// TODO(teawithsand): rebuild this using AsyncQueue
 export class BusAwaiter<T> {
 	private readonly canceller: SubscriptionCanceler
 	private readonly latePromiseQueue: Queue<
