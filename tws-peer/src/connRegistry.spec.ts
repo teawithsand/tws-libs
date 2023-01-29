@@ -33,6 +33,7 @@ export class DummyAdapter
 	implements
 		ConnRegistryAdapter<DummyConn, DummyState, DummyConfig, DummyInitData>
 {
+	modifyConfigOnRemove = (config: DummyConfig) => config
 	makeInitialConfig = (
 		conn: DummyConn,
 		initData: DummyInitData,
@@ -173,30 +174,6 @@ describe("conn registry", () => {
 		)
 	})
 
-	it("can close conn", async () => {
-		await runCondTest(
-			async (reg) => {
-				const id = reg.addConn(
-					{},
-					{
-						n: 2,
-					}
-				)
-
-				reg.setConfig(id, {
-					n: 10,
-					done: true,
-				})
-
-				return id
-			},
-			async (reg, id) => {
-				const s = await busAwaitSingleEvent(reg.stateBus)
-				return s[id]?.isClosed === true
-			}
-		)
-	})
-
 	it("can throw conn", async () => {
 		const ex = new Error("Whoopsie error")
 		await runCondTest(
@@ -244,6 +221,33 @@ describe("conn registry", () => {
 			async (reg, id) => {
 				const s = await busAwaitSingleEvent(reg.stateBus)
 				if (s[id]?.isClosed ?? false) reg.removeConn(id)
+				return !(id in s)
+			}
+		)
+	})
+
+	it("can remove conn even when not closed", async () => {
+		const ex = new Error("Whoopsie error")
+		await runCondTest(
+			async (reg) => {
+				const id = reg.addConn(
+					{},
+					{
+						n: 2,
+					}
+				)
+
+				reg.setConfig(id, {
+					n: 1,
+					done: false,
+				})
+
+				reg.removeConn(id)
+
+				return id
+			},
+			async (reg, id) => {
+				const s = await busAwaitSingleEvent(reg.stateBus)
 				return !(id in s)
 			}
 		)

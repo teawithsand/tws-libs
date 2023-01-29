@@ -18,6 +18,10 @@ export interface ConnRegistryAdapter<T, S, C, I> {
 	makeInitialState: (conn: T, config: C, initData: I, id: string) => S
 
 	handle: (handle: ConnRegistryAdapterHandle<T, S, C, I>) => Promise<void>
+	/**
+	 * Gives adapter chance to handle some closing procedure when connection removal starts.
+	 */
+	modifyConfigOnRemove: (config: C) => C
 
 	/**
 	 * Called after `handle` finishes it's execution in any way, either by returning or throwing exception.
@@ -77,6 +81,10 @@ export class ConnRegistry<T, S, C, I> {
 	 * Call is ignored when connection with given id does not exist.
 	 */
 	setConfig = (id: string, config: C) => {
+		// connection may have been removed already
+		if (!(id in this.stateBus.lastEvent)) return
+
+		// but config bus is removed when connections dies really
 		this.configBuses[id]?.emitEvent(config)
 	}
 
@@ -130,9 +138,10 @@ export class ConnRegistry<T, S, C, I> {
 	removeConn = (id: string) => {
 		const v = this.innerStateBus.lastEvent[id]
 		if (v) {
-			if (!v.isClosed) throw new Error("Conn not closed yet")
-
 			const lastEvent = { ...this.innerStateBus.lastEvent }
+			const newConfig = this.adapter.modifyConfigOnRemove(v.config)
+			this.configBuses[id]?.emitEvent(newConfig)
+
 			delete lastEvent[id]
 			this.innerStateBus.emitEvent(lastEvent)
 		}
@@ -168,33 +177,36 @@ export class ConnRegistry<T, S, C, I> {
 		const configBus = new DefaultStickyEventBus<C>(helperConn.config)
 		this.configBuses[id] = configBus
 
+		const emitUpdatedState = (
+			callback: (
+				prevState: Readonly<ConnRegistryConn<T, S, C, I>>
+			) => ConnRegistryConn<T, S, C, I>
+		) => {
+			const prev = this.innerStateBus.lastEvent[id]
+			if (!prev) return
+
+			this.innerStateBus.emitEvent({
+				...this.innerStateBus.lastEvent,
+				[id]: callback(prev),
+			})
+		}
+
 		let handlingError: any | null = null
 		helperConn.promise = this.innerHandle(
 			id,
 			conn,
 			initData,
 			(state) => {
-				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
-					...this.innerStateBus.lastEvent[id],
-					state: state,
-				}
-
-				this.innerStateBus.emitEvent({
-					...this.innerStateBus.lastEvent,
-					[id]: newHelperConn,
-				})
+				emitUpdatedState((prev) => ({
+					...prev,
+					state,
+				}))
 			},
 			(cb) => {
-				const lastEvent = this.innerStateBus.lastEvent[id]
-				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
-					...lastEvent,
-					state: cb(lastEvent.state),
-				}
-
-				this.innerStateBus.emitEvent({
-					...this.innerStateBus.lastEvent,
-					[id]: newHelperConn,
-				})
+				emitUpdatedState((prev) => ({
+					...prev,
+					state: cb(prev.state),
+				}))
 			},
 			configBus
 		)
@@ -204,16 +216,11 @@ export class ConnRegistry<T, S, C, I> {
 			.finally(() => {
 				delete this.configBuses[id]
 
-				const newHelperConn: ConnRegistryConn<T, S, C, I> = {
-					...this.innerStateBus.lastEvent[id],
+				emitUpdatedState((prev) => ({
+					...prev,
 					isClosed: true,
 					error: handlingError,
-				}
-
-				this.innerStateBus.emitEvent({
-					...this.innerStateBus.lastEvent,
-					[id]: newHelperConn,
-				})
+				}))
 			})
 
 		// Put conn into the bus for the 1st time
@@ -221,7 +228,7 @@ export class ConnRegistry<T, S, C, I> {
 			...this.innerStateBus.lastEvent,
 			[id]: helperConn,
 		})
-		
+
 		// Notify state about config changes
 		configBus.addSubscriber((config) => {
 			const newHelperConn = {
