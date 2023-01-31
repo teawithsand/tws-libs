@@ -1,6 +1,6 @@
 import { MediaPlayerError, SourcePlayerError } from "../error"
 import { AudioFilter } from "../filter"
-import { PlayerSourceProvider } from "../sourceProvider"
+import { PlayerSource } from "../source"
 import { Milliseconds } from "../unit"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
@@ -34,23 +34,9 @@ export type PlayerConfig<S, SK> = {
 	allowExternalSetIsPlayingWhenReady: boolean
 
 	/**
-	 * Stopped/Ended state is when this is set to null. This is method to detect end of playlist.
+	 * PlayerSource to play or null if none is set.
 	 */
-	sourceKey: SK | null
-
-	/**
-	 * Source provider used to provide sources for this player. Can be swapped.
-	 */
-	sourceProvider: PlayerSourceProvider<S, SK>
-
-	/**
-	 * If true, swapping source provider even if key didn't change causes player to reload source. New provider
-	 * may have different source at same key. However this behavior sometimes may be not desired.
-	 *
-	 * This flag is capable of changing this. It's user responsibility to ensure that new provider has same
-	 * source at given key.
-	 */
-	forceReloadOnSourceProviderSwap: boolean
+	source: PlayerSource | null
 
 	/**
 	 * Defaults to null. Causes player to perform seek to given position.
@@ -66,7 +52,7 @@ export type PlayerState<S, SK> = {
 	/**
 	 * Once seek is performed, position is not automatically updated.
 	 * That is for a simple reason - it's inner player responsibility to report new one, once we changed it.
-	 * 
+	 *
 	 * New position may be out of bound or be unreachable or some other thing may go wrong, so it can't be set directly.
 	 * Any position reading(which should occur ASAP after seek) will set this value to true
 	 */
@@ -76,6 +62,13 @@ export type PlayerState<S, SK> = {
 
 	isPlaying: boolean
 	isSeeking: boolean
+
+	/**
+	 * True, when playback is impossible, because position(if set) points to end of file.
+	 *
+	 * Still, user can resume playback by performing seek.
+	 */
+	isEnded: boolean
 
 	networkState: PlayerNetworkState
 	readyState: PlayerReadyState

@@ -1,23 +1,22 @@
+import {
+	DefaultStickyEventBus,
+	DefaultTaskAtom,
+	StickyEventBus,
+} from "@teawithsand/tws-stl"
+import { castDraft, produce } from "immer"
+import { WritableDraft } from "immer/dist/internal"
 import { MediaPlayerError } from "../error"
 import { WebAudioFilterManager } from "../filter"
 import {
-	EmptyPlayerSourceProvider,
-	PlayerSourceProvider,
-	PlayerSourceResolver,
-} from "../sourceProvider"
+	DEFAULT_PLAYER_SOURCE_COMPARATOR,
+	PlayerSourceComparator,
+} from "../source/compare"
 import {
 	PlayerNetworkState,
 	PlayerReadyState,
 	readHTMLPlayerState,
 } from "../util/native"
 import { PlayerConfig, PlayerState } from "./state"
-import {
-	DefaultStickyEventBus,
-	DefaultTaskAtom,
-	StickyEventBus,
-} from "@teawithsand/tws-stl"
-import { castDraft, current, isDraft, produce } from "immer"
-import { WritableDraft } from "immer/dist/internal"
 
 type Element = HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
 
@@ -29,6 +28,7 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 	position: null,
 	isPlaying: false,
 	isSeeking: false,
+	isEnded: false,
 	networkState: PlayerNetworkState.IDLE,
 	readyState: PlayerReadyState.NOTHING,
 
@@ -39,11 +39,8 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
 		volume: 1,
 		filters: [],
 		allowExternalSetIsPlayingWhenReady: true,
-		sourceKey: null,
-		sourceProvider: new EmptyPlayerSourceProvider(),
+		source: null,
 		seekPosition: null,
-
-		forceReloadOnSourceProviderSwap: true, // by default true for backwards compatibility
 	},
 }
 
@@ -70,15 +67,8 @@ export class Player<S, SK> {
 	private lastState: PlayerState<S, SK> = IDLE_PORTABLE_PLAYER_STATE
 	private readonly loadSourceTaskAtom = new DefaultTaskAtom()
 
-	/**
-	 * @deprecated Kept for legacy reasons. Use config access instead.
-	 */
-	get sourceProvider(): PlayerSourceProvider<S, SK> {
-		return this.stateBus.lastEvent.config.sourceProvider
-	}
-
 	constructor(
-		public readonly sourceResolver: PlayerSourceResolver<S>,
+		private readonly comparator: PlayerSourceComparator = DEFAULT_PLAYER_SOURCE_COMPARATOR,
 		private readonly element: Element = new Audio()
 	) {
 		if (window.AudioContext) {
@@ -108,7 +98,7 @@ export class Player<S, SK> {
 	private syncSeek = (newState: PlayerState<S, SK>) => {
 		const canSeek =
 			!this.isLoadingSource &&
-			this.stateBus.lastEvent.config.sourceKey !== null &&
+			this.stateBus.lastEvent.config.source !== null &&
 			newState.readyState !== PlayerReadyState.NOTHING
 
 		const seekPositionMillis = newState.config.seekPosition
@@ -191,7 +181,7 @@ export class Player<S, SK> {
 	private syncIsPlayingWhenReady = (newState: PlayerState<S, SK>) => {
 		if (
 			!this.isLoadingSource &&
-			newState.config.sourceKey !== null && // if CSK is null(and we can unset prev source, even though we've tried)
+			newState.config.source !== null && // if CSK is null(and we can unset prev source, even though we've tried)
 			newState.config.isPlayingWhenReady
 		) {
 			this.element.play().catch(() => {
@@ -210,25 +200,21 @@ export class Player<S, SK> {
 	}
 
 	private syncSource = (newState: PlayerState<S, SK>) => {
-		const provider = newState.config.sourceProvider
-		const targetSourceKey = newState.config.sourceKey
+		const lastSource = this.lastState.config.source
+		const targetSource = newState.config.source
 
 		if (
-			targetSourceKey !== this.lastState.config.sourceKey ||
-			(newState.config.forceReloadOnSourceProviderSwap &&
-				newState.config.sourceProvider !==
-					this.lastState.config.sourceProvider)
+			(lastSource !== null) === (targetSource !== null) ||
+			(targetSource &&
+				lastSource &&
+				!this.comparator.equals(lastSource, targetSource))
 		) {
-			const src =
-				targetSourceKey !== null
-					? provider.providerSourceWithKey(targetSourceKey)
-					: null
 			const prevSourceCleanup = this.sourceCleanup
 
 			if (prevSourceCleanup) prevSourceCleanup()
 			this.sourceCleanup = null
 
-			if (src !== null) {
+			if (targetSource !== null) {
 				// FIXME(teawithsand):
 				//   In fact, even though this claim is here and code's is correct but
 				//   this code here could use cancelation logic
@@ -241,10 +227,12 @@ export class Player<S, SK> {
 				this.isLoadingSource = true
 				;(async () => {
 					let url: string
-					let close: () => void
+					let close: () => Promise<void>
 					try {
-						;[url, close] =
-							await this.sourceResolver.resolveSourceToURL(src)
+						const claim = await targetSource.claimUrl()
+						// close = claim.close.bind(claim)
+						close = async () => await claim.close() // using closure is preferred by me I guess
+						url = claim.url
 					} catch (e) {
 						if (!claim.isValid) return
 						this.element.src = ""
@@ -254,7 +242,7 @@ export class Player<S, SK> {
 						return
 					}
 					if (!claim.isValid) {
-						close()
+						await close()
 						return
 					}
 
@@ -365,9 +353,10 @@ export class Player<S, SK> {
 				draft.positionUpdatedAfterSeek = true
 				draft.networkState = playerState.networkState
 				draft.readyState = playerState.readyState
+				draft.isEnded = playerState.isEnded
 
 				// Do not report an error of player if we are loading or no source is set
-				if (this.isLoadingSource || draft.config.sourceKey == null) {
+				if (this.isLoadingSource || draft.config.source == null) {
 					draft.playerError = null
 				} else {
 					draft.playerError = playerState.error
@@ -383,22 +372,6 @@ export class Player<S, SK> {
 					setIsPlayingWhenReady !== null
 				)
 					draft.config.isPlayingWhenReady = setIsPlayingWhenReady
-			})
-		)
-	}
-
-	private onPlaybackEnded = () => {
-		this.innerPlayerState.emitEvent(
-			produce(this.innerPlayerState.lastEvent, (draft) => {
-				const nextSourceKey = castDraft(
-					draft.config.sourceProvider.getNextSourceKey(
-						isDraft(draft.config.sourceKey)
-							? current(draft.config.sourceKey)
-							: (draft.config.sourceKey as any) // any cast hack, but this code should be ok. Fix it if it's not
-					)
-				)
-
-				draft.config.sourceKey = nextSourceKey
 			})
 		)
 	}
@@ -427,10 +400,7 @@ export class Player<S, SK> {
 
 		regListener("timeupdate", () => handleStateChange())
 		regListener("durationchange", () => handleStateChange())
-		regListener("ended", () => {
-			handleStateChange()
-			this.onPlaybackEnded()
-		})
+		regListener("ended", () => handleStateChange())
 		regListener("seeking", () => handleStateChange())
 		regListener("seeked", () => handleStateChange())
 		regListener("progress", () => handleStateChange())
