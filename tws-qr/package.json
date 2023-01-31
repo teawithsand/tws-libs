@@ -1,7 +1,7 @@
 {
-	"name": "@teawithsand/tws-peer",
-	"version": "0.2.1",
-	"description": "Peer to peer communication abstraction layer and some utils",
+	"name": "@teawithsand/tws-qr",
+	"version": "0.0.1",
+	"description": "QR code creating/scanning tools",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
@@ -17,11 +17,16 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/jest": "^29.0.3",
+		"@types/qrcode": "^1.5.0",
 		"@types/react": "^18.0.21"
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.18",
-		"peerjs": "^1.4.7"
+		"html5-qrcode": "^2.3.4",
+		"qrcode": "^1.5.1"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
 	},
 	"files": [
 		"dist/**"

@@ -10,7 +10,8 @@
     "tws-goatcounter-gatsby-plugin",
     "tws-gallery",
     "tws-peer",
-    "tws-peer-react"
+    "tws-peer-react",
+    "tws-qr"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"
