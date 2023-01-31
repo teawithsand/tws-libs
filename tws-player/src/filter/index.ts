@@ -17,38 +17,73 @@ export type AudioFilter =
 	  }
 
 export class WebAudioFilterManager {
-	private readonly context: AudioContext = new window.AudioContext()
-	private readonly sourceNode: MediaElementAudioSourceNode
+	private audioContextData: {
+		context: AudioContext
+		sourceNode: MediaElementAudioSourceNode
+	} | null = null
 
 	private currentNodes: AudioNode[] = []
 	private currentFilters: AudioFilter[] = []
 
 	constructor(
-		element: HTMLAudioElement | HTMLVideoElement | HTMLMediaElement
-	) {
-		this.sourceNode = this.context.createMediaElementSource(element)
+		private readonly element:
+			| HTMLAudioElement
+			| HTMLVideoElement
+			| HTMLMediaElement
+	) {}
+
+	private static get isSupported() {
+		return "AudioContext" in window
+	}
+
+	private freeAudioContext = () => {
 		this.applyFiltersInner([])
+
+		if (!this.audioContextData) return
+		this.audioContextData.sourceNode.disconnect()
+		this.audioContextData.context.close().catch(() => {})
+		this.audioContextData = null
+	}
+
+	close = () => {
+		this.freeAudioContext()
+	}
+
+	private claimAudioContext = () => {
+		if (!WebAudioFilterManager.isSupported) return
+		if (this.audioContextData !== null) return
+
+		const context = new window.AudioContext()
+		this.audioContextData = {
+			context,
+			sourceNode: context.createMediaElementSource(this.element),
+		}
 	}
 
 	applyFilters = (filters: AudioFilter[]) => {
 		if (filters === this.currentFilters) return
+		// Only claim audio context, once filters were changed.
+		// Otherwise do not do it, as it(in general) should not be initialized eagerly.
+		if (!this.audioContextData) this.claimAudioContext()
 
 		this.applyFiltersInner(filters)
 		this.currentFilters = filters
 	}
 
 	private applyFiltersInner = (filters: AudioFilter[]) => {
+		if (!this.audioContextData) return
+		const { sourceNode, context } = this.audioContextData
 		for (const n of this.currentNodes) {
 			n.disconnect(0)
 		}
 		this.currentNodes = []
 
-		let node: AudioNode = this.sourceNode
+		let node: AudioNode = sourceNode
 		for (const f of filters) {
 			if (f.type === "gain") {
 				this.currentNodes.push(node)
 
-				const n = this.context.createGain()
+				const n = context.createGain()
 				n.gain.value = f.value
 
 				node.connect(n)
@@ -56,7 +91,7 @@ export class WebAudioFilterManager {
 			} else if (f.type === "dynamic-compressor") {
 				this.currentNodes.push(node)
 
-				const n = this.context.createDynamicsCompressor()
+				const n = context.createDynamicsCompressor()
 				n.threshold.value = f.threshold
 				n.attack.value = f.attack
 				n.release.value = f.release
@@ -71,6 +106,6 @@ export class WebAudioFilterManager {
 
 		this.currentNodes.push(node)
 
-		node.connect(this.context.destination)
+		node.connect(context.destination)
 	}
 }
