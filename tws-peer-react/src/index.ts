@@ -1,1 +1,1 @@
-export * from "./qr"
+// Right now it does nothing
