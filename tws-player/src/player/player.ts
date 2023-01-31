@@ -20,7 +20,7 @@ import { PlayerConfig, PlayerState } from "./state"
 
 type Element = HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
 
-export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
+export const IDLE_PORTABLE_PLAYER_STATE: PlayerState = {
 	playerError: null,
 	sourceError: null,
 	duration: null,
@@ -50,7 +50,7 @@ export const IDLE_PORTABLE_PLAYER_STATE: PlayerState<any, any> = {
  * SimplePlayer, which uses HTMLAudioElement | HTMLMediaElement | HTMLVideoElement
  * in order to provide controls.
  */
-export class Player<S, SK> {
+export class Player {
 	private eventListeners: {
 		event: string
 		listener: any
@@ -58,13 +58,13 @@ export class Player<S, SK> {
 
 	private sourceCleanup: (() => void) | null = null
 
-	private readonly innerPlayerState: StickyEventBus<PlayerState<S, SK>>
+	private readonly innerPlayerState: StickyEventBus<PlayerState>
 	private readonly filtersHelper: WebAudioFilterManager | null
 
 	private isLoadingSource = false
 	private isIsPlayingSynchronizedAfterSourceLoaded = false
 
-	private lastState: PlayerState<S, SK> = IDLE_PORTABLE_PLAYER_STATE
+	private lastState: PlayerState = IDLE_PORTABLE_PLAYER_STATE
 	private readonly loadSourceTaskAtom = new DefaultTaskAtom()
 
 	constructor(
@@ -87,15 +87,15 @@ export class Player<S, SK> {
 		})
 	}
 
-	public get stateBus(): StickyEventBus<PlayerState<S, SK>> {
+	public get stateBus(): StickyEventBus<PlayerState> {
 		return this.innerPlayerState
 	}
 
-	public get state(): Readonly<PlayerState<S, SK>> {
+	public get state(): Readonly<PlayerState> {
 		return this.innerPlayerState.lastEvent
 	}
 
-	private syncSeek = (newState: PlayerState<S, SK>) => {
+	private syncSeek = (newState: PlayerState) => {
 		const canSeek =
 			!this.isLoadingSource &&
 			this.stateBus.lastEvent.config.source !== null &&
@@ -129,7 +129,7 @@ export class Player<S, SK> {
 		}
 	}
 
-	private readonly onStateChange = (newState: PlayerState<S, SK>) => {
+	private readonly onStateChange = (newState: PlayerState) => {
 		this.syncFilters(newState)
 		this.syncIsPlayingWhenReady(newState)
 		this.syncSource(newState)
@@ -143,7 +143,7 @@ export class Player<S, SK> {
 		this.lastState = newState
 	}
 
-	private syncPlaybackOptions = (newState: PlayerState<S, SK>) => {
+	private syncPlaybackOptions = (newState: PlayerState) => {
 		if (newState.config.speed !== this.element.playbackRate) {
 			this.element.playbackRate = newState.config.speed
 		}
@@ -169,7 +169,7 @@ export class Player<S, SK> {
 		if (this.element.muted) this.element.muted = false
 	}
 
-	private syncFilters = (newState: PlayerState<S, SK>) => {
+	private syncFilters = (newState: PlayerState) => {
 		if (
 			this.filtersHelper !== null &&
 			newState.config.filters !== this.lastState.config.filters
@@ -178,7 +178,7 @@ export class Player<S, SK> {
 		}
 	}
 
-	private syncIsPlayingWhenReady = (newState: PlayerState<S, SK>) => {
+	private syncIsPlayingWhenReady = (newState: PlayerState) => {
 		if (
 			!this.isLoadingSource &&
 			newState.config.source !== null && // if CSK is null(and we can unset prev source, even though we've tried)
@@ -199,7 +199,7 @@ export class Player<S, SK> {
 		}
 	}
 
-	private syncSource = (newState: PlayerState<S, SK>) => {
+	private syncSource = (newState: PlayerState) => {
 		const lastSource = this.lastState.config.source
 		const targetSource = newState.config.source
 
@@ -279,7 +279,7 @@ export class Player<S, SK> {
 		}
 	}
 
-	public setConfig = (config: PlayerConfig<S, SK>) => {
+	public setConfig = (config: PlayerConfig) => {
 		this.innerPlayerState.emitEvent(
 			produce(this.innerPlayerState.lastEvent, (draft) => {
 				draft.config = castDraft(config)
@@ -288,7 +288,7 @@ export class Player<S, SK> {
 	}
 
 	public mutateConfig = (
-		mutator: (draft: WritableDraft<PlayerConfig<S, SK>>) => void
+		mutator: (draft: WritableDraft<PlayerConfig>) => void
 	) => {
 		this.innerPlayerState.emitEvent(
 			produce(this.innerPlayerState.lastEvent, (draft) => {

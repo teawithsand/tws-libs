@@ -4,7 +4,7 @@ import { PlayerSource } from "../source"
 import { Milliseconds } from "../unit"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
-export type PlayerConfig<S, SK> = {
+export type PlayerConfig = {
 	isPlayingWhenReady: boolean
 
 	speed: number
@@ -45,7 +45,7 @@ export type PlayerConfig<S, SK> = {
 	seekPosition: Milliseconds | null
 }
 
-export type PlayerState<S, SK> = {
+export type PlayerState = {
 	playerError: MediaPlayerError | null
 	sourceError: SourcePlayerError | null
 
@@ -73,5 +73,5 @@ export type PlayerState<S, SK> = {
 	networkState: PlayerNetworkState
 	readyState: PlayerReadyState
 
-	config: PlayerConfig<S, SK>
+	config: PlayerConfig
 }
