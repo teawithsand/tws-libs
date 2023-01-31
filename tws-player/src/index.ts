@@ -1,5 +1,6 @@
 export * from "./metadata"
 export * from "./sourceProvider"
+export * from "./source"
 export * from "./error"
 export * from "./player"
 export * from "./util"
