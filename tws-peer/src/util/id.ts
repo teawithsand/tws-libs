@@ -12,7 +12,7 @@ export const timingSafeStringEq = (a: string, b: string): boolean => {
 
 	let r = 0
 	for (let i = 0; i < a.length; i++) {
-		r |= a.charCodeAt(i) & b.charCodeAt(i)
+		r |= a.charCodeAt(i) ^ b.charCodeAt(i)
 	}
 
 	return r === 0
