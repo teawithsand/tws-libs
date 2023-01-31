@@ -1,6 +1,6 @@
 import { DefaultEventBus } from "@teawithsand/tws-stl"
 import { DataConnection } from "peerjs"
-import { ClosableSubscribable } from "../util/closable"
+import { ClosableSubscribable } from "./closable"
 
 export interface PeerDataConnSubscribable
 	extends ClosableSubscribable<PeerDataConnEvent> {

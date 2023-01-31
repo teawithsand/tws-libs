@@ -1,6 +1,6 @@
 import { DefaultEventBus } from "@teawithsand/tws-stl"
 import Peer, { DataConnection, MediaConnection } from "peerjs"
-import { ClosableSubscribable } from "../util/closable"
+import { ClosableSubscribable } from "./closable"
 
 export interface PeerSubscribable extends ClosableSubscribable<PeerEvent> {
 	readonly peer: Peer
