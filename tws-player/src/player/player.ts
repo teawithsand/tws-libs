@@ -4,7 +4,7 @@ import {
 	EmptyPlayerSourceProvider,
 	PlayerSourceProvider,
 	PlayerSourceResolver,
-} from "../source"
+} from "../sourceProvider"
 import {
 	PlayerNetworkState,
 	PlayerReadyState,

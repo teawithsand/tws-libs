@@ -1,4 +1,4 @@
-import { PlayerSourceResolver } from "../../source"
+import { PlayerSourceResolver } from "../../sourceProvider"
 import { ID3Metadata, Metadata } from "../metadata"
 import { MetadataLoader } from "./abstract"
 

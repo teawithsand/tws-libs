@@ -1,6 +1,6 @@
 import { MediaPlayerError, SourcePlayerError } from "../error"
 import { AudioFilter } from "../filter"
-import { PlayerSourceProvider } from "../source"
+import { PlayerSourceProvider } from "../sourceProvider"
 import { Milliseconds } from "../unit"
 import { PlayerNetworkState, PlayerReadyState } from "../util/native"
 
