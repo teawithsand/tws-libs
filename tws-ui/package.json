@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-ui",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"description": "Random UI components, which one day *will be* ui library",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,8 +21,8 @@
 		"@types/styled-components": "^5.1.26"
 	},
 	"dependencies": {
-		"@teawithsand/tws-stl": "^0.0.9",
-		"@teawithsand/tws-stl-react": "^0.0.4",
+		"@teawithsand/tws-stl": "^0.0.18",
+		"@teawithsand/tws-stl-react": "^0.0.5",
 		"@types/react-dnd": "^3.0.2",
 		"react-dnd": "^16.0.1"
 	},
