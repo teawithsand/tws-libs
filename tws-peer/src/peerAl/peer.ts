@@ -12,6 +12,9 @@ import Peer, { MediaConnection, PeerJSOption } from "peerjs"
 import { makePeerBus, PeerEventType } from "../innerUtil"
 import { IDataConnection, PeerJSIDataConnection } from "./dataConn"
 
+
+// TODO(teawithsand): implement
+
 export type IPeerState = {
 	/**
 	 * If true, this peer can open and receive connections.

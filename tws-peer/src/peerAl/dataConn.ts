@@ -8,7 +8,29 @@ import {
 } from "@teawithsand/tws-stl"
 import { DataConnection } from "peerjs"
 import { makePeerDataConnBus, PeerDataConnEventType } from "../innerUtil"
+import { TwsPeerError } from "../util"
 import { IPeer } from "./peer"
+
+export class IPeerDataConnectionTwsPeerError extends TwsPeerError {
+	constructor(message: string) {
+		super(message)
+		this.name = "IDataConnTwsPeerError"
+	}
+}
+
+export class ClosedIPeerDataConnectionTwsPeerError extends IPeerDataConnectionTwsPeerError {
+	constructor(message: string) {
+		super(message)
+		this.name = "ClosedIPeerDataConnectionTwsPeerError"
+	}
+}
+
+export class UnknownIPeerDataConnectionTwsPeerError extends IPeerDataConnectionTwsPeerError {
+	constructor(message: string, public readonly cause: Error) {
+		super(message)
+		this.name = "UnknownIPeerDataConnectionTwsPeerError"
+	}
+}
 
 export enum IPeerDataConnectionEventType {
 	OPEN = 1,
@@ -56,6 +78,8 @@ export interface IDataConnectionMessageQueue {
 
 	/**
 	 * This promise throws if conn is in closed/error state.
+	 *
+	 * It does not throw if connection is closed, but there are some messages yet to be received.
 	 */
 	receive: () => Promise<any>
 }
@@ -90,32 +114,24 @@ export class PeerJSIDataConnection implements IDataConnection {
 		})
 
 	private isReceivedMessagesQueueClosed = false
+	private readonly onAfterClosedReceivedMessagesQueue = new Queue<any>()
 	private readonly receivedMessagesQueue = new AsyncQueue<any>()
 	private readonly preSendQueue = new Queue<any>()
 
-	private onCloseCleanup = (error?: Error) => {
-		if (!this.isReceivedMessagesQueueClosed) {
-			this.preSendQueue.clear() // just in case it was not cleared
-			this.receivedMessagesQueue.close(error)
-			this.isReceivedMessagesQueueClosed = true
-		}
-	}
-
 	private readonly innerHandleEvent = (event: IPeerDataConnectionEvent) => {
 		if (event.type === IPeerDataConnectionEventType.ERROR) {
-			this.innerStateBus.emitEvent({
-				...this.innerStateBus.lastEvent,
-				error: event.error,
-				isClosed: true,
-			})
-			this.doOnClose(event.error)
+			const error = new UnknownIPeerDataConnectionTwsPeerError(
+				"Received error from peerjs",
+				event.error
+			)
+			this.innerOnError(error)
 		} else if (event.type === IPeerDataConnectionEventType.CLOSE) {
 			this.innerStateBus.emitEvent({
 				...this.innerStateBus.lastEvent,
 				isClosed: true,
 			})
 
-			this.doOnClose()
+			this.innerDoCleanup()
 		} else if (event.type === IPeerDataConnectionEventType.OPEN) {
 			const state = this.innerStateBus.lastEvent
 			if (!state.isClosed && !state.error) {
@@ -134,16 +150,41 @@ export class PeerJSIDataConnection implements IDataConnection {
 		this.innerEventBus.emitEvent(event)
 	}
 
-	private doOnClose = (e?: Error) => {
+	private innerDoCleanup = (e?: Error) => {
 		if (!this.isReceivedMessagesQueueClosed) {
-			this.receivedMessagesQueue.close(e)
 			this.isReceivedMessagesQueueClosed = true
 
-			this.onCloseCleanup()
+			// This hack is required, since close may have been triggered by remote party BEFORE
+			// we were able to receive all incoming messages.
+			// So store them in separate instant-access queue, if there are some that is.
+			while (this.receivedMessagesQueue.resultQueueLength > 0) {
+				const v = this.receivedMessagesQueue.pop()
+				this.onAfterClosedReceivedMessagesQueue.append(v)
+			}
+
+			this.preSendQueue.clear() // just in case it was not cleared
+			this.receivedMessagesQueue.close(
+				e ??
+					new ClosedIPeerDataConnectionTwsPeerError(
+						"PeerJSIDataConnection was closed and can't receive messages"
+					)
+			)
 
 			try {
 				this.innerConn.close()
 			} catch (e) {}
+		}
+	}
+
+	private innerOnError = (error: Error) => {
+		const lastEvent = this.innerStateBus.lastEvent
+		if (lastEvent.error === null && !lastEvent.isClosed) {
+			this.innerStateBus.emitEvent({
+				...this.innerStateBus.lastEvent,
+				error,
+				isClosed: true,
+			})
+			this.innerDoCleanup(error)
 		}
 	}
 
@@ -154,9 +195,12 @@ export class PeerJSIDataConnection implements IDataConnection {
 			if (doThrow) {
 				throw e
 			} else {
-				if (e instanceof Error) {
-					this.doOnClose(e)
-				}
+				this.innerOnError(
+					new UnknownIPeerDataConnectionTwsPeerError(
+						"PeerJS thrown while sending message",
+						e instanceof Error ? e : new Error("Unknown error")
+					)
+				)
 			}
 		}
 	}
@@ -202,12 +246,31 @@ export class PeerJSIDataConnection implements IDataConnection {
 		const self = this
 		return {
 			get length() {
+				if (!self.onAfterClosedReceivedMessagesQueue.isEmpty)
+					return self.onAfterClosedReceivedMessagesQueue.length
+				if (self.isReceivedMessagesQueueClosed) return 0
 				return self.receivedMessagesQueue.resultQueueLength
 			},
 			pop: () => {
+				if (!this.onAfterClosedReceivedMessagesQueue.isEmpty) {
+					return this.onAfterClosedReceivedMessagesQueue.pop()
+				}
+
+				if (self.isReceivedMessagesQueueClosed) return null
+
 				return self.receivedMessagesQueue.pop()
 			},
 			receive: async () => {
+				if (!this.onAfterClosedReceivedMessagesQueue.isEmpty) {
+					return this.onAfterClosedReceivedMessagesQueue.pop()
+				}
+
+				if (self.isReceivedMessagesQueueClosed) {
+					throw new ClosedIPeerDataConnectionTwsPeerError(
+						"PeerJSIDataConnection was closed and can't send given message"
+					)
+				}
+
 				// custom exception is
 				const v = await self.receivedMessagesQueue.popAsync()
 				return v
@@ -225,7 +288,9 @@ export class PeerJSIDataConnection implements IDataConnection {
 	send = (data: any) => {
 		const state = this.innerStateBus.lastEvent
 		if (state.isClosed) {
-			throw new Error("Conn already closed")
+			throw new ClosedIPeerDataConnectionTwsPeerError(
+				"PeerJSIDataConnection was closed and can't send given message"
+			)
 		}
 
 		if (!state.isOpen) {
