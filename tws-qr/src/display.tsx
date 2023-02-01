@@ -1,6 +1,6 @@
-import { makeQrCode } from "@teawithsand/tws-peer"
 import { QRCodeErrorCorrectionLevel } from "qrcode"
 import React, { useEffect, useState } from "react"
+import { makeQrCode } from "./qr"
 
 /**
  * Element, which draws QR code on canvas.
