@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-qr",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "QR code creating/scanning tools",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

@@ -39,7 +39,7 @@ export const QRCodeScanner = (props: {
 	// So that we ensure that new scanner will be rendered with new div id
 	// If that does not help, we have to await scanner.clear promise.
 	// Also making sure that config does not change too often would be useful
-	const id = useMemo(() => generateUUID(), [deps])
+	const id = useMemo(() => generateUUID(), [...deps])
 	const [_scanner, setScanner] = useState<Html5QrcodeScanner | null>(null)
 
 	const successCallbackRef = useRef<QRCodeScannerOnSuccessCallback | null>(
