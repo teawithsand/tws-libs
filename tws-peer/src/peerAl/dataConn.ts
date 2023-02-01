@@ -97,6 +97,12 @@ export interface IDataConnection {
 	 * Sends provided JS data to remote target.
 	 *
 	 * It's also allowed to enqueue messages to send until connection is open.
+	 *
+	 * Note: this function works on best-effort basis. If close is called too fast, it may not send
+	 * message it was requested to send. There is no way to "flush" it in WebRTC standard.
+	 *
+	 * In order to close connection properly(having all messages sent), make sure that last call is
+	 * call to receiving function, so that both parties may exchange end of conn magics and close connection safely.
 	 */
 	send: (data: any) => void
 
