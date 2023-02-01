@@ -17,3 +17,5 @@ publish "tws-player";
 
 publish "tws-peer";
 publish "tws-peer-react";
+
+publish "tws-qr";
