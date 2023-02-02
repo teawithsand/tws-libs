@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-stl",
-	"version": "0.0.18",
+	"version": "0.0.19",
 	"description": "Bunch of misc utils that I've used at least in three projects",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
