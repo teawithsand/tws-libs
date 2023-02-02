@@ -1,6 +1,6 @@
+import { useEffect, useMemo, useState } from "react"
 import { Orientation, ScreenDimensions } from "."
 import { requireNoSsr } from "../ssr"
-import { useEffect, useState } from "react"
 
 // TODO(teawithsand): refactor me
 type WindowDimensions = ScreenDimensions
@@ -42,4 +42,34 @@ export const useWindowDimensions = (
 	}, [setWindowDimensions])
 
 	return windowDimensions
+}
+
+/**
+ * Hook, which watches using window.matchMedia method to determine whether viewport matches specific viewport or not.
+ */
+export const useMatchMedia = (
+	query: string,
+	ssrInitialize?: boolean
+): boolean => {
+	if (typeof ssrInitialize === "undefined") requireNoSsr()
+
+	const [matches, setMatches] = useState(
+		() => ssrInitialize ?? window.matchMedia(query).matches
+	)
+
+	useEffect(() => {
+		const mql = window.matchMedia(query)
+		const listener = (value: MediaQueryListEvent) => {
+			setMatches(value.matches)
+		}
+		setMatches(mql.matches)
+
+		mql.addEventListener("change", listener)
+
+		return () => {
+			mql.removeEventListener("change", listener)
+		}
+	}, [query, setMatches])
+
+	return matches
 }
