@@ -11,11 +11,14 @@ export class DefaultEventBus<T> implements EventBus<T> {
 	private subscribers: Subscriber<T>[] = []
 
 	emitEvent = (event: T) => {
-		this.subscribers.forEach((s) =>
-			s(event, () => {
-				this.removeSubscriber(s)
+		const copy = [...this.subscribers]
+		// Can't use forEach without copy here, since .forEach method at least
+		// has this weird quirk that causes some elements to be skipped if array gets modified in between calls
+		for (const subscriber of copy) {
+			subscriber(event, () => {
+				this.removeSubscriber(subscriber)
 			})
-		)
+		}
 	}
 
 	addSubscriber = (subscriber: Subscriber<T>): SubscriptionCanceler => {
