@@ -37,19 +37,11 @@ const makeDateObject = (date: string | number | Date): Date => {
 }
 
 export const readCommonConfig = (prefix: string = ""): CommonConfig => {
-	const env = process.env
 	const object: CommonConfig = {
-		projectName: "",
-		siteUrl: "",
+		// These have to be written like that, so webpack can understand these and replace with propper values
+		projectName: process.env.projectName as string,
+		siteUrl: process.env.siteUrl as string,
 	}
-
-	for (const k in object) {
-		const v = env[prefix + k]
-		if (typeof v !== "string")
-			throw new Error(`Key ${prefix + k} is not provided in process.env`)
-		;(object as any)[k] = v
-	}
-
 	return object
 }
 
