@@ -24,7 +24,8 @@
 		"@teawithsand/tws-stl": "^0.0.18",
 		"@teawithsand/tws-stl-react": "^0.0.5",
 		"@types/react-dnd": "^3.0.2",
-		"react-dnd": "^16.0.1"
+		"react-dnd": "^16.0.1",
+		"react-transition-group": "^4.4.5"
 	},
 	"peerDependencies": {
 		"react": "^18.2.0"
