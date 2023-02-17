@@ -5,11 +5,14 @@ import { css } from "styled-components"
  * A piece of styles, which makes markdown rendered by gatsby a little bit cleaner.
  *
  * It can be included using template string.
+ *
+ * @deprecated Use new definition with global constant for gatsby markdown styles.
  */
 export const gatsbyMarkdownWrapperStyles = css`
 	& h1 {
 		font-size: 2.3rem;
-		font-weight: 400;
+        font-weight: bold;
+		font-weight: 400; // use weight only on browsers/fonts that support it
 
 		// On small devices it's required to decrease font size
 		@media ${breakpointMediaDown(BREAKPOINT_MD)} {
@@ -69,7 +72,12 @@ export const gatsbyMarkdownWrapperStyles = css`
 		overflow: hidden;
 		& > span {
 			overflow: hidden;
-			max-height: max(80vh, 200px);
+            max-height: 80vh;
+
+            // Using @media has better support compared to max function
+            @media screen and (max-height: 200px) {
+                max-height: 200px;
+            }
 
 			& img {
 				object-fit: contain;
@@ -90,6 +98,8 @@ export const gatsbyMarkdownWrapperStyles = css`
 		padding-left: 2rem;
 	}
 
+    // Makes nested(especially 3+ levels) lists look better on small devices
+    //  does not matter that much for single-level lists
 	@media ${breakpointMediaDown(BREAKPOINT_MD)} {
 		ol,
 		ul {
@@ -101,18 +111,26 @@ export const gatsbyMarkdownWrapperStyles = css`
 /**
  * Processes HTML of blog post to make it prettier and better in general.
  * For now it only fixes links to have noopener and noreferrer attributes.
+ *
+ * @deprecated Use new definition with global constant for gatsby markdown styles.
  */
 export const postProcessMarkdownHTML = (
 	html: string,
 	options?: {
 		makeLinkNoOpenerNoReferrer: boolean
-	},
+	}
 ): string => {
 	const makeLinks = options?.makeLinkNoOpenerNoReferrer ?? true
 	return makeLinks
 		? html.replace(
 				/<a(.*?)href="(.*?)"(.*?)>/gim,
-				`<a $1 href="$2" rel="noopener noreferrer" $3>`,
+				`<a $1 href="$2" rel="noopener noreferrer" $3>`
 		  )
 		: html
+}
+
+export const StylesGatsbyMarkdown = {
+	v1: gatsbyMarkdownWrapperStyles,
+
+	postprocessHTML: postProcessMarkdownHTML,
 }
