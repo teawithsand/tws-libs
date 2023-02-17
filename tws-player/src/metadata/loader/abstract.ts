@@ -1,19 +1,20 @@
 import { Metadata } from "../metadata"
 import { MetadataBag } from "../bag"
 import { StickySubscribable } from "@teawithsand/tws-stl"
+import { PlayerSource } from "../../source"
 
-export interface MetadataLoader<S> {
-	loadMetadata(src: S): Promise<Metadata>
+export interface MetadataLoader {
+	loadMetadata(src: PlayerSource): Promise<Metadata>
 }
 
-export interface OptimisticMetadataLoader<S> {
-	loadMetadata(src: S): Promise<Metadata | null>
+export interface OptimisticMetadataLoader {
+	loadMetadata(src: PlayerSource): Promise<Metadata | null>
 }
 
-export interface MetadataBagLoader<S> {
-	loadMetadataBag(sources: S[]): {
+export interface MetadataBagLoader {
+	loadMetadataBag(sources: PlayerSource[]): {
 		done: Promise<void>
-		bag: StickySubscribable<MetadataBag>,
+		bag: StickySubscribable<MetadataBag>
 		cancel: (err: any) => void
 	}
 }

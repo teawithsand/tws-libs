@@ -1,12 +1,13 @@
 import { DefaultStickyEventBus } from "@teawithsand/tws-stl"
+import { PlayerSource } from "../../source"
 import { MetadataBag } from "../bag"
 import { MetadataLoadingResult, MetadataLoadingResultType } from "../metadata"
 import { MetadataBagLoader, OptimisticMetadataLoader } from "./abstract"
 
-export class DefaultMetadataBagLoader<S> implements MetadataBagLoader<S> {
-	constructor(private readonly loaders: OptimisticMetadataLoader<S>[]) {}
+export class DefaultMetadataBagLoader implements MetadataBagLoader {
+	constructor(private readonly loaders: OptimisticMetadataLoader[]) {}
 
-	loadMetadataBag = (sources: S[]) => {
+	loadMetadataBag = (sources: PlayerSource[]) => {
 		const results: (MetadataLoadingResult | null)[] = new Array(
 			sources.length
 		).fill(null)

@@ -1,19 +1,17 @@
 import { ID3Metadata, Metadata } from "../metadata"
 import { MetadataLoader } from "./abstract"
-import { PlayerSource } from "../../source"
 
 import * as jsMediaTags from "@teawithsand/jsmediatags"
+import { PlayerSource } from "../../source"
 
-export class DefaultMetadataLoader<T extends PlayerSource>
-	implements MetadataLoader<T>
-{
+export class DefaultMetadataLoader implements MetadataLoader {
 	constructor() {}
 
 	/**
 	 * Returns duration in SECONDS NOT MILLIS!
 	 */
 	private loadDuration = async (
-		src: T,
+		src: PlayerSource,
 		url: string
 	): Promise<number | null> => {
 		const audio = new Audio()
@@ -75,7 +73,7 @@ export class DefaultMetadataLoader<T extends PlayerSource>
 		}
 	}
 
-	private loadOtherMetadata = async (src: T): Promise<ID3Metadata> => {
+	private loadOtherMetadata = async (src: PlayerSource): Promise<ID3Metadata> => {
 		// TODO(teawithsand): custom exception here
 
 		const claim = await src.claimUrl()
@@ -105,7 +103,7 @@ export class DefaultMetadataLoader<T extends PlayerSource>
 		}
 	}
 
-	loadMetadata = async (src: T): Promise<Metadata> => {
+	loadMetadata = async (src: PlayerSource): Promise<Metadata> => {
 		const claim = await src.claimUrl()
 		try {
 			const duration = await this.loadDuration(src, claim.url)
