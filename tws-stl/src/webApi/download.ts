@@ -97,6 +97,7 @@ export class DownloadApiHelper {
 
 		const a = document.createElement("a")
 		a.style.display = "none"
+		a.rel = "noopener noreferrer"
 
 		let url = ""
 		let releaser = () => {}
@@ -131,6 +132,7 @@ export class DownloadApiHelper {
 		const [p, resolve] = latePromise<void>()
 		const a = document.createElement("a")
 		a.style.display = "none"
+		a.rel = "noopener noreferrer"
 
 		let url = ""
 		let releaser = () => {}
@@ -269,7 +271,9 @@ export class DownloadApiHelper {
 	 */
 	downloadUrl = (url: string, filename: string) => {
 		const a = document.createElement("a")
+		a.rel = "noopener noreferrer"
 		a.style.display = "none"
+		
 		a.href = url
 		a.download = filename
 		document.body.appendChild(a)
@@ -287,7 +291,9 @@ export class DownloadApiHelper {
 	 */
 	downloadObject = (obj: Blob | File, filename: string) => {
 		const a = document.createElement("a")
+		a.rel = "noopener noreferrer"
 		a.style.display = "none"
+
 		const url = URL.createObjectURL(obj)
 		a.href = url
 		a.download = filename
