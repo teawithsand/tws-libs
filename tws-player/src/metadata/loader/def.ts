@@ -1,11 +1,13 @@
-import { PlayerSourceResolver } from "../../sourceProvider"
 import { ID3Metadata, Metadata } from "../metadata"
 import { MetadataLoader } from "./abstract"
+import { PlayerSource } from "../../source"
 
 import * as jsMediaTags from "@teawithsand/jsmediatags"
 
-export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
-	constructor(private readonly resolver: PlayerSourceResolver<T>) {}
+export class DefaultMetadataLoader<T extends PlayerSource>
+	implements MetadataLoader<T>
+{
+	constructor() {}
 
 	/**
 	 * Returns duration in SECONDS NOT MILLIS!
@@ -76,9 +78,11 @@ export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 	private loadOtherMetadata = async (src: T): Promise<ID3Metadata> => {
 		// TODO(teawithsand): custom exception here
 
-		const [blob, release] = await this.resolver.resolveSourceToBlob(src)
+		const claim = await src.claimUrl()
 
 		try {
+			const blob = await (await fetch(claim.url)).blob()
+
 			const p = new Promise<ID3Metadata>((resolve, reject) => {
 				;(jsMediaTags as any).read(blob, {
 					onSuccess: (tags: any) => {
@@ -97,15 +101,14 @@ export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 			const res = await p
 			return res
 		} finally {
-			release()
+			claim.close()
 		}
 	}
 
 	loadMetadata = async (src: T): Promise<Metadata> => {
-		const [url, closer] = await this.resolver.resolveSourceToURL(src)
-
+		const claim = await src.claimUrl()
 		try {
-			const duration = await this.loadDuration(src, url)
+			const duration = await this.loadDuration(src, claim.url)
 			const id3 = await this.loadOtherMetadata(src)
 
 			const res = {
@@ -115,7 +118,7 @@ export class DefaultMetadataLoader<T> implements MetadataLoader<T> {
 
 			return res
 		} finally {
-			closer()
+			claim.close()
 		}
 	}
 }
