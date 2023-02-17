@@ -134,4 +134,12 @@ export class MetadataBag {
 	get isDone() {
 		return this.innerIsDone
 	}
+
+	/**
+	 * Returns total duration of this bag.
+	 */
+	get duration(): number | null {
+		if (this.length === 0) return 0
+		return this.getDurationToIndex(this.length - 1, true)
+	}
 }
