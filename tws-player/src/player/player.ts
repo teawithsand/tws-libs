@@ -182,7 +182,8 @@ export class Player {
 		if (
 			!this.isLoadingSource &&
 			newState.config.source !== null && // if CSK is null(and we can unset prev source, even though we've tried)
-			newState.config.isPlayingWhenReady
+			newState.config.isPlayingWhenReady &&
+			!newState.isEnded
 		) {
 			this.element.play().catch(() => {
 				// TODO(teawithsand): this can be used to check if autoplay was banned or not
@@ -204,7 +205,7 @@ export class Player {
 		const targetSource = newState.config.source
 
 		if (
-			(lastSource !== null) === (targetSource !== null) ||
+			(lastSource !== null) !== (targetSource !== null) ||
 			(targetSource &&
 				lastSource &&
 				!this.comparator.equals(lastSource, targetSource))
