@@ -19,3 +19,4 @@ publish "tws-peer";
 publish "tws-peer-react";
 
 publish "tws-qr";
+publish "tws-config";
