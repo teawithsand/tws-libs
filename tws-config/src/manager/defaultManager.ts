@@ -51,11 +51,20 @@ export class DefaultConfigManager<T extends {}, E extends Record<any, string>>
 	private configVersion = -2147483648 // min 32 bit int to stay on SMI for as long as possible
 	private savedConfigVersion = -2147483648 // min 32 bit int to stay on SMI for as long as possible
 
+	/**
+	 *
+	 * @param defaultConfig default config, as the name says. It may or may not be used depending on methods called.
+	 * @param serializer Serializer for config used
+	 * @param store Store that stores serialized product
+	 * @param saveIntervalMs Interval, in witch config should be auto-saved. Ignored when 0. Must be finite integer >= 0
+	 * @param comparator Support comparator, used to determine whether config really changed or not. If it didn't, saving is skipped.
+	 */
 	constructor(
 		public readonly defaultConfig: T,
-		public readonly serializer: Serializer<T, E>,
-		public readonly store: ConfigStore<E>,
-		public readonly saveIntervalMs: number
+		private readonly serializer: Serializer<T, E>,
+		private readonly store: ConfigStore<E>,
+		saveIntervalMs: number,
+		private readonly comparator: ((a: T, b: T) => boolean) | null = null
 	) {
 		if (!isFinite(saveIntervalMs) || saveIntervalMs < 0)
 			throw new Error(
@@ -97,13 +106,19 @@ export class DefaultConfigManager<T extends {}, E extends Record<any, string>>
 	}
 
 	private onNewConfig = (config: T, wasMutated: boolean = true) => {
+		if (wasMutated) {
+			if (
+				!this.comparator ||
+				!this.innerCurrentConfig ||
+				!this.comparator(config, this.innerCurrentConfig)
+			) {
+				this.configVersion++
+			}
+		}
+
 		this.innerCurrentConfig = config
 		this.innerBus.emitEvent(config)
 		this.innerDefaultBus.emitEvent(config)
-
-		if (wasMutated) {
-			this.configVersion++
-		}
 	}
 
 	get currentConfig(): T | null {
