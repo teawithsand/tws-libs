@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-player",
-	"version": "0.1.4-np",
+	"version": "0.1.4-np-b2",
 	"description": "Complete audio player, like ExoPlayer for android",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
