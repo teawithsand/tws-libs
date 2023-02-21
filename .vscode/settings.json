@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "Deque",
+        "deserializers",
         "goatcounter",
         "immer",
         "initializable",
@@ -10,6 +11,7 @@
         "metas",
         "Millis",
         "peerjs",
+        "Pluggable",
         "qrcode",
         "subgrid",
         "subgrids",
