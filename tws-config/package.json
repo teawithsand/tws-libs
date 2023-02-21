@@ -1,0 +1,35 @@
+{
+	"name": "@teawithsand/tws-config",
+	"version": "0.0.1",
+	"description": "Storing configuration stuff for PWAs with stuff like future-proof serialization, nice loading and so on",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "jest"
+	},
+	"keywords": [
+		"teawithsand",
+		"react",
+		"translation"
+	],
+	"author": "teawithsand",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/jest": "^29.0.3",
+		"@types/localforage": "^0.0.34",
+		"@types/react": "^18.0.21"
+	},
+	"dependencies": {
+		"@teawithsand/tws-stl": "^0.0.23",
+		"@teawithsand/tws-stl-react": "^0.0.6",
+		"immer": "^9",
+		"localforage": "^1"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
+	},
+	"files": [
+		"dist/**"
+	]
+}
