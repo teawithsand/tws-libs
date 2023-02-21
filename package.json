@@ -11,7 +11,8 @@
     "tws-gallery",
     "tws-peer",
     "tws-peer-react",
-    "tws-qr"
+    "tws-qr",
+    "tws-config"
   ],
   "scripts": {
     "test-all": "npm run build --workspaces && npm run test --workspaces"
