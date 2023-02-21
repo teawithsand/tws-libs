@@ -28,7 +28,7 @@ const makeInnerLoadedPromise = (): InnerLoadedPromise => {
 	}
 }
 
-export class DefaultConfigManager<T extends {}, E extends Record<any, string>>
+export class DefaultConfigManager<T extends {}, E extends Record<string, any>>
 	implements ConfigManager<T>
 {
 	// This code reminds me of times when I've written java.

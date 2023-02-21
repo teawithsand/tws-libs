@@ -6,7 +6,7 @@ import LocalForage from "localforage"
 /**
  * Simple ConfigStore, which uses localForage as internal driver.
  */
-export class LocalForageConfigStore<T extends Record<any, string>>
+export class LocalForageConfigStore<T extends Record<string, any>>
 	implements ConfigStore<T>
 {
 	constructor(

@@ -3,7 +3,7 @@ import { ConfigStore } from "./store"
 /**
  * Non-persistent config store. Used for debugging and testing.
  */
-export class InMemoryConfigStore<T extends Record<any, string>>
+export class InMemoryConfigStore<T extends Record<string, any>>
 	implements ConfigStore<T>
 {
 	private value: T | null = null
