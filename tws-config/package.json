@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-config",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Storing configuration stuff for PWAs with stuff like future-proof serialization, nice loading and so on",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

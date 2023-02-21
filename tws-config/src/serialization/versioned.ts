@@ -5,7 +5,7 @@ interface Versioned {
 }
 
 export type VersionedDeserializers<T, E extends Versioned> = {
-	[versionNumber: number]: (data: E & { version?: typeof versionNumber }) => T
+	[versionNumber: number]: (data: E) => T
 }
 
 /**
