@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-config",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "Storing configuration stuff for PWAs with stuff like future-proof serialization, nice loading and so on",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.23",
-		"@teawithsand/tws-stl-react": "^0.0.7",
+		"@teawithsand/tws-stl-react": "^0.0.8",
 		"immer": "^9",
 		"localforage": "^1"
 	},
