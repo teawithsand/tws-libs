@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"@teawithsand/tws-stl": "^0.0.23",
-		"@teawithsand/tws-stl-react": "^0.0.6",
+		"@teawithsand/tws-stl-react": "^0.0.7",
 		"immer": "^9",
 		"localforage": "^1"
 	},
