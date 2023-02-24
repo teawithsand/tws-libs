@@ -313,6 +313,65 @@ const makeSelfPlugin = (options) => {
 	}
 }
 
+/**
+ * Makes offline plugin for gatsby stuff.
+ *
+ * See https://www.gatsbyjs.com/plugins/gatsby-plugin-offline/ for more info.
+ *
+ * It also requires `cache_busting_mode: 'none'` in makeManifestPlugin options
+ */
+const makeOfflinePlugin = (opts) => {
+	const config = loadConfig()
+	const { cacheId, workboxOptions, options } = opts
+	const cacheBustedRegex = /(\.js$|\.css$|static\/)/
+
+	return {
+		resolve: "gatsby-plugin-offline",
+		options: {
+			workboxConfig: {
+				importWorkboxFrom: `local`,
+				cacheId: cacheId ?? config.projectName + "/offline-cache",
+				// Don't cache-bust JS or CSS files, and anything in the static directory,
+				// since these files have unique URLs and their contents will never change
+				dontCacheBustURLsMatching: cacheBustedRegex,
+				globPatterns: ["**/*.{js,css,html}", "**/icon-prefix-magic*"],
+				runtimeCaching: [
+					{
+						// Use cacheFirst since these don't need to be revalidated (same RegExp
+						// and same reason as above)
+						urlPattern: cacheBustedRegex,
+						handler: `CacheFirst`,
+					},
+					{
+						// page-data.json files, static query results and app-data.json
+						// are not content hashed
+						urlPattern: /^https?:.*\/page-data\/.*\.json/,
+						handler: `StaleWhileRevalidate`,
+					},
+					{
+						// Add runtime caching of various other page resources
+						// These are not critical and can be stale-while-revalidate
+						// Also: most of them is cache-busted anyway
+						urlPattern:
+							/^https?:.*\.(png|jpg|jpeg|webp|svg|gif|tiff|js|woff|woff2|json|css)$/,
+						handler: `StaleWhileRevalidate`,
+					},
+					{
+						// Google Fonts CSS (doesn't end in .css so we need to specify it)
+						urlPattern: /^https?:\/\/fonts\.googleapis\.com\/css/,
+						handler: `StaleWhileRevalidate`,
+					},
+				],
+				skipWaiting: true,
+				clientsClaim: true,
+				importWorkboxFrom: `local`,
+				...(workboxOptions || {}),
+			},
+			...(options || {}),
+		},
+	}
+}
+
 module.exports = {
 	BasicSitePluginsStart,
 	BasicSitePluginsEnd,
@@ -326,6 +385,7 @@ module.exports = {
 	customizeDefaultPlugins,
 	mergePlugins,
 	makeLayoutPlugin,
+	makeOfflinePlugin,
 
 	makeExposeConfigGloballyPlugin,
 	makeConfig,
