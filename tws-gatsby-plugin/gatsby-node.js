@@ -207,21 +207,9 @@ const onCreateWebpackConfig = ({
 		actions.replaceWebpackConfig(config)
 	}
 
-	if (
-		stage === "build-html" ||
-		stage === "develop-html" ||
-		stage === "develop"
-	) {
+	if (stage === "build-html" || stage === "develop-html") {
 		config.module = config.module ?? {}
-		config.module.rules = config.module.rules ?? {}
-		config.module.rules = [
-			...config.module.rules,
-			{
-				test: /xterm|xterm-addon-fit/,
-				use: loaders.null(),
-			},
-		]
-		actions.replaceWebpackConfig(config)
+		config.module.rules = config.module.rules ?? []
 	}
 
 	const exportedVariablesObject = loadConfig(false)
@@ -233,6 +221,17 @@ const onCreateWebpackConfig = ({
 
 	if (Object.keys(res).length) {
 		config.plugins = [...config.plugins, plugins.define(res)]
+	}
+
+	if (stage === "build-html" || stage === "develop-html") {
+		config.module.rules = [
+			...(config.module.rules ?? []),
+			{
+				// peerjs say version 1.4.7 references global navigator on import, which is no-no in gatsby's world
+				test: /peerjs/,
+				use: loaders.null(),
+			},
+		]
 	}
 
 	actions.replaceWebpackConfig(config)
