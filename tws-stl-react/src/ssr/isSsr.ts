@@ -14,8 +14,19 @@ export const canUseDom = () => innerCanUseDom
  * Instead use `useIsSSR`
  * 
  * @see useIsSsr
+ * @deprecated useIsSsr unsafe
  */
 export const isSsr = () => !canUseDom()
+
+/**
+ * Returns true, whether react is used in SSR context.
+ * 
+ * DO NOT USE THIS IN REACT RENDER COMPONENTS!
+ * Instead use `useIsSSR`.
+ * 
+ * @see useIsSsr
+ */
+export const isSsrUnsafe = () => !canUseDom()
 
 /**
  * On first render, returns true ALWAYS.
