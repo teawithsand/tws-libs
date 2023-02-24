@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-stl-react",
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"description": "Bunch of misc utils that I've used at least in three projects, which use react",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
