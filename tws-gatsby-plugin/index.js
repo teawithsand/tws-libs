@@ -387,7 +387,6 @@ module.exports = {
 	makeLayoutPlugin,
 	makeOfflinePlugin,
 
-	makeExposeConfigGloballyPlugin,
 	makeConfig,
 	makeConfigRequired,
 	loadConfig,
