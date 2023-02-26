@@ -13,6 +13,7 @@
         "peerjs",
         "Pluggable",
         "qrcode",
+        "revisioned",
         "subgrid",
         "subgrids",
         "subproject",
