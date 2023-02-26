@@ -332,8 +332,8 @@ const makeOfflinePlugin = (opts) => {
 
 	const workboxConfig = {
 		importWorkboxFrom: `local`,
-		inlineWorkboxRuntime: true,
-		cleanupOutdatedCaches: true,
+		// inlineWorkboxRuntime: true,
+		// cleanupOutdatedCaches: true,
 		cacheId: cacheId ?? config.projectName + "/offline-cache",
 		// Don't cache-bust JS or CSS files, and anything in the static directory,
 		// since these files have unique URLs and their contents will never change
@@ -357,12 +357,12 @@ const makeOfflinePlugin = (opts) => {
 			// Note that caching all png/jpg/webp/avif is too risky, since they may be quire big
 			// too big for precaching service worker
 		],
-		// What to ignore from above included lists
-		globIgnores: [
-			// Some stuff has to be ignored from preloading
-			// TODO(teawithsand): adjust cacheBustedRegex to include these
-			"**/node_modules/**/*",
-		],
+		// // What to ignore from above included lists
+		// globIgnores: [
+		// 	// Some stuff has to be ignored from preloading
+		// 	// TODO(teawithsand): adjust cacheBustedRegex to include these
+		// 	"**/node_modules/**/*",
+		// ],
 		runtimeCaching: [
 			{
 				// Use cacheFirst since these don't need to be revalidated (same RegExp
