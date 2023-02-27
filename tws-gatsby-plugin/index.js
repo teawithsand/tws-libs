@@ -313,107 +313,6 @@ const makeSelfPlugin = (options) => {
 	}
 }
 
-/**
- * Makes offline plugin for gatsby stuff.
- *
- * See https://www.gatsbyjs.com/plugins/gatsby-plugin-offline/ for more info.
- *
- * It also requires `cache_busting_mode: 'none'` in makeManifestPlugin options
- */
-const makeOfflinePlugin = (opts) => {
-	const config = loadConfig()
-	const { cacheId, workboxOptions, options, workboxConfigModifier } = opts
-
-	// regex that matches items which won't have revision in sw.js, as they do not need them
-	// Also: these will be stale-while-revalidate for all not-prefetched stuff
-
-	// const cacheBustedRegex = /(\.js$|\.css$|static\/)/
-	const cacheBustedRegex = /^\.(js|css)$/ // while static stuff should be static, do not require so yet
-
-	const workboxConfig = {
-		importWorkboxFrom: `local`,
-		// inlineWorkboxRuntime: true,
-		// cleanupOutdatedCaches: true,
-		cacheId: cacheId ?? config.projectName + "/offline-cache",
-		// Don't cache-bust JS or CSS files, and anything in the static directory,
-		// since these files have unique URLs and their contents will never change
-		//
-		// Long story short, these files won't have revision included in sw.js
-		dontCacheBustURLsMatching: cacheBustedRegex,
-		// What to prefetch ie. what resources should be loaded along with any page loaded
-		globPatterns: [
-			"**/*.{js,css,html,svg}",
-
-			// page-data must be both preloaded, and revisioned in order to allow loading pages
-			// not only HTML for each one.
-			"page-data/*",
-			"page-data/**/*",
-
-			// They *could* be cache busted, but this breaks SW apparently,
-			// at least according to gatsby-plugin-offline docs
-			"favicon*",
-			"icons/**",
-
-			// Note that caching all png/jpg/webp/avif is too risky, since they may be quire big
-			// too big for precaching service worker
-		],
-		// // What to ignore from above included lists
-		// globIgnores: [
-		// 	// Some stuff has to be ignored from preloading
-		// 	// TODO(teawithsand): adjust cacheBustedRegex to include these
-		// 	"**/node_modules/**/*",
-		// ],
-		runtimeCaching: [
-			{
-				// Use cacheFirst since these don't need to be revalidated (same RegExp
-				// and same reason as above)
-				//
-				// Please note, that using this strategy is the same as using network-first one
-				// for cache busted resources
-				urlPattern: cacheBustedRegex,
-				handler: `CacheFirst`,
-			},
-			{
-				// app-data.json/page-data.json(s) files, static query results and app-data.json
-				// are not content hashed
-				//
-				// For latest data, they must be network-first loaded
-				urlPattern: /^https?:.*\/page-data\/.*\.json/,
-				handler: `NetworkFirst`,
-			},
-			{
-				// Add runtime caching of various other page resources
-				// These are not critical and can be stale-while-revalidate
-				// Also: most of them is http-cache-busted anyway, so it does not matter that much
-				urlPattern:
-					/^https?:.*\.(png|jpg|jpeg|webp|avif|svg|gif|tiff|js|woff|woff2|css)$/,
-				handler: `StaleWhileRevalidate`,
-			},
-			{
-				// Google Fonts CSS (doesn't end in .css so we need to specify it)
-				urlPattern: /^https?:\/\/fonts\.googleapis\.com\/css/,
-				handler: `StaleWhileRevalidate`,
-			},
-		],
-		skipWaiting: true,
-		clientsClaim: true,
-		importWorkboxFrom: `local`,
-		...(workboxOptions || {}),
-	}
-
-	return {
-		resolve: "gatsby-plugin-offline",
-		options: {
-			// TODO(teawithsand): check if this takes effect if workbox config globs are configured,
-			precachePages: ["*", "**/*", "/*"], // AKA precache all stuff
-			workboxConfig: workboxConfigModifier
-				? workboxConfigModifier(workboxConfig)
-				: workboxConfig,
-			...(options || {}),
-		},
-	}
-}
-
 module.exports = {
 	BasicSitePluginsStart,
 	BasicSitePluginsEnd,
@@ -427,7 +326,6 @@ module.exports = {
 	customizeDefaultPlugins,
 	mergePlugins,
 	makeLayoutPlugin,
-	makeOfflinePlugin,
 
 	makeConfig,
 	makeConfigRequired,
