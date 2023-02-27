@@ -1,7 +1,7 @@
 {
 	"name": "@teawithsand/tws-gatsby-plugin-sw",
-	"version": "0.0.17",
-	"description": "Plugin for abstracting away common gatsby tasks in my projects",
+	"version": "0.0.18",
+	"description": "Plugin for making stuff run offline, which is not gatsby-plugin-offline, since it does poorly when full-offline-app-on-first-load is neededd",
 	"main": "index.js",
 	"types": "dist/index.ts",
 	"scripts": {
@@ -9,10 +9,7 @@
 		"test": "echo asdf > /dev/null"
 	},
 	"dependencies": {
-		"@svgr/webpack": "^6.5.1",
-		"dotenv": "^16.0.3",
 		"md5": "^2.3.0",
-		"tsconfig-paths-webpack-plugin": "^3.5.2",
 		"typescript": "^4.9.5",
 		"workbox-build": "^6.5.4"
 	},
