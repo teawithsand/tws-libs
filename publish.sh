@@ -7,6 +7,7 @@ publish "tws-stl-react";
 publish "tws-ui";
 
 publish "tws-gatsby-plugin";
+publish "tws-gatsby-plugin-sw";
 publish "tws-goatcounter-gatsby-plugin";
 
 publish "tws-seo";
