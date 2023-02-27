@@ -1,11 +1,10 @@
 // use `let` to workaround https://github.com/jhnns/rewire/issues/144
 
-import { GatsbyNode } from "gatsby"
-import { Config, PrecachePageData } from "./types"
 import { getResourcesFromHTML as innerImport } from "./get-resources-from-html"
+import { Config, PrecachePageData } from "./types"
 /* eslint-disable prefer-const */
 let fs = require(`fs`)
-let md5 = require('md5')
+let md5 = require("md5")
 let workboxBuild = require(`workbox-build`)
 const path = require(`path`)
 const { slash } = require(`gatsby-core-utils`)
@@ -14,23 +13,6 @@ const _ = require(`lodash`)
 
 let getResourcesFromHTML: (path: string, pathPrefix: string) => string[] =
 	innerImport
-
-export const onPreBootstrap: GatsbyNode["onPreBootstrap"] = ({ cache }) => {
-	const appShellSourcePath = path.join(__dirname, `app-shell.js`)
-	const appShellTargetPath = path.join(cache.directory, `app-shell.js`)
-	fs.copyFileSync(appShellSourcePath, appShellTargetPath)
-}
-
-export const createPages: GatsbyNode["createPages"] = ({ actions, cache }) => {
-	const appShellPath = path.join(cache.directory, `app-shell.js`)
-	if (process.env.NODE_ENV === `production`) {
-		const { createPage } = actions
-		createPage({
-			path: `/offline-plugin-app-shell-fallback/`,
-			component: slash(appShellPath),
-		})
-	}
-}
 
 let s: any
 const readStats = () => {
@@ -52,6 +34,31 @@ function getAssetsForChunks(chunks: string[]): string[] {
 		chunks.map((chunk) => readStats().assetsByChunkName[chunk])
 	)
 	return _.compact(files)
+}
+
+const generateUUID = () => {
+	var d = new Date().getTime() //Timestamp
+	var d2 =
+		(typeof performance !== "undefined" &&
+			performance.now &&
+			performance.now() * 1000) ||
+		0 //Time in microseconds since page-load or 0 if unsupported
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+		/[xy]/g,
+		function (c) {
+			var r = Math.random() * 16 //random number between 0 and 16
+			if (d > 0) {
+				//Use timestamp until depleted
+				r = (d + r) % 16 | 0
+				d = Math.floor(d / 16)
+			} else {
+				//Use microseconds since page-load if supported
+				r = (d2 + r) % 16 | 0
+				d2 = Math.floor(d2 / 16)
+			}
+			return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
+		}
+	)
 }
 
 function getPrecachePages(globs: string[], base: string): string[] {
@@ -101,62 +108,26 @@ export const onPostBuild = (
 	const rootDir = `public`
 
 	// Get exact asset filenames for app and offline app shell chunks
-	const files = getAssetsForChunks([
-		`app`,
-		`webpack-runtime`,
-		`component---node-modules-gatsby-plugin-offline-app-shell-js`,
-	])
+	const files = getAssetsForChunks([`app`, `webpack-runtime`])
 	const appFile = files.find((file) => file.startsWith(`app-`))
 
-	const offlineShellPath = `${process.cwd()}/${rootDir}/offline-plugin-app-shell-fallback/index.html`
 	const precachePages: string[] = _.uniq([
-		offlineShellPath,
-		...getPrecachePages(
-			precachePagesGlobs,
-			`${process.cwd()}/${rootDir}`
-		).filter((page) => page !== offlineShellPath),
+		...getPrecachePages(precachePagesGlobs, `${process.cwd()}/${rootDir}`),
 	])
 
-	const generateUUID = () => {
-		var d = new Date().getTime() //Timestamp
-		var d2 =
-			(typeof performance !== "undefined" &&
-				performance.now &&
-				performance.now() * 1000) ||
-			0 //Time in microseconds since page-load or 0 if unsupported
-		return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-			/[xy]/g,
-			function (c) {
-				var r = Math.random() * 16 //random number between 0 and 16
-				if (d > 0) {
-					//Use timestamp until depleted
-					r = (d + r) % 16 | 0
-					d = Math.floor(d / 16)
-				} else {
-					//Use microseconds since page-load if supported
-					r = (d2 + r) % 16 | 0
-					d2 = Math.floor(d2 / 16)
-				}
-				return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
-			},
-		)
-	}
-
-
+	const buildId = generateUUID()
 	const pages: PrecachePageData[] = precachePages.map((page) => ({
-		path: page
-			.replace("/index.html", "")
-			.slice(`${process.cwd()}/${rootDir}`.length) || "/", // TODO(teawithsand): respect trailing slash
+		path:
+			page
+				.replace("/index.html", "")
+				.slice(`${process.cwd()}/${rootDir}`.length) || "/", // TODO(teawithsand): respect trailing slash
 		dependencies: getResourcesFromHTML(page, pathPrefix),
 		indexHtmlPath: page,
-		buildId: generateUUID(),
-		indexHtmlHash: md5(fs.readFileSync(page, 'utf-8'))
+		buildId: buildId,
+		indexHtmlHash: md5(fs.readFileSync(page, "utf-8")),
 	}))
 
-	const otherGlobPatterns = [
-		// criticalFilePaths doesn't include HTML pages (we only need this one)
-		`offline-plugin-app-shell-fallback/index.html`,
-	]
+	const otherGlobPatterns: string[] = []
 
 	const manifests = [`manifest.json`, `manifest.webmanifest`]
 	manifests.forEach((file) => {
@@ -226,38 +197,11 @@ export const onPostBuild = (
 	combinedOptions.globPatterns = _.uniq(combinedOptions.globPatterns ?? [])
 	combinedOptions.globIgnores = _.uniq(combinedOptions.globIgnores ?? [])
 
-	const idbKeyvalFile = `idb-keyval-iife.min.js`
-	const idbKeyvalSource = require.resolve(`idb-keyval/dist/${idbKeyvalFile}`)
-	const idbKeyvalPackageJson = require(`idb-keyval/package.json`)
-	const idbKeyValVersioned = `idb-keyval-${idbKeyvalPackageJson.version}-iife.min.js`
-	const idbKeyvalDest = `public/${idbKeyValVersioned}`
-	fs.createReadStream(idbKeyvalSource).pipe(
-		fs.createWriteStream(idbKeyvalDest)
-	)
-
 	return workboxBuild
 		.generateSW(combinedOptions)
 		.then(({ count, size, warnings }: any) => {
 			if (warnings)
 				warnings.forEach((warning: any) => console.warn(warning))
-
-			if (debug !== undefined) {
-				const swText = fs
-					.readFileSync(swDest, `utf8`)
-					.replace(
-						/(workbox\.setConfig\({modulePathPrefix: "[^"]+")}\);/,
-						`$1, debug: ${JSON.stringify(debug)}});`
-					)
-				fs.writeFileSync(swDest, swText)
-			}
-
-			const swAppend = fs
-				.readFileSync(`${__dirname}/sw-append.js`, `utf8`)
-				.replace(/%idbKeyValVersioned%/g, idbKeyValVersioned)
-				.replace(/%pathPrefix%/g, pathPrefix)
-				.replace(/%appFile%/g, appFile)
-
-			// fs.appendFileSync(`public/sw.js`, `\n` + swAppend)
 
 			if (appendScript !== null) {
 				let userAppend
@@ -282,57 +226,3 @@ export const onPostBuild = (
 			)
 		})
 }
-/*
-const MATCH_ALL_KEYS = /^/
-export const pluginOptionsSchema = function ({ Joi }: any) {
-	// These are the options of the v3: https://www.gatsbyjs.com/plugins/gatsby-plugin-offline/#available-options
-	return Joi.object({
-		precachePages: Joi.array()
-			.items(Joi.string())
-			.description(
-				`An array of pages whose resources should be precached by the service worker, using an array of globs`
-			),
-		appendScript: Joi.string().description(
-			`A file (path) to be appended at the end of the generated service worker`
-		),
-		debug: Joi.boolean().description(
-			`Specifies whether Workbox should show debugging output in the browser console at runtime. When undefined, defaults to showing debug messages on localhost only`
-		),
-		workboxConfig: Joi.object({
-			importWorkboxFrom: Joi.string(),
-			globDirectory: Joi.string(),
-			globPatterns: Joi.array().items(Joi.string()),
-			modifyURLPrefix: Joi.object().pattern(MATCH_ALL_KEYS, Joi.string()),
-			cacheId: Joi.string(),
-			dontCacheBustURLsMatching: Joi.object().instance(RegExp),
-			maximumFileSizeToCacheInBytes: Joi.number(),
-			additionalManifestEntries: Joi.array().items(
-				Joi.object({
-					integrity: Joi.string(),
-					revision: Joi.string(),
-					url: Joi.string(),
-				})
-			),
-			runtimeCaching: Joi.array().items(
-				Joi.object({
-					urlPattern: Joi.object().instance(RegExp),
-					handler: Joi.string().valid(
-						`StaleWhileRevalidate`,
-						`CacheFirst`,
-						`NetworkFirst`,
-						`NetworkOnly`,
-						`CacheOnly`
-					),
-					options: Joi.object({
-						networkTimeoutSeconds: Joi.number(),
-					}),
-				})
-			),
-			skipWaiting: Joi.boolean(),
-			clientsClaim: Joi.boolean(),
-		})
-			.description(`Overrides workbox configuration. Helpful documentation: https://www.gatsbyjs.com/plugins/gatsby-plugin-offline/#overriding-workbox-configuration
-      `),
-	})
-}
-*/
