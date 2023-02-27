@@ -3,7 +3,7 @@ const path = require(`path`)
 const fs = require(`fs`)
 const _ = require(`lodash`)
 
-module.exports = (htmlPath, pathPrefix) => {
+module.exports.getResourcesFromHTML = (htmlPath, pathPrefix) => {
 	// load index.html to pull scripts/links necessary for proper offline reload
 	let html
 	try {
@@ -16,6 +16,7 @@ module.exports = (htmlPath, pathPrefix) => {
 		if (err.code === `ENOENT`) {
 			return []
 		} else {
+			console.error("Filed to read", path.resolve(htmlPath))
 			throw err
 		}
 	}

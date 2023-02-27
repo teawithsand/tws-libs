@@ -1,8 +1,10 @@
 import { GenerateSWOptions } from "workbox-build"
 export type PrecachePageData = {
+    buildId: string
     path: string
     indexHtmlPath: string
     dependencies: string[]
+    indexHtmlHash: string,
     // TODO(teawithsand): add page-data.json path here
 }
 

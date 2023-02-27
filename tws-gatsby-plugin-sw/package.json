@@ -1,8 +1,9 @@
 {
 	"name": "@teawithsand/tws-gatsby-plugin-sw",
-	"version": "0.0.1",
+	"version": "0.0.15",
 	"description": "Plugin for abstracting away common gatsby tasks in my projects",
 	"main": "index.js",
+	"types": "dist/index.ts",
 	"scripts": {
 		"build": "tsc && cp -r assets/* dist",
 		"test": "echo asdf > /dev/null"
@@ -10,11 +11,19 @@
 	"dependencies": {
 		"@svgr/webpack": "^6.5.1",
 		"dotenv": "^16.0.3",
+		"md5": "^2.3.0",
 		"tsconfig-paths-webpack-plugin": "^3.5.2",
 		"typescript": "^4.9.5",
 		"workbox-build": "^6.5.4"
 	},
 	"peerDependencies": {
 		"gatsby": "^5"
-	}
+	},
+	"files": [
+		"dist/**",
+		"/index.js",
+		"/gatsby-browser.js",
+		"/gatsby-ssr.js",
+		"/gatsby-node.js"
+	]
 }

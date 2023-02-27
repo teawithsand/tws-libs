@@ -2,19 +2,18 @@
 
 import { GatsbyNode } from "gatsby"
 import { Config, PrecachePageData } from "./types"
-
+import { getResourcesFromHTML as innerImport } from "./get-resources-from-html"
 /* eslint-disable prefer-const */
 let fs = require(`fs`)
+let md5 = require('md5')
 let workboxBuild = require(`workbox-build`)
 const path = require(`path`)
 const { slash } = require(`gatsby-core-utils`)
 const glob = require(`glob`)
 const _ = require(`lodash`)
 
-let getResourcesFromHTML: (
-	path: string,
-	pathPrefix: string
-) => string[] = require(`./get-resources-from-html`)
+let getResourcesFromHTML: (path: string, pathPrefix: string) => string[] =
+	innerImport
 
 export const onPreBootstrap: GatsbyNode["onPreBootstrap"] = ({ cache }) => {
 	const appShellSourcePath = path.join(__dirname, `app-shell.js`)
@@ -73,7 +72,10 @@ function getPrecachePages(globs: string[], base: string): string[] {
 			}
 
 			// Add this check, since glob may match some directories, that do not have index.html inside.
-			if (!fs.existsSync(precachePath)) {
+			if (
+				!fs.existsSync(precachePath) ||
+				!fs.lstatSync(precachePath).isFile()
+			) {
 				return
 			}
 
@@ -105,20 +107,50 @@ export const onPostBuild = (
 		`component---node-modules-gatsby-plugin-offline-app-shell-js`,
 	])
 	const appFile = files.find((file) => file.startsWith(`app-`))
-	
+
 	const offlineShellPath = `${process.cwd()}/${rootDir}/offline-plugin-app-shell-fallback/index.html`
-	const precachePages = [
+	const precachePages: string[] = _.uniq([
 		offlineShellPath,
 		...getPrecachePages(
 			precachePagesGlobs,
 			`${process.cwd()}/${rootDir}`
 		).filter((page) => page !== offlineShellPath),
-	]
+	])
+
+	const generateUUID = () => {
+		var d = new Date().getTime() //Timestamp
+		var d2 =
+			(typeof performance !== "undefined" &&
+				performance.now &&
+				performance.now() * 1000) ||
+			0 //Time in microseconds since page-load or 0 if unsupported
+		return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+			/[xy]/g,
+			function (c) {
+				var r = Math.random() * 16 //random number between 0 and 16
+				if (d > 0) {
+					//Use timestamp until depleted
+					r = (d + r) % 16 | 0
+					d = Math.floor(d / 16)
+				} else {
+					//Use microseconds since page-load if supported
+					r = (d2 + r) % 16 | 0
+					d2 = Math.floor(d2 / 16)
+				}
+				return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
+			},
+		)
+	}
+
 
 	const pages: PrecachePageData[] = precachePages.map((page) => ({
-		path: page.replace("/index.html", ""), // TODO(teawithsand): respect trailing slash
+		path: page
+			.replace("/index.html", "")
+			.slice(`${process.cwd()}/${rootDir}`.length) || "/", // TODO(teawithsand): respect trailing slash
 		dependencies: getResourcesFromHTML(page, pathPrefix),
 		indexHtmlPath: page,
+		buildId: generateUUID(),
+		indexHtmlHash: md5(fs.readFileSync(page, 'utf-8'))
 	}))
 
 	const otherGlobPatterns = [
@@ -142,7 +174,7 @@ export const onPostBuild = (
 				// the default prefix with `pathPrefix`.
 				"/": `${pathPrefix}/`,
 			},
-			cacheId: `gatsby-plugin-offline`,
+			cacheId: `tws-gatsby-plugin-sw`,
 			// Don't cache-bust JS or CSS files, and anything in the static directory,
 			// since these files have unique URLs and their contents will never change
 			dontCacheBustURLsMatching: /(\.js$|\.css$|static\/)/,
@@ -165,7 +197,7 @@ export const onPostBuild = (
 				{
 					// page-data.json files, static query results and app-data.json
 					// are not content hashed
-					// 
+					//
 					// Make sure they are shipped with their latest versions always
 					urlPattern: /^https?:.*\/page-data\/.*\.json/,
 					handler: `NetworkFirst`,
@@ -225,7 +257,7 @@ export const onPostBuild = (
 				.replace(/%pathPrefix%/g, pathPrefix)
 				.replace(/%appFile%/g, appFile)
 
-			fs.appendFileSync(`public/sw.js`, `\n` + swAppend)
+			// fs.appendFileSync(`public/sw.js`, `\n` + swAppend)
 
 			if (appendScript !== null) {
 				let userAppend
