@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"types": "dist/index.ts",
 	"scripts": {
-		"build": "tsc && cp -r assets/* dist",
+		"build": "tsc",
 		"test": "echo asdf > /dev/null"
 	},
 	"dependencies": {
