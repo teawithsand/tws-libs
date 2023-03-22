@@ -27,6 +27,11 @@ export enum MediaSessionEventType {
 	PREVIOUS_TRACK = 7,
 	NEXT_TRACK = 8,
 	SKIP_AD = 9,
+	NEXT_SLIDE = 10,
+	PREVIOUS_SLIDE = 11,
+	HANG_UP = 12,
+	TOGGLE_CAMERA = 13,
+	TOGGLE_MICROPHONE = 14,
 }
 
 export type MediaSessionEvent =
@@ -61,12 +66,28 @@ export type MediaSessionEvent =
 	| {
 			type: MediaSessionEventType.SKIP_AD
 	  }
+	| {
+			type: MediaSessionEventType.NEXT_SLIDE
+	  }
+	| {
+			type: MediaSessionEventType.PREVIOUS_SLIDE
+	  }
+	| {
+			type: MediaSessionEventType.HANG_UP
+	  }
+	| {
+			type: MediaSessionEventType.TOGGLE_CAMERA
+	  }
+	| {
+			type: MediaSessionEventType.TOGGLE_MICROPHONE
+	  }
 
 // Docs:
 // https://developer.mozilla.org/en-US/docs/Web/API/MediaSession/setActionHandler
 // https://developer.mozilla.org/en-US/docs/Web/API/MediaSession/setPositionState
 
 export type MediaSessionActionType =
+	// playback stuff
 	| "play"
 	| "pause"
 	| "stop"
@@ -75,9 +96,17 @@ export type MediaSessionActionType =
 	| "seekto"
 	| "previoustrack"
 	| "nexttrack"
+	// ads
 	| "skipad"
+	// presentation
+	| "previousslide"
+	| "nextslide"
+	// calls
+	| "hangup"
+	| "togglecamera"
+	| "togglemicrophone"
 
-export const allMediaSessionActions: MediaSessionActionType[] = [
+export const allMediaSessionActions: Readonly<MediaSessionActionType[]> = [
 	"play",
 	"pause",
 	"stop",
@@ -87,6 +116,10 @@ export const allMediaSessionActions: MediaSessionActionType[] = [
 	"previoustrack",
 	"nexttrack",
 	"skipad",
+	"previousslide",
+	"nextslide",
+	"togglecamera",
+	"togglemicrophone",
 ]
 
 const tuplesToMap = <T, E>(iterable: Iterable<[T, E]>): Map<T, E> => {
@@ -258,6 +291,41 @@ export class MediaSessionApiHelper {
 					type: MediaSessionEventType.SKIP_AD,
 				}),
 		],
+		[
+			"nextslide",
+			() =>
+				this.innerEventBus.emitEvent({
+					type: MediaSessionEventType.NEXT_SLIDE,
+				}),
+		],
+		[
+			"previousslide",
+			() =>
+				this.innerEventBus.emitEvent({
+					type: MediaSessionEventType.PREVIOUS_SLIDE,
+				}),
+		],
+		[
+			"hangup",
+			() =>
+				this.innerEventBus.emitEvent({
+					type: MediaSessionEventType.HANG_UP,
+				}),
+		],
+		[
+			"togglecamera",
+			() =>
+				this.innerEventBus.emitEvent({
+					type: MediaSessionEventType.TOGGLE_CAMERA,
+				}),
+		],
+		[
+			"togglemicrophone",
+			() =>
+				this.innerEventBus.emitEvent({
+					type: MediaSessionEventType.TOGGLE_MICROPHONE,
+				}),
+		],
 	])
 
 	/**
@@ -315,7 +383,11 @@ export class MediaSessionApiHelper {
 			for (const a of removedActions) {
 				results.set(a, null)
 				try {
-					navigator.mediaSession.setActionHandler(a, null)
+					// cast a to be MSA, as TS does not know all latest MDN-listed actions
+					navigator.mediaSession.setActionHandler(
+						a as MediaSessionAction,
+						null
+					)
 				} catch (e) {
 					results.set(a, e)
 
@@ -336,7 +408,11 @@ export class MediaSessionApiHelper {
 					)
 				}
 				try {
-					navigator.mediaSession.setActionHandler(a, h)
+					// cast a to be MSA, as TS does not know all latest MDN-listed actions
+					navigator.mediaSession.setActionHandler(
+						a as MediaSessionAction,
+						h
+					)
 				} catch (e) {
 					results.set(a, e)
 
