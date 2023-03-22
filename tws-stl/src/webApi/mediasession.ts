@@ -154,14 +154,15 @@ export class MediaSessionApiHelper {
 	private ensureInitialized = () => {
 		if (!this.initialized) {
 			if (this.checkSupport()) this.setSupportedActions([])
-			this.initialized = true
 		}
+
+		this.initialized = true
 	}
 
 	private constructor() {}
 
-	private checkSupport = () => {
-		return (
+	private checkSupport = (): boolean => {
+		return !!(
 			typeof window !== "undefined" &&
 			window.navigator &&
 			window.navigator.mediaSession
@@ -174,11 +175,13 @@ export class MediaSessionApiHelper {
 		return this.innerEventBus
 	}
 
-	public get isSupported() {
+	public get isSupported(): boolean {
 		return this.checkSupport()
 	}
 
-	private supportedActions: Set<MediaSessionActionType> = new Set()
+	private activeActions: Set<MediaSessionActionType> = new Set()
+	private activationResults: Map<MediaSessionActionType, any | null> =
+		new Map()
 
 	private lastSetMediaSessionMetadata: MediaSessionMetadata | null = null
 	private lastSetMediaPositionState: MediaSessionPositionState | null = null
@@ -258,9 +261,28 @@ export class MediaSessionApiHelper {
 	])
 
 	/**
+	 * Gets set of actions, which are *really* active. It means that they were set
+	 * using setSupportedActions AND they are supported by browser.
+	 */
+	getActiveActions = (): MediaSessionActionType[] => [...this.activeActions]
+
+	/**
+	 * Returns errors that occurred while this manager tried to activate/deactivate actions.
+	 * It includes all actions used in last call setActiveActions.
+	 */
+	getActivationResults = (): {
+		[k in keyof MediaSessionActionType]: any | null
+	} => {
+		const v = Object.fromEntries([...this.activationResults.entries()])
+		return v as { [k in keyof MediaSessionActionType]: any | null }
+	}
+
+	/**
 	 * Sets actions that will be handled on event bus.
 	 *
 	 * Automatically removes actions, which are not supported by browser.
+	 *
+	 * @deprecated use setActiveActions instead, as this method is poorly named
 	 */
 	setSupportedActions = (
 		actions:
@@ -268,41 +290,56 @@ export class MediaSessionApiHelper {
 			| Iterable<MediaSessionActionType>
 			| Set<MediaSessionActionType>
 	) => {
-		// make a copy + cast if needed
-		const castedActions = new Set(actions)
+		// this.ensureInitialized() // this one may not be called here
+		this.initialized = true
 
-		const removedActions = [...this.supportedActions.values()].filter(
-			(v) => !castedActions.has(v)
+		// make a copy + cast if needed
+		const desiredActions = new Set(actions)
+
+		const removedActions = [...this.activeActions.values()].filter(
+			(v) => !desiredActions.has(v)
 		)
 
-		const addedActions = [...castedActions.values()].filter(
-			(v) => !this.supportedActions.has(v)
+		const addedActions = [...desiredActions.values()].filter(
+			(v) => !this.activeActions.has(v)
 		)
 
 		const unsupportedActions = new Set<MediaSessionActionType>()
+		const results: Map<MediaSessionActionType, any | null> = new Map()
+
+		for (const a of desiredActions) {
+			results.set(a, null)
+		}
 
 		if (this.checkSupport()) {
 			for (const a of removedActions) {
+				results.set(a, null)
 				try {
 					navigator.mediaSession.setActionHandler(a, null)
 				} catch (e) {
+					results.set(a, e)
+
 					// HACK(teawithsand): in chrome skipad may not be set, which causes this to throw
 					// so just ignore it for now
 					// see https://github.com/w3c/mediasession/issues/228 for more info
 
-					unsupportedActions.add(a)
+					unsupportedActions.add(a) // it's not required, but it's fine
 				}
 			}
 
 			for (const a of addedActions) {
+				results.set(a, null)
 				const h = this.actionHandlers.get(a)
-				if (!h)
+				if (!h) {
 					throw new Error(
 						`Unreachable code - no handler for action ${a}`
 					)
+				}
 				try {
 					navigator.mediaSession.setActionHandler(a, h)
 				} catch (e) {
+					results.set(a, e)
+
 					// HACK(teawithsand): in chrome skipad may not be set, which causes this to throw
 					// so just ignore it for now
 					// see https://github.com/w3c/mediasession/issues/228 for more info
@@ -310,11 +347,24 @@ export class MediaSessionApiHelper {
 					unsupportedActions.add(a)
 				}
 			}
+		} else {
+			const e = new Error("Media session not supported by this browser")
+			for (const a of addedActions) {
+				unsupportedActions.add(a)
+				results.set(a, e)
+			}
+			for (const a of removedActions) {
+				unsupportedActions.add(a)
+				results.set(a, e)
+			}
+			for (const a of desiredActions) {
+				results.set(a, e)
+			}
 		}
 
-		unsupportedActions.forEach((a) => castedActions.delete(a))
-
-		this.supportedActions = castedActions
+		unsupportedActions.forEach((a) => desiredActions.delete(a))
+		this.activeActions = desiredActions
+		this.activationResults = results
 	}
 
 	setMetadata = (metadata: MediaSessionMetadata | null) => {
@@ -340,6 +390,8 @@ export class MediaSessionApiHelper {
 			}
 		}
 	}
+
+	setActiveActions = this.setSupportedActions
 
 	setPlaybackState = (state: "playing" | "paused" | "none") => {
 		this.ensureInitialized()
