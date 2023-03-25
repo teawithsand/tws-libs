@@ -1,6 +1,3 @@
-# tws-ui
+# tws-gallery
 
-Bunch of UI stuff, which turned out to be really useful.
-
-## Styling system
-This library uses exclusively styled-components.
+Really simple gallery, which works with Gatsby's `StaticImage` and `GatsbyImage`, rather than only raw `img` objects.
