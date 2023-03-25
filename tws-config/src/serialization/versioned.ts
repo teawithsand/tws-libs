@@ -36,14 +36,17 @@ export class VersioningSerializer<T, E extends Versioned>
 
 		const { version = this.versionFallback } = data
 		if (typeof version !== "number") {
-			throw new Error(`No version found in data provided`)
+			throw new Error(
+				`No version found in data provided or it's not number`
+			)
 		}
 
 		const deserializer = this.deserializers[version]
-		if (!deserializer)
+		if (!deserializer) {
 			throw new Error(
 				`Deserializer for version: ${version} was not found`
 			)
+		}
 
 		return deserializer(data)
 	}
