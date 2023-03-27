@@ -1,4 +1,5 @@
 import { DefaultEventBus, Subscribable } from "../eventBus"
+import { generateUUID } from "../lang"
 
 export type MediaSessionMetadata = {
 	title: string
@@ -518,6 +519,35 @@ export class MediaSessionApiHelper {
 					position,
 				})
 			}
+		}
+	}
+
+	/**
+	 * Since Chrome on android loves to randomly remove notification and
+	 * thus clear metadata of media session _without_ killing js vm.
+	 * 
+	 * It makes next call to setMetadata always take effect.
+	 */
+	clearMetadataCache = () => {
+		this.lastSetMediaSessionMetadata = {
+			album: generateUUID(),
+			artist: generateUUID(),
+			artwork: [],
+			title: generateUUID(),
+		}
+	}
+
+	/**
+	 * Since Chrome on android loves to randomly remove notification and
+	 * thus clear metadata of media session _without_ killing js vm.
+	 * 
+	 * It makes next call to setPositionState always take effect.
+	 */
+	clearPlaybackStateCache = () => {
+		this.lastSetMediaPositionState = {
+			duration: Math.random(),
+			playbackRate: Math.random(),
+			position: Math.random(),
 		}
 	}
 }
