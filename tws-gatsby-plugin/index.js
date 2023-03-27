@@ -234,20 +234,24 @@ const customizeDefaultPlugins = (...configs) =>
 	mergePlugins(BasicSitePluginsStart, ...configs, BasicSitePluginsEnd)
 
 const loadConfig = (require) => {
-	const { DEPLOYER_SITE_URL, DEPLOYER_PROJECT_NAME } = process.env
+	const { DEPLOYER_SITE_URL, DEPLOYER_PROJECT_NAME, DEPLOYER_VERSION } = process.env
 
 	const obj = {
 		DEPLOYER_SITE_URL,
 		DEPLOYER_PROJECT_NAME,
+		DEPLOYER_VERSION
 	}
 
 	const config = {
 		siteUrl: DEPLOYER_SITE_URL,
 		projectName: DEPLOYER_PROJECT_NAME,
+		version: DEPLOYER_VERSION ?? "0.0.1",
 	}
 
 	if (require) {
 		for (const k of Object.keys(obj)) {
+			if(k === "version") continue;
+			
 			if (!obj[k])
 				throw new Error(`loadConfig required, but env var ${k} not set`)
 		}
