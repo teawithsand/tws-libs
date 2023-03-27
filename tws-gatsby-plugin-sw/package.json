@@ -1,6 +1,6 @@
 {
 	"name": "@teawithsand/tws-gatsby-plugin-sw",
-	"version": "0.0.18",
+	"version": "0.0.22",
 	"description": "Plugin for making stuff run offline, which is not gatsby-plugin-offline, since it does poorly when full-offline-app-on-first-load is neededd",
 	"main": "index.js",
 	"types": "dist/index.ts",

@@ -134,12 +134,22 @@ export const onPostBuild = (
 		if (fs.existsSync(`${rootDir}/${file}`)) otherGlobPatterns.push(file)
 	})
 
+	const noCacheBustUrl = /(\.js$|\.css$|static\/)/
+
 	const swDest = `public/sw.js`
 	const combinedOptions = makeWorkboxConfig(
 		{
 			swDest: swDest,
 			globDirectory: rootDir,
 			globPatterns: otherGlobPatterns,
+			globIgnores: [
+				"**/node_modules/**/*",
+				"*.gz",
+				".gz",
+				"*/**/*.gz",
+				"**/*.gz",
+				"/*.gz",
+			],
 			modifyURLPrefix: {
 				// If `pathPrefix` is configured by user, we should replace
 				// the default prefix with `pathPrefix`.
@@ -148,7 +158,7 @@ export const onPostBuild = (
 			cacheId: `tws-gatsby-plugin-sw`,
 			// Don't cache-bust JS or CSS files, and anything in the static directory,
 			// since these files have unique URLs and their contents will never change
-			dontCacheBustURLsMatching: /(\.js$|\.css$|static\/)/,
+			dontCacheBustURLsMatching: noCacheBustUrl,
 			runtimeCaching: [
 				// ignore cypress endpoints (only for testing)
 				...(process.env.CYPRESS_SUPPORT
@@ -160,10 +170,15 @@ export const onPostBuild = (
 					  ]
 					: []),
 				{
+					// NEVER CACHE SW.JS!!1!
+					urlPattern: /sw\.js$/,
+					handler: `NetworkFirst`,
+				},
+				{
 					// Use cacheFirst since these don't need to be revalidated (same RegExp
 					// and same reason as above)
-					urlPattern: /(\.js$|\.css$|static\/)/,
-					handler: `CacheFirst`,
+					urlPattern: noCacheBustUrl,
+					handler: `NetworkFirst`,
 				},
 				{
 					// page-data.json files, static query results and app-data.json
@@ -177,7 +192,7 @@ export const onPostBuild = (
 					// Add runtime caching of various other page resources
 					urlPattern:
 						/^https?:.*\.(png|jpg|jpeg|webp|avif|svg|gif|tiff|js|woff|woff2|json|css)$/,
-					handler: `StaleWhileRevalidate`,
+					handler: `NetworkFirst`,
 				},
 				{
 					// Google Fonts CSS (doesn't end in .css so we need to specify it)
