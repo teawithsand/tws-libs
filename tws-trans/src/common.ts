@@ -28,6 +28,7 @@ export interface CommonTranslation {
 export interface CommonConfig {
 	projectName: string
 	siteUrl: string
+	version: string
 }
 
 const makeDateObject = (date: string | number | Date): Date => {
@@ -41,6 +42,7 @@ export const readCommonConfig = (prefix: string = ""): CommonConfig => {
 		// These have to be written like that, so webpack can understand these and replace with propper values
 		projectName: process.env.projectName as string,
 		siteUrl: process.env.siteUrl as string,
+		version: ((process ?? undefined)?.env?.version ?? "0.0.1") as string,
 	}
 	return object
 }
