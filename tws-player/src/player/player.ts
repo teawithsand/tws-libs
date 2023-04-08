@@ -96,15 +96,18 @@ export class Player {
 	}
 
 	private syncSeek = (newState: PlayerState) => {
+		const isPlayerInSeekableState =
+			newState.readyState === PlayerReadyState.CURRENT_DATA ||
+			newState.readyState === PlayerReadyState.ENOUGH_DATA ||
+			newState.readyState === PlayerReadyState.FUTURE_DATA
+
 		const canSeek =
 			!this.isLoadingSource &&
-			this.stateBus.lastEvent.config.source !== null &&
-			newState.readyState !== PlayerReadyState.NOTHING
+			newState.config.source !== null &&
+			isPlayerInSeekableState
 
 		const seekPositionMillis = newState.config.seekPosition
 
-		// Note: if this seeking model does not work
-		// add UUID of seek and check IT rather than seek value
 		if (
 			canSeek &&
 			// Seek in last state should be ignored?
